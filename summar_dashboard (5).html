@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summar — Dashboard Operacional</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- SheetJS loaded on demand -->
+<style>
+:root{--red:#C0272D;--red2:#8B1A1E;--redl:#F5E0E0;--gray:#4A4A4A;--grayl:#F4F4F4;--graym:#E5E5E5;--text:#2C2C2C;--muted:#7A7A7A;--ok:#1D9E75;--okl:#E1F5EE;--warn:#BA7517;--warnl:#FAEEDA;--info:#185FA5;--infol:#E6F1FB;--sw:218px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--text);display:flex;font-size:13px}
+.sb{width:var(--sw);background:#181818;min-height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;overflow-y:auto;z-index:100}
+.sb-logo{padding:16px;border-bottom:.5px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.sb-logo-ic{width:34px;height:34px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-ic svg{width:20px;height:20px}
+.sb-logo-tx{color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.3px;line-height:1.3}
+.sb-logo-sub{color:var(--red);font-size:8.5px;font-weight:600;letter-spacing:1.3px;display:block}
+.sb-grp{padding:10px 0 4px}
+.sb-grp-lbl{color:rgba(255,255,255,.25);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:0 14px 6px}
+.nav{display:flex;align-items:center;gap:8px;padding:7px 14px;color:rgba(255,255,255,.48);cursor:pointer;border-left:3px solid transparent;font-size:12px;transition:background .1s,color .1s}
+.nav:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.82)}
+.nav.on{background:rgba(192,39,45,.18);color:#fff;border-left-color:var(--red)}
+.nav-ic{font-size:13px;width:16px;text-align:center}
+.sb-foot{margin-top:auto;padding:12px;border-top:.5px solid rgba(255,255,255,.06);font-size:9px;color:rgba(255,255,255,.2);text-align:center}
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:56px;background:#fff;border-bottom:1px solid var(--graym);display:flex;align-items:center;padding:0 22px;gap:10px;position:sticky;top:0;z-index:50}
+.top-title{font-size:15px;font-weight:700;flex:1}
+.live{background:var(--okl);color:var(--ok);font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px}
+.upd{font-size:10.5px;color:var(--muted)}
+.fi-on{background:var(--redl);color:var(--red2);font-weight:700;padding:3px 9px;border-radius:12px;font-size:10.5px}
+.fbar{background:#fff;padding:8px 22px;border-bottom:1px solid var(--graym);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.flbl{font-size:11px;color:var(--muted);font-weight:600}
+.fsel{border:1px solid var(--graym);border-radius:6px;padding:4px 7px;font-size:11.5px;background:var(--grayl);color:var(--text);cursor:pointer;height:27px;outline:none}
+.fsel:focus,.fsel.af{border-color:var(--red);background:var(--redl);color:var(--red2);font-weight:700}
+.btn-reset{background:none;border:1px solid var(--graym);border-radius:6px;padding:3px 11px;font-size:11px;cursor:pointer;color:var(--muted);height:27px}
+.btn-apply{background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 13px;font-size:11px;font-weight:700;cursor:pointer;height:27px;margin-left:auto}
+.cnt{padding:18px 22px;flex:1}
+.sec{display:none}.sec.on{display:block}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sh-ic{width:32px;height:32px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.sh h2{font-size:14.5px;font-weight:700}
+.sh p{font-size:11px;color:var(--muted)}
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:16px}
+.kc{background:#fff;border-radius:9px;padding:13px 15px;border:1px solid var(--graym);position:relative;overflow:hidden}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kcc,var(--red))}
+.kc-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.kc-val{font-size:22px;font-weight:800;color:var(--text);line-height:1;margin-bottom:2px}
+.kc-sub{font-size:10px;color:var(--muted)}
+.kc-d{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:9px;margin-top:3px}
+.d-up{background:var(--okl);color:var(--ok)}.d-dn{background:var(--redl);color:var(--red)}.d-nt{background:var(--warnl);color:var(--warn)}
+.ans-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.ans-card{background:#fff;border-radius:9px;border:1px solid var(--graym);padding:14px 18px;display:flex;align-items:center;gap:14px}
+.gauge-wrap{position:relative;width:76px;height:76px;flex-shrink:0}
+.gauge-wrap canvas{position:absolute;top:0;left:0;width:76px!important;height:76px!important}
+.gauge-lbl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:72px}
+.gauge-pct{font-size:15px;font-weight:800;line-height:1}
+.gauge-type{font-size:8.5px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+.ans-info h3{font-size:12.5px;font-weight:700;margin-bottom:4px}
+.ans-info p{font-size:10.5px;color:var(--muted);line-height:1.5}
+.ans-pills{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.pill{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:9px}
+.pg{background:var(--okl);color:var(--ok)}.pr{background:var(--redl);color:var(--red)}.pb{background:var(--infol);color:var(--info)}
+.og{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:14px}
+.oc{background:#fff;border-radius:7px;border:1px solid var(--graym);padding:8px 6px;text-align:center}
+.oc-lbl{font-size:9.5px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px}
+.oc-t{font-size:14px;font-weight:800;line-height:1;margin-bottom:1px}
+.oc-tsub{font-size:8.5px;color:var(--muted)}
+.oc-c{font-size:12px;font-weight:700;color:var(--info);margin-top:3px}
+.oc-csub{font-size:8.5px;color:var(--muted)}
+.oc.best{border:2px solid var(--ok)}.oc.best .oc-t{color:var(--ok)}
+.oc.worst{border:2px solid var(--red)}.oc.worst .oc-t{color:var(--red)}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:13px;margin-bottom:16px}
+.cg.t23{grid-template-columns:2fr 1fr}
+.cg.t12{grid-template-columns:1fr 2fr}
+.cc{background:#fff;border-radius:9px;border:1px solid var(--graym);padding:14px}
+.cc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cc-title{font-size:12px;font-weight:700}
+.cc-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:9px;background:var(--redl);color:var(--red2)}
+.cw{position:relative;width:100%}
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.tbl th{background:var(--grayl);padding:6px 9px;text-align:left;font-weight:700;color:var(--muted);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--graym)}
+.tbl td{padding:7px 9px;border-bottom:.5px solid var(--graym)}
+.tbl tr:hover td{background:var(--grayl)}
+.badge{display:inline-block;padding:2px 6px;border-radius:8px;font-size:9.5px;font-weight:700}
+.bs{background:var(--okl);color:var(--ok)}.bd{background:var(--redl);color:var(--red)}.bw{background:var(--warnl);color:var(--warn)}.bi{background:var(--infol);color:var(--info)}
+.pr-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.pr-lbl{font-size:10.5px;width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.pr-bar{flex:1;background:var(--graym);border-radius:3px;height:6px;overflow:hidden}
+.pr-fill{height:100%;border-radius:3px}
+.pr-val{font-size:10.5px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:7px;font-size:10px;color:var(--muted)}
+.ld{display:inline-flex;align-items:center;gap:4px}
+.ls{width:8px;height:8px;border-radius:2px;display:inline-block}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:11px;margin-bottom:16px}
+.sc{background:#fff;border-radius:9px;padding:12px;border:1px solid var(--graym);text-align:center}
+.si{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;font-size:17px}
+.sv{font-size:19px;font-weight:800;line-height:1;margin-bottom:2px}
+.sl{font-size:9.5px;color:var(--muted);font-weight:600}
+.tscroll{overflow-x:auto}
+/* FUERO FILTER BUTTONS */
+.fuero-filter-btn{background:none;border:1px solid var(--graym);border-radius:16px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--muted);font-family:inherit;transition:all .15s}
+.fuero-filter-btn:hover{background:var(--grayl)}
+.fuero-filter-btn.active{background:var(--text);color:white;border-color:var(--text)}
+/* PIPELINE */
+.pipe-wrap{background:white;border-radius:10px;border:1px solid var(--graym);padding:16px;margin-bottom:16px}
+.pipe-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.pipe-hdr-left h3{font-size:13px;font-weight:700;color:var(--text)}
+.pipe-hdr-left p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.pipe-filters{display:flex;gap:8px;flex-wrap:wrap}
+.pfsel{border:1px solid var(--graym);border-radius:6px;padding:3px 8px;font-size:11px;background:var(--grayl);color:var(--text);cursor:pointer;height:26px;outline:none}
+.pfsel.on{border-color:var(--red);background:var(--redl);color:var(--red2);font-weight:700}
+.pipe-stages{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-bottom:16px}
+.pipe-stages::before{content:'';position:absolute;top:24px;left:12.5%;right:12.5%;height:3px;background:linear-gradient(90deg,var(--red),var(--warn),var(--info),var(--ok));z-index:0;border-radius:2px}
+.pstage{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;padding:4px 8px 8px}
+.pnode{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:6px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.pcount{font-size:24px;font-weight:900;line-height:1;margin-bottom:1px}
+.plbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;text-align:center;margin-bottom:2px}
+.psub{font-size:9px;color:var(--muted);text-align:center}
+.pipe-bar-row{margin-top:8px;padding-top:10px;border-top:1px solid var(--graym)}
+.pipe-bar-lbl{font-size:10px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.pipe-stacked{display:flex;height:20px;border-radius:4px;overflow:hidden;gap:1px}
+.pseg{display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:white;transition:width .4s;min-width:0;cursor:default}
+.pipe-legend{display:flex;gap:12px;margin-top:5px;flex-wrap:wrap}
+.pleg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)}
+.pdot{width:9px;height:9px;border-radius:2px}
+.pipe-dtl{margin-top:12px;padding-top:10px;border-top:1px solid var(--graym)}
+.pipe-dtl-ttl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+/* SSTA red headers */
+.red-hdr{background:#8B1A1E;color:white;padding:6px 10px;border-radius:5px;margin:-14px -14px 12px;font-size:12px;font-weight:700}
+/* Entrevistas sentiment */
+.sent-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.sent-card{background:white;border-radius:10px;padding:14px 16px}
+.sent-card-pos{border-left:5px solid var(--ok)}
+.sent-card-neu{border-left:5px solid var(--warn)}
+.sent-card-neg{border-left:5px solid var(--red)}
+.sent-ttl{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sent-ttl span:first-child{font-size:20px}
+.sent-ttl strong{font-size:12.5px;font-weight:700}
+.sent-list{font-size:11px;color:var(--muted);line-height:1.7}
+
+</style>
+</head>
+<body>
+<div id="upload-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1C1C1C;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px">
+  <div style="background:#242424;border-radius:16px;padding:40px 48px;max-width:860px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:32px">
+      <div style="width:48px;height:48px;background:#C0272D;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="28" height="28" viewBox="0 0 20 20" fill="none"><path d="M2 16L7 4L12 13L15 8L18 16H2Z" fill="white" opacity=".9"/><path d="M10 3L16 16H4L10 3Z" fill="white" opacity=".4"/></svg>
+      </div>
+      <div>
+        <div style="color:white;font-size:20px;font-weight:800;letter-spacing:.3px">SUMMAR PRODUCTIVIDAD</div>
+        <div style="color:#C0272D;font-size:11px;font-weight:600;letter-spacing:1.5px">DASHBOARD OPERACIONAL — CARGA DE DATOS</div>
+      </div>
+    </div>
+
+    <p style="color:rgba(255,255,255,.65);font-size:13px;margin-bottom:28px;line-height:1.6">
+      Sube los archivos Excel con los datos de tu operación. Los archivos <strong style="color:white">nunca salen de tu computador</strong> — se procesan localmente en el navegador. Puedes subir uno o varios archivos a la vez.
+    </p>
+
+    <!-- Drop zone -->
+    <div id="drop-zone" style="border:2px dashed rgba(192,39,45,.5);border-radius:12px;padding:32px;text-align:center;margin-bottom:24px;cursor:pointer;transition:all .2s;background:rgba(192,39,45,.04)"
+      ondragover="event.preventDefault();this.style.borderColor='#C0272D';this.style.background='rgba(192,39,45,.1)'"
+      ondragleave="this.style.borderColor='rgba(192,39,45,.5)';this.style.background='rgba(192,39,45,.04)'"
+      ondrop="handleDrop(event)"
+      onclick="document.getElementById('file-input').click()">
+      <div style="font-size:36px;margin-bottom:10px">📂</div>
+      <div style="color:white;font-size:14px;font-weight:600;margin-bottom:6px">Arrastra los archivos aquí o haz clic para seleccionar</div>
+      <div style="color:rgba(255,255,255,.4);font-size:12px">Acepta archivos .xlsx — Plantillas Summar Operacionales</div>
+      <input type="file" id="file-input" accept=".xlsx" multiple style="display:none" onchange="handleFiles(this.files)">
+    </div>
+
+    <!-- File list -->
+    <div id="file-list" style="margin-bottom:24px;display:none">
+      <div style="color:rgba(255,255,255,.5);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Archivos cargados</div>
+      <div id="file-items"></div>
+    </div>
+
+    <!-- Expected sheets guide -->
+    <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:16px;margin-bottom:24px">
+      <div style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Hojas que se leen automáticamente</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="sheet-status">
+        <div class="sheet-chip" data-sheet="SELECCIÓN">📋 SELECCIÓN</div>
+        <div class="sheet-chip" data-sheet="PIPELINE">🔍 PIPELINE</div>
+        <div class="sheet-chip" data-sheet="PERSONAL_ACTIVO">👥 PERSONAL_ACTIVO</div>
+        <div class="sheet-chip" data-sheet="ROTACIÓN">🔄 ROTACIÓN</div>
+        <div class="sheet-chip" data-sheet="ENTREVISTAS_RETIRO">💬 ENTREVISTAS_RETIRO</div>
+        <div class="sheet-chip" data-sheet="AT_ACCIDENTES">⚠️ AT_ACCIDENTES</div>
+        <div class="sheet-chip" data-sheet="EG_ENFERMEDADES">🏥 EG_ENFERMEDADES</div>
+        <div class="sheet-chip" data-sheet="SINIESTRO">📋 SINIESTRO</div>
+        <div class="sheet-chip" data-sheet="FUEROS_SALUD">🛡️ FUEROS_SALUD</div>
+        <div class="sheet-chip" data-sheet="FORMACION_SST">📚 FORMACION_SST</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div id="upload-progress" style="display:none;margin-bottom:20px">
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-bottom:8px" id="progress-text">Procesando datos...</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden">
+        <div id="progress-bar" style="height:100%;background:#C0272D;border-radius:4px;width:0%;transition:width .3s"></div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex;gap:12px;justify-content:flex-end;align-items:center">
+      <div id="upload-error" style="color:#FF6B6B;font-size:12px;flex:1;display:none"></div>
+      <button onclick="loadDemoData()" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:inherit">
+        Ver con datos de demo
+      </button>
+      <button id="btn-load" onclick="processFiles()" disabled style="background:#C0272D;color:white;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.4">
+        ▶ Cargar al Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top:20px;color:rgba(255,255,255,.2);font-size:11px;text-align:center">
+    Los datos se procesan localmente en tu navegador · Ningún archivo se envía a servidores externos
+  </div>
+</div>
+
+<style>
+.sheet-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;font-size:10.5px;color:rgba(255,255,255,.5);font-family:'Segoe UI',sans-serif}
+.sheet-chip.loaded{background:rgba(29,158,117,.15);border-color:rgba(29,158,117,.4);color:#1D9E75}
+.sheet-chip.partial{background:rgba(186,117,23,.15);border-color:rgba(186,117,23,.4);color:#BA7517}
+.file-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.05);border-radius:7px;margin-bottom:6px}
+.file-item-icon{font-size:18px}
+.file-item-name{color:white;font-size:12.5px;font-weight:600;flex:1}
+.file-item-size{color:rgba(255,255,255,.4);font-size:11px}
+.file-item-status{font-size:11px;font-weight:700}
+</style>
+
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-ic"><svg viewBox="0 0 20 20" fill="none"><path d="M2 16L7 4L12 13L15 8L18 16H2Z" fill="white" opacity=".9"/><path d="M10 3L16 16H4L10 3Z" fill="white" opacity=".4"/></svg></div>
+    <div class="sb-logo-tx">SUMMAR <span class="sb-logo-sub">PRODUCTIVIDAD · BPO</span></div>
+  </div>
+  <div class="sb-grp"><div class="sb-grp-lbl">Principal</div>
+    <div class="nav on" onclick="go('resumen',this)"><span class="nav-ic">📊</span><span>Resumen Ejecutivo</span></div>
+  </div>
+  <div class="sb-grp"><div class="sb-grp-lbl">Gestión de Talento</div>
+    <div class="nav" onclick="go('seleccion',this)"><span class="nav-ic">🔍</span><span>Indicadores Selección</span></div>
+    <div class="nav" onclick="go('activo',this)"><span class="nav-ic">👥</span><span>Personal Activo</span></div>
+    <div class="nav" onclick="go('rotacion',this)"><span class="nav-ic">🔄</span><span>Rotación</span></div>
+    <div class="nav" onclick="go('entrevistas',this)"><span class="nav-ic">💬</span><span>Entrevistas de Retiro</span></div>
+    <div class="nav" onclick="go('talento',this)"><span class="nav-ic">🏆</span><span>Gestión del Talento</span></div>
+    <div class="nav" onclick="go('bienestar',this)"><span class="nav-ic">🌿</span><span>Bienestar</span></div>
+  </div>
+  <div class="sb-grp"><div class="sb-grp-lbl">Seguridad &amp; Salud</div>
+    <div class="nav" onclick="go('at',this)"><span class="nav-ic">⚠️</span><span>Accidentes de Trabajo</span></div>
+    <div class="nav" onclick="go('eg',this)"><span class="nav-ic">🏥</span><span>Enfermedades Generales</span></div>
+    <div class="nav" onclick="go('siniestro',this)"><span class="nav-ic">🩺</span><span>Siniestro &amp; Fueros</span></div>
+    <div class="nav" onclick="go('formacion',this)"><span class="nav-ic">📚</span><span>Formación SST</span></div>
+  </div>
+  <div class="sb-foot">v4.0 · Datos reales · Jun 2026</div>
+</nav>
+
+<div class="main">
+<div class="topbar">
+  <div class="top-title" id="top-title">Resumen Ejecutivo</div>
+  <span class="live">● En vivo</span>
+  <span id="fi-status" class="upd">Sin filtros activos</span>
+</div>
+
+<div class="fbar">
+  <span class="flbl">Filtrar:</span>
+  <select class="fsel" id="f-mes" onchange="markActive(this)">
+    <option value="">Todos los meses</option>
+    <option value="2025-12">Dic 2025</option>
+    <option value="2026-01">Ene 2026</option>
+    <option value="2026-02">Feb 2026</option>
+    <option value="2026-03">Mar 2026</option>
+    <option value="2026-04">Abr 2026</option>
+    <option value="2026-05">May 2026</option>
+  </select>
+  <span class="flbl">Desde:</span>
+  <input type="date" class="fsel" id="f-desde" value="2025-12-01" style="width:130px" onchange="markActive(this)">
+  <span class="flbl">Hasta:</span>
+  <input type="date" class="fsel" id="f-hasta" value="2026-05-31" style="width:130px" onchange="markActive(this)">
+  <select class="fsel" id="f-sucursal" onchange="markActive(this)">
+    <option value="">Todas las sucursales</option>
+    <option value="Cali Centro">Cali Centro</option>
+    <option value="Yumbo">Yumbo</option>
+    <option value="Palmira">Palmira</option>
+    <option value="Buga">Buga</option>
+    <option value="Cali Norte">Cali Norte</option>
+    <option value="Pereira">Pereira</option>
+    <option value="Bogota">Bogotá</option>
+    <option value="Medellin">Medellín</option>
+  </select>
+  <select class="fsel" id="f-ciudad" onchange="markActive(this)">
+    <option value="">Todas las ciudades</option>
+    <option value="SANTAFE DE BOGOTA D. C.">Bogotá</option>
+    <option value="CALI">Cali</option>
+    <option value="MEDELLIN">Medellín</option>
+    <option value="BARRANQUILLA">Barranquilla</option>
+    <option value="BUCARAMANGA">Bucaramanga</option>
+    <option value="PEREIRA">Pereira</option>
+    <option value="PALMIRA">Palmira</option>
+    <option value="BUGA">Buga</option>
+  </select>
+  <input type="hidden" id="f-rec" value="">
+  <button class="btn-reset" onclick="resetF()">↺ Limpiar</button>
+  <button class="btn-apply" onclick="applyF()">▶ Aplicar</button>
+</div>
+
+<div class="cnt">
+<!-- RESUMEN -->
+<div class="sec on" id="sec-resumen">
+  <div class="sh"><div class="sh-ic">📊</div><div><h2>Resumen Ejecutivo Operacional</h2><p id="res-sub">Dic 2025 – May 2026 · Datos reales de 6,656 requisiciones</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Requisiciones</div><div class="kc-val" id="r-req">6,656</div><div class="kc-sub">Período completo</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Contratados</div><div class="kc-val" id="r-cont">9,324</div><div class="kc-sub" id="r-cont-sub">de 10,551 solicitados</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">% Oportunidad</div><div class="kc-val" id="r-pt">84.4%</div><div class="kc-sub" id="r-pt-sub">5,031 a tiempo / 5,963 cerradas</div><div class="kc-d d-up">▲ Meta 80%</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% ANS Cantidad</div><div class="kc-val" id="r-pc">88.4%</div><div class="kc-sub" id="r-pc-sub">9,324 / 10,551 solicitados</div><div class="kc-d d-up">▲ Meta 85%</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Rotación</div><div class="kc-val">944</div><div class="kc-sub">Retiros período</div><div class="kc-d d-nt">→ 8.7%</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">AT YTD 2026</div><div class="kc-val">23</div><div class="kc-sub">Accidentes trabajo</div><div class="kc-d d-up">▼ −30% vs 2025</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Ausentismo</div><div class="kc-val">3.8%</div><div class="kc-sub">Promedio 2026</div><div class="kc-d d-up">▲ vs 4.3% 2025</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Entrevistas Retiro</div><div class="kc-val">76</div><div class="kc-sub">72% cobertura</div></div>
+  </div>
+  <!-- PIPELINE TRACKER -->
+  <div class="pipe-wrap">
+    <div class="pipe-hdr">
+      <div class="pipe-hdr-left"><h3>📍 Pipeline de Selección — Estado en Tiempo Real</h3><p>Personas activas en cada etapa del proceso · Jun 2026</p></div>
+      <div class="pipe-filters">
+        <select class="pfsel" id="pf-cargo" onchange="renderPipeline()">
+          <option value="">Todos los cargos</option>
+          <option>Auxiliar de Servicios</option>
+          <option>Auxiliar Servicios BPM</option>
+          <option>Op. Apoyo Logístico</option>
+          <option>Aux. Mantenimiento Loc.</option>
+          <option>Operario de Jardinería</option>
+          <option>Coordinador Operativo</option>
+          <option>Aux. Servicios Alturas</option>
+        </select>
+        <select class="pfsel" id="pf-suc" onchange="renderPipeline()">
+          <option value="">Todas las sucursales</option>
+          <option>Cali Centro</option><option>Yumbo</option><option>Palmira</option>
+          <option>Buga</option><option>Cali Norte</option><option>Pereira</option>
+          <option>Bogotá</option><option>Medellín</option>
+        </select>
+        <button style="background:none;border:1px solid var(--graym);border-radius:6px;padding:2px 9px;font-size:10.5px;cursor:pointer;height:26px;color:var(--muted)" onclick="document.getElementById('pf-cargo').value='';document.getElementById('pf-suc').value='';renderPipeline()">↺</button>
+      </div>
+    </div>
+    <div class="pipe-stages" id="pipe-stages"></div>
+    <div class="pipe-bar-row">
+      <div class="pipe-bar-lbl">Distribución por sucursal en pipeline</div>
+      <div class="pipe-stacked" id="pipe-bar"></div>
+      <div class="pipe-legend" id="pipe-legend"></div>
+    </div>
+    <div class="pipe-dtl">
+      <div class="pipe-dtl-ttl">Detalle por cargo y sucursal</div>
+      <div class="tscroll"><table class="tbl">
+        <thead><tr><th>Cargo</th><th>Sucursal</th><th style="color:#C0272D">🔍 Reclutamiento</th><th style="color:#BA7517">📋 Selección</th><th style="color:#185FA5">📝 Contratación</th><th style="color:#1D9E75">✅ Entregados</th><th>Total</th><th>Avance</th></tr></thead>
+        <tbody id="pipe-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <!-- CHARTS -->
+  <div class="cg t23">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Requisiciones vs Contratados por Mes</div></div>
+      <div class="leg"><span class="ld"><span class="ls" style="background:#C0272D"></span>Requisiciones</span><span class="ld"><span class="ls" style="background:#1D9E75"></span>Contratados</span><span class="ld"><span class="ls" style="background:#185FA5"></span>Solicitados</span></div>
+      <div class="cw" style="height:200px"><canvas id="c-r1"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">ANS Tiempo vs Cantidad</div></div>
+      <div class="cw" style="height:200px"><canvas id="c-r2"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Top ciudades · Requisiciones</div></div><div id="pr-rcit"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div><div class="cw" style="height:180px"><canvas id="c-r3"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Indicadores SSTA</div></div><div class="cw" style="height:180px"><canvas id="c-r4"></canvas></div></div>
+  </div>
+</div>
+
+<!-- SELECCIÓN -->
+<div class="sec" id="sec-seleccion">
+  <div class="sh"><div class="sh-ic">🔍</div><div><h2>Indicadores de Selección</h2><p>Cumplimiento en tiempo y en cantidad · Datos reales Dic 2025 – May 2026</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Requisiciones</div><div class="kc-val" id="s-req">6,656</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Solicitados</div><div class="kc-val" id="s-sol">10,551</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Contratados</div><div class="kc-val" id="s-cont">9,324</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Pendientes</div><div class="kc-val" id="s-pend">84</div></div>
+  </div>
+  <div class="ans-row">
+    <div class="ans-card">
+      <div class="gauge-wrap"><canvas id="g-t" width="76" height="76"></canvas>
+        <div class="gauge-lbl"><div class="gauge-pct" id="g-t-val">84.4%</div><div class="gauge-type">TIEMPO</div></div></div>
+      <div class="ans-info"><h3>% Cumplimiento en Tiempo</h3><p id="ans-t-p">Requisiciones cerradas a tiempo sobre el total cerradas.</p>
+        <div class="ans-pills"><span class="pill pg" id="ans-t-at">✓ 5,031 a tiempo</span><span class="pill pr" id="ans-t-in">✗ 932 incumplidas</span><span class="pill pb">Meta: 80%</span></div></div>
+    </div>
+    <div class="ans-card">
+      <div class="gauge-wrap"><canvas id="g-c" width="76" height="76"></canvas>
+        <div class="gauge-lbl"><div class="gauge-pct" id="g-c-val">88.4%</div><div class="gauge-type">CANTIDAD</div></div></div>
+      <div class="ans-info"><h3>% Cumplimiento en Cantidad</h3><p id="ans-c-p">Personas entregadas vs solicitadas por el cliente.</p>
+        <div class="ans-pills"><span class="pill pg" id="ans-c-en">✓ 9,324 entregadas</span><span class="pill pr" id="ans-c-fa">✗ 1,227 faltantes</span><span class="pill pb">Meta: 85%</span></div></div>
+    </div>
+  </div>
+  <div class="cc" style="margin-bottom:16px">
+    <div class="cc-h"><div class="cc-title">Oportunidad Mensual en Selección</div></div>
+    <div class="og" id="og"></div>
+    <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>% ANS Tiempo</span><span class="ld"><span class="ls" style="background:#185FA5"></span>% ANS Cantidad</span></div>
+    <div class="cw" style="height:190px"><canvas id="c-oport"></canvas></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Estado de Requisición</div></div><div class="cw" style="height:240px"><canvas id="c-est"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Tiempo por Sucursal</div></div><div class="cw" style="height:240px"><canvas id="c-suc-t"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Cantidad por Sucursal</div></div><div class="cw" style="height:240px"><canvas id="c-suc-c"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Tiempo por Ciudad</div></div><div class="cw" style="height:210px"><canvas id="c-cit"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Cantidad por Ciudad</div></div><div class="cw" style="height:210px"><canvas id="c-cic"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Top 10 Perfiles Solicitados</div></div><div id="pr-perf"></div></div>
+  </div>
+</div>
+
+<!-- PERSONAL ACTIVO -->
+<div class="sec" id="sec-activo">
+  <div class="sh"><div class="sh-ic">👥</div><div><h2>Personal Activo</h2><p>Estado de fuerza laboral · Jun 2026</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Activos</div><div class="kc-val">150</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Sucursales Activas</div><div class="kc-val">9</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Cargos Diferentes</div><div class="kc-val">14</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Contratos &gt;1 Año</div><div class="kc-val">12</div><div class="kc-sub">En revisión temporalidad</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Áreas Operativas</div><div class="kc-val">6</div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Sucursal / Ciudad</div></div><div class="cw" style="height:220px"><canvas id="c-act-ciudad"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Cargo (Top 8)</div></div><div id="pr-act-cargo"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Área Operativa</div></div><div class="cw" style="height:220px"><canvas id="c-act-area"></canvas></div></div>
+  </div>
+  <div class="cg t23">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Retiros Mensuales por Motivo</div></div>
+      <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>Paso Directo</span><span class="ld"><span class="ls" style="background:#BA7517"></span>Renuncia</span><span class="ld"><span class="ls" style="background:#185FA5"></span>Fin Obra</span><span class="ld"><span class="ls" style="background:#C0272D"></span>Bajo Desemp.</span></div>
+      <div class="cw" style="height:210px"><canvas id="c-act-ret"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div>
+      <table class="tbl"><thead><tr><th>Motivo</th><th>%</th></tr></thead><tbody>
+        <tr><td>Finalización Obra / Temporalidad</td><td><span class="badge bi">57.3%</span></td></tr>
+        <tr><td>Renuncia</td><td><span class="badge bw">25.4%</span></td></tr>
+        <tr><td>Vinculación Directa</td><td><span class="badge bs">9.1%</span></td></tr>
+        <tr><td>Período de Prueba</td><td><span class="badge bd">8.2%</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <div class="cc" style="margin-bottom:16px">
+    <div class="cc-h"><div class="cc-title">Colaboradores con Contratos &gt;1 Año — Temporalidad</div></div>
+    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Sucursal</th><th>Fecha Ingreso</th><th>Meses</th><th>Acción</th></tr></thead><tbody>
+      <tr><td>Carlos Andrés Pérez</td><td>Auxiliar de Servicios</td><td>Bogotá</td><td>Mar 2024</td><td>27</td><td><span class="badge bw">Revisar</span></td></tr>
+      <tr><td>María del Carmen López</td><td>Operario Logístico</td><td>Cali Centro</td><td>Ene 2024</td><td>29</td><td><span class="badge bd">Urgente</span></td></tr>
+      <tr><td>Jhon Fredy Martínez</td><td>Auxiliar Servicios BPM</td><td>Medellín</td><td>Feb 2024</td><td>28</td><td><span class="badge bd">Urgente</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ROTACIÓN -->
+<div class="sec" id="sec-rotacion">
+  <div class="sh"><div class="sh-ic">🔄</div><div><h2>Índice de Rotación</h2><p>Análisis de retiros, causas y tendencias</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Retiros</div><div class="kc-val">944</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Paso Directo</div><div class="kc-val">541</div><div class="kc-sub">57.3%</div><div class="kc-d d-up">▲ Positivo</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Renuncias</div><div class="kc-val">240</div><div class="kc-sub">25.4%</div><div class="kc-d d-dn">▼ Intervención</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Terminación de contrato</div><div class="kc-val">160</div><div class="kc-sub">16.9%</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Masculino</div><div class="kc-val">69.8%</div><div class="kc-sub">659 personas</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Femenino</div><div class="kc-val">30.2%</div><div class="kc-sub">285 personas</div></div>
+  </div>
+  <div class="cg t23">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Retiros por Mes — Tendencia</div></div><div class="cw" style="height:200px"><canvas id="c-rot-m"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Causal de Retiro</div></div><div class="cw" style="height:200px"><canvas id="c-rot-c"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Índice de Rotación por Cargo</div></div><div id="pr-rot-cargo"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Índice de Rotación por Ciudad / Sucursal</div></div><div id="pr-rot-ciudad"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Evolución Índice Rotación Mensual</div></div><div class="cw" style="height:190px"><canvas id="c-rot-idx"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Por Zona</div></div><div class="cw" style="height:170px"><canvas id="c-rot-z"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Por Género</div></div><div class="cw" style="height:170px"><canvas id="c-rot-g"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Permanencia</div></div><div class="cw" style="height:170px"><canvas id="c-rot-d"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ENTREVISTAS -->
+<div class="sec" id="sec-entrevistas">
+  <div class="sh"><div class="sh-ic">💬</div><div><h2>Entrevistas de Retiro</h2><p>76 entrevistas · Percepción de salida y clima laboral</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Total Entrevistas</div><div class="kc-val">76</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Cobertura</div><div class="kc-val">72%</div><div class="kc-sub">Meta: 85%</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">😊 Comentarios Positivos</div><div class="kc-val">62</div><div class="kc-sub">81.6%</div><div class="kc-d d-up">▲</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">😐 Comentarios Neutros</div><div class="kc-val">11</div><div class="kc-sub">14.5%</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">😞 Comentarios Negativos</div><div class="kc-val">3</div><div class="kc-sub">3.9%</div><div class="kc-d d-dn">▼</div></div>
+  </div>
+  <div class="sent-cards">
+    <div class="sent-card sent-card-pos"><div class="sent-ttl"><span>😊</span><strong style="color:var(--ok)">Positivos · 62 personas (81.6%)</strong></div>
+      <div class="sent-list">✓ Buen trato del jefe inmediato<br>✓ Trabajo acorde a lo ofrecido<br>✓ Recibieron retroalimentación<br>✓ Contaron con herramientas<br>✓ Pudieron aplicar sus conocimientos</div></div>
+    <div class="sent-card sent-card-neu"><div class="sent-ttl"><span>😐</span><strong style="color:var(--warn)">Neutros · 11 personas (14.5%)</strong></div>
+      <div class="sent-list">~ Trato del jefe: regular<br>~ Trabajo parcialmente esperado<br>~ Retroalimentación ocasional<br>~ Algunos elementos faltantes<br>~ Salida por mejor oferta</div></div>
+    <div class="sent-card sent-card-neg"><div class="sent-ttl"><span>😞</span><strong style="color:var(--red)">Negativos · 3 personas (3.9%)</strong></div>
+      <div class="sent-list">✗ Mal trato del jefe inmediato<br>✗ Trabajo diferente a lo prometido<br>✗ Sin retroalimentación<br>✗ Elementos deficientes<br>✗ Ambiente laboral inadecuado</div></div>
+  </div>
+  <div class="cg t23">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos Principales de Retiro</div></div><div class="cw" style="height:260px"><canvas id="c-em"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Percepción General de Salida</div></div><div class="cw" style="height:260px"><canvas id="c-ej"></canvas></div></div>
+  </div>
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h"><div class="cc-title">Resumen de Experiencia Laboral — Respuestas por Pregunta</div></div>
+    <div id="ent-preguntas"></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Entrevistas por Sucursal</div></div><div class="cw" style="height:180px"><canvas id="c-ent-suc"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Percepción por Cargo</div></div><div id="pr-ent-cargo"></div></div>
+  </div>
+</div>
+
+<!-- TALENTO -->
+<div class="sec" id="sec-talento">
+  <div class="sh"><div class="sh-ic">🏆</div><div><h2>Gestión del Talento</h2><p>Procesos disciplinarios y temporalidad</p></div></div>
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h"><div class="cc-title">Procesos Disciplinarios</div></div>
+    <table class="tbl"><thead><tr><th>Mes</th><th>Nombre</th><th>Cargo</th><th>Motivo</th><th>Acción</th></tr></thead>
+    <tbody><tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros en el período</td></tr></tbody></table>
+  </div>
+  <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Control de la Temporalidad</div></div>
+    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Ciudad</th><th>Fecha Ingreso</th></tr></thead><tbody>
+      <tr><td>Carlos Andrés Pérez</td><td>Auxiliar de Servicios</td><td>Bogotá</td><td>Mar 2024</td></tr>
+      <tr><td>María del Carmen López</td><td>Operario Logístico</td><td>Cali</td><td>Ene 2024</td></tr>
+      <tr><td>Jhon Fredy Martínez</td><td>Auxiliar Servicios BPM</td><td>Medellín</td><td>Feb 2024</td></tr>
+    </tbody></table>
+    <p style="font-size:10.5px;color:var(--muted);margin-top:11px;font-style:italic">De cara al año 2026, renovamos nuestro compromiso con la excelencia, proyectando trabajo colaborativo enfocado en la mejora continua, la innovación y la generación de mayor valor.</p>
+  </div>
+</div>
+
+<!-- BIENESTAR -->
+<div class="sec" id="sec-bienestar">
+  <div class="sh"><div class="sh-ic">🌿</div><div><h2>Actividades de Bienestar</h2><p>Plan de bienestar laboral 2026</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Actividades Ejecutadas</div><div class="kc-val">8</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Personas Beneficiadas</div><div class="kc-val">487</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% Impacto Promedio</div><div class="kc-val">76%</div></div>
+  </div>
+  <div class="cc"><div class="tscroll"><table class="tbl">
+    <thead><tr><th>Mes</th><th>Fecha</th><th>Actividad</th><th>Medio</th><th>Personas</th><th>% Impacto</th></tr></thead>
+    <tbody>
+      <tr><td>Ene</td><td>15/01/26</td><td>Bienvenida 2026 — Celebración inicio de año</td><td>Presencial</td><td>72</td><td><span class="badge bs">82%</span></td></tr>
+      <tr><td>Feb</td><td>14/02/26</td><td>Día de la Amistad — Integración virtual</td><td>Virtual</td><td>85</td><td><span class="badge bs">78%</span></td></tr>
+      <tr><td>Mar</td><td>08/03/26</td><td>Día de la Mujer — Reconocimiento y charla</td><td>Híbrido</td><td>63</td><td><span class="badge bw">71%</span></td></tr>
+      <tr><td>Abr</td><td>22/04/26</td><td>Pausas activas saludables</td><td>Presencial</td><td>91</td><td><span class="badge bs">85%</span></td></tr>
+      <tr><td>May</td><td>15/05/26</td><td>Celebración Día de la Madre</td><td>Virtual</td><td>78</td><td><span class="badge bs">80%</span></td></tr>
+      <tr><td>May</td><td>28/05/26</td><td>Taller Bienestar Emocional y Estrés</td><td>Virtual</td><td>54</td><td><span class="badge bw">65%</span></td></tr>
+    </tbody>
+  </table></div></div>
+</div>
+
+<!-- AT -->
+<div class="sec" id="sec-at">
+  <div class="sh"><div class="sh-ic">⚠️</div><div><h2>Accidentes de Trabajo</h2><p>#SeguridadesPRIMERO · Frecuencia, severidad y clasificación · 2024–2026</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Tasa de Accidentalidad YTD</div><div class="kc-val">3.07%</div><div class="kc-sub">Por cada 100 trabajadores</div><div class="kc-d d-up">▼ vs 3.8% 2025</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Cantidad Accidentes</div><div class="kc-val">559</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Días Ausentismo AT</div><div class="kc-val">4,096</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Tasa de Severidad AT</div><div class="kc-val">22.46%</div><div class="kc-sub">Días incapacidad ÷ total trabajadores</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días hasta 1er AT</div><div class="kc-val">47 días</div><div class="kc-sub">Prom. contratación → AT</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Mortales</div><div class="kc-val">0</div><div class="kc-d d-up">▲ Sin fatalidades</div></div>
+  </div>
+  <div class="cg">
+    <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title" style="font-weight:700">Frecuencia Accidentalidad — Nº Accidentes y Tasa % por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-at-if"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title" style="font-weight:700">Severidad AT — Días Perdidos y Tasa Severidad % por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-at-is"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Causa AT</div></div><div class="cw" style="height:175px"><canvas id="c-at-causa"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Clasificación por Total Días de AT</div></div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:6px">Sin severidad: 0 días · Leve: 1–3 · Moderado: 4–14 · Severo: &gt;15</div>
+      <div class="cw" style="height:145px"><canvas id="c-at-clas"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Peligro</div></div><div id="pr-peligro"></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Parte Cuerpo Afectada</div></div><div id="pr-cuerpo"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Mecanismo AT</div></div><div id="pr-mec"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Tipo de Lesión</div></div><div id="pr-lesion"></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Tasa AT por Género</div></div><div class="cw" style="height:160px"><canvas id="c-at-gen"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">AT por Sucursal — Frecuencia</div></div><div id="pr-at-suc-f"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">AT por Cargo</div></div><div id="pr-at-cargo"></div></div>
+  </div>
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h"><div class="cc-title" style="font-weight:700">⏱ Tiempo desde Contratación hasta el Primer Accidente de Trabajo</div></div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px">
+      <div style="text-align:center;background:var(--redl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)">47 días</div><div style="font-size:9.5px;color:var(--muted)">Promedio global</div></div>
+      <div style="text-align:center;background:var(--redl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)">38%</div><div style="font-size:9.5px;color:var(--muted)">Menos de 1 mes</div></div>
+      <div style="text-align:center;background:var(--warnl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--warn)">24%</div><div style="font-size:9.5px;color:var(--muted)">De 1 a 2 meses</div></div>
+      <div style="text-align:center;background:var(--okl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--ok)">22%</div><div style="font-size:9.5px;color:var(--muted)">De 3 a 6 meses</div></div>
+      <div style="text-align:center;background:var(--okl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--ok)">16%</div><div style="font-size:9.5px;color:var(--muted)">Mayor a 6 meses</div></div>
+    </div>
+    <div class="cw" style="height:160px"><canvas id="c-at-tiempo"></canvas></div>
+  </div>
+</div>
+
+<!-- EG -->
+<div class="sec" id="sec-eg">
+  <div class="sh"><div class="sh-ic">🏥</div><div><h2>Enfermedades Generales</h2><p>Severidad, frecuencia y diagnósticos · 2024–2026</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Tasa Severidad EG</div><div class="kc-val">1.67%</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Tasa Frecuencia EG</div><div class="kc-val">38.03%</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Casos Registrados</div><div class="kc-val">6,876</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val">43,268</div></div>
+  </div>
+  <div class="cg t23">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Severidad EG — Días Perdidos y Tasa %</div></div><div class="cw" style="height:180px"><canvas id="c-eg-is"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Frecuencia EG — Nº Casos y Tasa %</div></div><div class="cw" style="height:180px"><canvas id="c-eg-if"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Diagnóstico EG — Severidad</div></div><div id="pr-eg-diag-s"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Diagnóstico EG — Frecuencia</div></div><div id="pr-eg-diag-f"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">EG por Sucursal — Severidad</div></div><div id="pr-eg-suc-s"></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Tasa EG por Género</div></div><div class="cw" style="height:155px"><canvas id="c-eg-gen"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">EG por Ciudad</div></div><div id="pr-eg-ciudad"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Top EG por Cargo</div></div><div id="pr-eg-cargo"></div></div>
+  </div>
+</div>
+
+<!-- SINIESTRO -->
+<div class="sec" id="sec-siniestro">
+  <div class="sh"><div class="sh-ic">🩺</div><div>
+    <h2>Gestión del Siniestro &amp; Fueros de Salud</h2>
+    <p>Seguimiento de casos médicos activos · Identificación de fueros de estabilidad reforzada vigentes</p>
+  </div></div>
+
+  <!-- ═══ BLOQUE 1: RESUMEN DE CASOS MÉDICOS ═══ -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">
+    <div class="kc" style="--kcc:#C0272D">
+      <div class="kc-lbl">Casos Médicos Origen Laboral</div>
+      <div class="kc-val">34</div>
+      <div class="kc-sub">AT activos en seguimiento</div>
+      <div class="kc-d d-dn">▼ Requieren atención</div>
+    </div>
+    <div class="kc" style="--kcc:#BA7517">
+      <div class="kc-lbl">Casos Médicos Origen Común</div>
+      <div class="kc-val">82</div>
+      <div class="kc-sub">EG activos en gestión</div>
+      <div class="kc-d d-nt">→ Seguimiento activo</div>
+    </div>
+    <div class="kc" style="--kcc:#1D9E75">
+      <div class="kc-lbl">Casos Cerrados YTD</div>
+      <div class="kc-val">143</div>
+      <div class="kc-sub">Resueltos en 2026</div>
+      <div class="kc-d d-up">▲ Alta médica / Reintegro</div>
+    </div>
+  </div>
+
+  <div class="cg" style="margin-bottom:18px">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Estado de Casos Activos</div></div>
+      <div class="cw" style="height:200px"><canvas id="c-sin-est"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Desenlace de Casos</div></div>
+      <div id="pr-sin-des"></div></div>
+  </div>
+
+  <!-- ═══ DIVISOR ═══ -->
+  <div style="display:flex;align-items:center;gap:14px;margin:22px 0 20px">
+    <div style="flex:1;height:1px;background:var(--graym)"></div>
+    <div style="background:#8B1A1E;color:white;font-size:11px;font-weight:700;padding:5px 16px;border-radius:20px;letter-spacing:.5px;white-space:nowrap">
+      🛡️ FUEROS DE SALUD — ESTABILIDAD REFORZADA
+    </div>
+    <div style="flex:1;height:1px;background:var(--graym)"></div>
+  </div>
+
+  <p style="font-size:11.5px;color:var(--muted);margin-bottom:16px;line-height:1.6;background:var(--infol);padding:10px 14px;border-radius:8px;border-left:3px solid var(--info)">
+    <strong style="color:var(--info)">⚖️ Definición legal:</strong> Un trabajador con <strong>fuero de salud</strong> no puede ser desvinculado sin autorización previa del Ministerio de Trabajo. 
+    Se activa cuando existe una <strong>limitación física o de salud</strong> conocida por el empleador al momento del despido. 
+    Criterio principal para identificar casos potenciales: <strong>incapacidad médica activa o reciente</strong>.
+  </p>
+
+  <!-- KPIs de fueros -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+    <div class="kc" style="--kcc:#C0272D">
+      <div class="kc-lbl">🔴 Riesgo Crítico</div>
+      <div class="kc-val">12</div>
+      <div class="kc-sub">Incapacidad &gt;90 días · En calificación</div>
+      <div class="kc-d d-dn">▼ Acción inmediata</div>
+    </div>
+    <div class="kc" style="--kcc:#BA7517">
+      <div class="kc-lbl">🟡 Riesgo Alto</div>
+      <div class="kc-val">21</div>
+      <div class="kc-sub">Incapacidad 30–90 días</div>
+      <div class="kc-d d-nt">→ Monitoreo activo</div>
+    </div>
+    <div class="kc" style="--kcc:#1D9E75">
+      <div class="kc-lbl">🟢 Controlados</div>
+      <div class="kc-val">14</div>
+      <div class="kc-sub">Incapacidad &lt;30 días · Alta reciente</div>
+    </div>
+    <div class="kc" style="--kcc:#8B1A1E">
+      <div class="kc-lbl">⚠️ Riesgo Acción Legal</div>
+      <div class="kc-val">5</div>
+      <div class="kc-sub">Requieren concepto jurídico</div>
+      <div class="kc-d d-dn">▼ Urgente</div>
+    </div>
+  </div>
+
+  <!-- Semáforo visual compacto -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
+    <div style="background:white;border-radius:10px;border-left:5px solid var(--red);padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:28px">🔴</div>
+      <div>
+        <div style="font-size:20px;font-weight:900;color:var(--red)">12 críticos</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.5">Incapacidad &gt;90 días · En calificación<br>Riesgo de acción legal ante el MinTrabajo</div>
+      </div>
+    </div>
+    <div style="background:white;border-radius:10px;border-left:5px solid var(--warn);padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:28px">🟡</div>
+      <div>
+        <div style="font-size:20px;font-weight:900;color:var(--warn)">21 altos</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.5">Incapacidad 30–90 días · Prórroga recurrente<br>Diagnóstico osteomuscular / psicológico</div>
+      </div>
+    </div>
+    <div style="background:white;border-radius:10px;border-left:5px solid var(--ok);padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:28px">🟢</div>
+      <div>
+        <div style="font-size:20px;font-weight:900;color:var(--ok)">14 controlados</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.5">Incapacidad &lt;30 días · Alta médica reciente<br>Sin recurrencia · Sin riesgo jurídico inmediato</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficas de fueros -->
+  <div class="cg" style="margin-bottom:18px">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Evolución de Casos por Nivel de Riesgo</div></div>
+      <div class="cw" style="height:200px"><canvas id="c-fu-mes"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Tipo de Contingencia</div></div>
+      <div class="cw" style="height:200px"><canvas id="c-fu-tipo"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Diagnósticos Más Frecuentes</div></div>
+      <div id="pr-fu-diag"></div></div>
+  </div>
+
+  <!-- ═══ TABLA MAESTRA: FUEROS VIGENTES A LA FECHA ═══ -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h" style="flex-wrap:wrap;gap:8px">
+      <div class="cc-title" style="font-weight:700;font-size:13px">📋 Fueros de Salud Vigentes a la Fecha — Registro Maestro</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge bd">🔴 Crítico: 12</span>
+        <span class="badge bw">🟡 Alto: 21</span>
+        <span class="badge bs">🟢 Control: 14</span>
+        <span class="badge bi">Total: 47</span>
+      </div>
+    </div>
+    <!-- Filtro de riesgo -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="fuero-filter-btn active" onclick="filterFueros('todos',this)">Todos (47)</button>
+      <button class="fuero-filter-btn" onclick="filterFueros('critico',this)" style="border-color:var(--red);color:var(--red)">🔴 Críticos (12)</button>
+      <button class="fuero-filter-btn" onclick="filterFueros('alto',this)" style="border-color:var(--warn);color:var(--warn)">🟡 Altos (21)</button>
+      <button class="fuero-filter-btn" onclick="filterFueros('control',this)" style="border-color:var(--ok);color:var(--ok)">🟢 Controlados (14)</button>
+    </div>
+    <div class="tscroll">
+    <table class="tbl" id="fueros-tabla">
+      <thead><tr>
+        <th>ID</th>
+        <th>Origen</th>
+        <th>Cargo</th>
+        <th>Sucursal</th>
+        <th>Diagnóstico CIE-10</th>
+        <th>Fecha Inicio Inc.</th>
+        <th>Días Incapacidad</th>
+        <th>Nº Prórrogas</th>
+        <th>Estado Actual</th>
+        <th>Vencimiento Fuero</th>
+        <th>Riesgo Jurídico</th>
+        <th>Acción Requerida</th>
+      </tr></thead>
+      <tbody id="fueros-tbody">
+        <tr data-riesgo="critico"><td>F-001</td><td><span class="badge bd">AT</span></td><td>Aux. de Servicios</td><td>Cali Centro</td><td>M54 – Dorsalgia/Lumbalgia</td><td>15/01/2026</td><td>112</td><td>3</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--red);font-weight:700">30/07/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Reintegro laboral urgente</td></tr>
+        <tr data-riesgo="critico"><td>F-002</td><td><span class="badge bi">EG</span></td><td>Op. Logístico</td><td>Bogotá</td><td>M75 – Lesión hombro</td><td>20/01/2026</td><td>98</td><td>2</td><td><span class="badge bw">En calificación</span></td><td style="color:var(--red);font-weight:700">15/08/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Concepto jurídico</td></tr>
+        <tr data-riesgo="critico"><td>F-003</td><td><span class="badge bi">EG</span></td><td>Aux. Servicios BPM</td><td>Medellín</td><td>G54 – Túnel carpiano</td><td>05/02/2026</td><td>95</td><td>2</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--red);font-weight:700">01/09/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Adaptación puesto</td></tr>
+        <tr data-riesgo="critico"><td>F-004</td><td><span class="badge bd">AT</span></td><td>Coordinador Operativo</td><td>Yumbo</td><td>S52 – Fractura</td><td>10/01/2026</td><td>120</td><td>3</td><td><span class="badge bw">Junta médica</span></td><td style="color:var(--red);font-weight:700">10/07/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Junta médica urgente</td></tr>
+        <tr data-riesgo="alto"><td>F-005</td><td><span class="badge bi">EG</span></td><td>Aux. de Servicios</td><td>Palmira</td><td>M79 – Dolor musculoesq.</td><td>01/03/2026</td><td>72</td><td>2</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--warn);font-weight:700">01/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Seguimiento médico</td></tr>
+        <tr data-riesgo="alto"><td>F-006</td><td><span class="badge bi">EG</span></td><td>Aux. de Servicios</td><td>Buga</td><td>F41 – Trastorno ansioso</td><td>15/03/2026</td><td>67</td><td>2</td><td><span class="badge bw">Psicología activa</span></td><td style="color:var(--warn);font-weight:700">15/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Seguimiento psicológico</td></tr>
+        <tr data-riesgo="alto"><td>F-007</td><td><span class="badge bi">EG</span></td><td>Op. Apoyo Logístico</td><td>Cali Centro</td><td>M54 – Dorsalgia</td><td>10/03/2026</td><td>62</td><td>1</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--warn);font-weight:700">10/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Seguimiento médico</td></tr>
+        <tr data-riesgo="alto"><td>F-008</td><td><span class="badge bd">AT</span></td><td>Aux. Servicios Alturas</td><td>Barranquilla</td><td>S83 – Lesión rodilla</td><td>20/03/2026</td><td>55</td><td>1</td><td><span class="badge bw">Fisioterapia</span></td><td style="color:var(--warn);font-weight:700">20/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Control fisioterapia</td></tr>
+        <tr data-riesgo="control"><td>F-009</td><td><span class="badge bi">EG</span></td><td>Aux. de Servicios</td><td>Bogotá</td><td>K29 – Gastritis</td><td>01/05/2026</td><td>28</td><td>1</td><td><span class="badge bs">Alta médica</span></td><td style="color:var(--ok);font-weight:700">01/08/2026</td><td><span class="badge bs">🟢 Control</span></td><td>Alta próxima</td></tr>
+        <tr data-riesgo="control"><td>F-010</td><td><span class="badge bi">EG</span></td><td>Aux. Servicios BPM</td><td>Pereira</td><td>J06 – IRA / Gripa</td><td>10/05/2026</td><td>14</td><td>0</td><td><span class="badge bs">Alta médica</span></td><td style="color:var(--ok);font-weight:700">10/08/2026</td><td><span class="badge bs">🟢 Control</span></td><td>Cerrar caso</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="margin-top:10px;font-size:10.5px;color:var(--muted);font-style:italic">
+      * Vencimiento del Fuero estimado: 6 meses después de la última incapacidad / alta médica. Verificar con concepto jurídico en casos críticos.
+      <br>* Los datos deben actualizarse desde la hoja <strong>FUEROS_SALUD</strong> del archivo Excel de plantillas.
+    </div>
+  </div>
+</div>
+
+<!-- FORMACIÓN -->
+<div class="sec" id="sec-formacion">
+  <div class="sh"><div class="sh-ic">📚</div><div><h2>Formación SST — Plan de Capacitación</h2><p>Temas formados, programados, cobertura y avance · 2026</p></div></div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Programados YTD</div><div class="kc-val">378</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Asistentes YTD</div><div class="kc-val">46</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Cobertura Promedio</div><div class="kc-val">17.8%</div><div class="kc-d d-nt">→ Meta: 80%</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Temas Ejecutados</div><div class="kc-val">5 / 14</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">% Ejecutado</div><div class="kc-val">100%</div><div class="kc-d d-up">▲ Al día</div></div>
+  </div>
+  <div class="cc" style="margin-bottom:14px">
+    <div class="red-hdr">Formaciones Acumulado Año</div>
+    <div class="tscroll"><table class="tbl" id="tb-form">
+      <thead><tr><th>Mes</th><th>Tema</th><th>Programados</th><th>Asistentes</th><th>Cobertura</th></tr></thead>
+      <tbody id="tb-form-body"></tbody>
+    </table></div>
+  </div>
+  <div class="cg t23">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Programados vs Asistentes por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-form-pa"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">% Cobertura por Tema</div></div><div id="pr-form-cob"></div></div>
+  </div>
+</div>
+
+</div>
+</div>
+<script>
+// ===== DYNAMIC DATA (loaded from Excel or demo fallback) =====
+var FD = {"all": {"total": {"req": 6656, "sol": 10551, "cont": 9324, "cer": 5963, "at": 5031, "inc": 932, "pct_t": 84.4, "pct_c": 88.4, "cancel": 538, "abierto": 155, "pend": 84}, "by_month": {"2025-12": {"req": 1191, "sol": 2398, "cont": 2173, "cer": 1069, "at": 732, "inc": 337, "pct_t": 68.5, "pct_c": 90.6, "cancel": 122, "abierto": 0, "pend": 11}, "2026-01": {"req": 1199, "sol": 1746, "cont": 1610, "cer": 1087, "at": 943, "inc": 144, "pct_t": 86.8, "pct_c": 92.2, "cancel": 112, "abierto": 0, "pend": 3}, "2026-02": {"req": 1077, "sol": 1600, "cont": 1463, "cer": 996, "at": 889, "inc": 107, "pct_t": 89.3, "pct_c": 91.4, "cancel": 81, "abierto": 0, "pend": 2}, "2026-03": {"req": 1126, "sol": 1590, "cont": 1451, "cer": 1026, "at": 876, "inc": 150, "pct_t": 85.4, "pct_c": 91.3, "cancel": 100, "abierto": 0, "pend": 9}, "2026-04": {"req": 1008, "sol": 1448, "cont": 1352, "cer": 934, "at": 836, "inc": 98, "pct_t": 89.5, "pct_c": 93.4, "cancel": 70, "abierto": 4, "pend": 6}, "2026-05": {"req": 1055, "sol": 1769, "cont": 1275, "cer": 851, "at": 755, "inc": 96, "pct_t": 88.7, "pct_c": 72.1, "cancel": 53, "abierto": 151, "pend": 53}}}, "SANTAFE DE BOGOTA D. C.": {"total": {"req": 1794, "sol": 2868, "cont": 2668, "cer": 1641, "at": 1414, "inc": 227, "pct_t": 86.2, "pct_c": 93.0, "cancel": 128, "abierto": 25, "pend": 2}, "by_month": {"2025-12": {"req": 335, "sol": 576, "cont": 549, "cer": 312, "at": 199, "inc": 113, "pct_t": 63.8, "pct_c": 95.3, "cancel": 23, "abierto": 0, "pend": 0}, "2026-01": {"req": 324, "sol": 506, "cont": 474, "cer": 298, "at": 277, "inc": 21, "pct_t": 93.0, "pct_c": 93.7, "cancel": 26, "abierto": 0, "pend": 0}, "2026-02": {"req": 314, "sol": 490, "cont": 439, "cer": 285, "at": 259, "inc": 26, "pct_t": 90.9, "pct_c": 89.6, "cancel": 29, "abierto": 0, "pend": 0}, "2026-03": {"req": 272, "sol": 426, "cont": 399, "cer": 246, "at": 213, "inc": 33, "pct_t": 86.6, "pct_c": 93.7, "cancel": 26, "abierto": 0, "pend": 1}, "2026-04": {"req": 263, "sol": 400, "cont": 384, "cer": 253, "at": 237, "inc": 16, "pct_t": 93.7, "pct_c": 96.0, "cancel": 10, "abierto": 0, "pend": 0}, "2026-05": {"req": 286, "sol": 470, "cont": 423, "cer": 247, "at": 229, "inc": 18, "pct_t": 92.7, "pct_c": 90.0, "cancel": 14, "abierto": 25, "pend": 1}}}, "CALI": {"total": {"req": 1445, "sol": 2321, "cont": 2052, "cer": 1251, "at": 1080, "inc": 171, "pct_t": 86.3, "pct_c": 88.4, "cancel": 151, "abierto": 43, "pend": 15}, "by_month": {"2025-12": {"req": 290, "sol": 670, "cont": 605, "cer": 248, "at": 190, "inc": 58, "pct_t": 76.6, "pct_c": 90.3, "cancel": 42, "abierto": 0, "pend": 5}, "2026-01": {"req": 258, "sol": 363, "cont": 320, "cer": 225, "at": 194, "inc": 31, "pct_t": 86.2, "pct_c": 88.2, "cancel": 33, "abierto": 0, "pend": 0}, "2026-02": {"req": 222, "sol": 319, "cont": 296, "cer": 205, "at": 182, "inc": 23, "pct_t": 88.8, "pct_c": 92.8, "cancel": 17, "abierto": 0, "pend": 1}, "2026-03": {"req": 247, "sol": 342, "cont": 305, "cer": 223, "at": 193, "inc": 30, "pct_t": 86.5, "pct_c": 89.2, "cancel": 24, "abierto": 0, "pend": 2}, "2026-04": {"req": 213, "sol": 318, "cont": 292, "cer": 189, "at": 177, "inc": 12, "pct_t": 93.7, "pct_c": 91.8, "cancel": 22, "abierto": 2, "pend": 1}, "2026-05": {"req": 215, "sol": 309, "cont": 234, "cer": 161, "at": 144, "inc": 17, "pct_t": 89.4, "pct_c": 75.7, "cancel": 13, "abierto": 41, "pend": 6}}}, "MEDELLIN": {"total": {"req": 733, "sol": 1232, "cont": 987, "cer": 650, "at": 476, "inc": 174, "pct_t": 73.2, "pct_c": 80.1, "cancel": 55, "abierto": 28, "pend": 14}, "by_month": {"2025-12": {"req": 131, "sol": 238, "cont": 217, "cer": 116, "at": 46, "inc": 70, "pct_t": 39.7, "pct_c": 91.2, "cancel": 15, "abierto": 0, "pend": 4}, "2026-01": {"req": 128, "sol": 193, "cont": 180, "cer": 116, "at": 86, "inc": 30, "pct_t": 74.1, "pct_c": 93.3, "cancel": 12, "abierto": 0, "pend": 3}, "2026-02": {"req": 106, "sol": 150, "cont": 135, "cer": 98, "at": 84, "inc": 14, "pct_t": 85.7, "pct_c": 90.0, "cancel": 8, "abierto": 0, "pend": 1}, "2026-03": {"req": 115, "sol": 163, "cont": 150, "cer": 110, "at": 89, "inc": 21, "pct_t": 80.9, "pct_c": 92.0, "cancel": 5, "abierto": 0, "pend": 3}, "2026-04": {"req": 109, "sol": 173, "cont": 156, "cer": 101, "at": 84, "inc": 17, "pct_t": 83.2, "pct_c": 90.2, "cancel": 8, "abierto": 0, "pend": 1}, "2026-05": {"req": 144, "sol": 315, "cont": 149, "cer": 109, "at": 87, "inc": 22, "pct_t": 79.8, "pct_c": 47.3, "cancel": 7, "abierto": 28, "pend": 2}}}, "BARRANQUILLA": {"total": {"req": 299, "sol": 511, "cont": 380, "cer": 260, "at": 209, "inc": 51, "pct_t": 80.4, "pct_c": 74.4, "cancel": 29, "abierto": 10, "pend": 27}, "by_month": {"2025-12": {"req": 57, "sol": 93, "cont": 83, "cer": 49, "at": 39, "inc": 10, "pct_t": 79.6, "pct_c": 89.2, "cancel": 8, "abierto": 0, "pend": 1}, "2026-01": {"req": 50, "sol": 62, "cont": 58, "cer": 45, "at": 41, "inc": 4, "pct_t": 91.1, "pct_c": 93.5, "cancel": 5, "abierto": 0, "pend": 0}, "2026-02": {"req": 39, "sol": 67, "cont": 55, "cer": 37, "at": 32, "inc": 5, "pct_t": 86.5, "pct_c": 82.1, "cancel": 2, "abierto": 0, "pend": 0}, "2026-03": {"req": 56, "sol": 88, "cont": 76, "cer": 47, "at": 31, "inc": 16, "pct_t": 66.0, "pct_c": 86.4, "cancel": 9, "abierto": 0, "pend": 0}, "2026-04": {"req": 40, "sol": 63, "cont": 56, "cer": 36, "at": 28, "inc": 8, "pct_t": 77.8, "pct_c": 88.9, "cancel": 3, "abierto": 1, "pend": 1}, "2026-05": {"req": 57, "sol": 138, "cont": 52, "cer": 46, "at": 38, "inc": 8, "pct_t": 82.6, "pct_c": 37.7, "cancel": 2, "abierto": 9, "pend": 25}}}, "BUCARAMANGA": {"total": {"req": 200, "sol": 265, "cont": 247, "cer": 181, "at": 138, "inc": 43, "pct_t": 76.2, "pct_c": 93.2, "cancel": 15, "abierto": 4, "pend": 0}, "by_month": {"2025-12": {"req": 38, "sol": 66, "cont": 62, "cer": 34, "at": 16, "inc": 18, "pct_t": 47.1, "pct_c": 93.9, "cancel": 4, "abierto": 0, "pend": 0}, "2026-01": {"req": 36, "sol": 45, "cont": 42, "cer": 33, "at": 25, "inc": 8, "pct_t": 75.8, "pct_c": 93.3, "cancel": 3, "abierto": 0, "pend": 0}, "2026-02": {"req": 37, "sol": 46, "cont": 42, "cer": 33, "at": 30, "inc": 3, "pct_t": 90.9, "pct_c": 91.3, "cancel": 4, "abierto": 0, "pend": 0}, "2026-03": {"req": 24, "sol": 31, "cont": 30, "cer": 23, "at": 19, "inc": 4, "pct_t": 82.6, "pct_c": 96.8, "cancel": 1, "abierto": 0, "pend": 0}, "2026-04": {"req": 35, "sol": 40, "cont": 39, "cer": 33, "at": 27, "inc": 6, "pct_t": 81.8, "pct_c": 97.5, "cancel": 2, "abierto": 0, "pend": 0}, "2026-05": {"req": 30, "sol": 37, "cont": 32, "cer": 25, "at": 21, "inc": 4, "pct_t": 84.0, "pct_c": 86.5, "cancel": 1, "abierto": 4, "pend": 0}}}, "PEREIRA": {"total": {"req": 176, "sol": 224, "cont": 197, "cer": 154, "at": 123, "inc": 31, "pct_t": 79.9, "pct_c": 87.9, "cancel": 17, "abierto": 5, "pend": 2}, "by_month": {"2025-12": {"req": 26, "sol": 52, "cont": 45, "cer": 23, "at": 12, "inc": 11, "pct_t": 52.2, "pct_c": 86.5, "cancel": 3, "abierto": 0, "pend": 1}, "2026-01": {"req": 31, "sol": 42, "cont": 39, "cer": 28, "at": 23, "inc": 5, "pct_t": 82.1, "pct_c": 92.9, "cancel": 3, "abierto": 0, "pend": 0}, "2026-02": {"req": 22, "sol": 24, "cont": 23, "cer": 21, "at": 18, "inc": 3, "pct_t": 85.7, "pct_c": 95.8, "cancel": 1, "abierto": 0, "pend": 0}, "2026-03": {"req": 33, "sol": 38, "cont": 34, "cer": 30, "at": 25, "inc": 5, "pct_t": 83.3, "pct_c": 89.5, "cancel": 3, "abierto": 0, "pend": 1}, "2026-04": {"req": 28, "sol": 32, "cont": 30, "cer": 26, "at": 21, "inc": 5, "pct_t": 80.8, "pct_c": 93.8, "cancel": 2, "abierto": 0, "pend": 0}, "2026-05": {"req": 36, "sol": 36, "cont": 26, "cer": 26, "at": 24, "inc": 2, "pct_t": 92.3, "pct_c": 72.2, "cancel": 5, "abierto": 5, "pend": 0}}}, "PALMIRA": {"total": {"req": 154, "sol": 257, "cont": 237, "cer": 139, "at": 126, "inc": 13, "pct_t": 90.6, "pct_c": 92.2, "cancel": 13, "abierto": 2, "pend": 4}, "by_month": {"2025-12": {"req": 34, "sol": 65, "cont": 59, "cer": 28, "at": 25, "inc": 3, "pct_t": 89.3, "pct_c": 90.8, "cancel": 6, "abierto": 0, "pend": 0}, "2026-01": {"req": 28, "sol": 56, "cont": 56, "cer": 28, "at": 25, "inc": 3, "pct_t": 89.3, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 30, "sol": 40, "cont": 37, "cer": 27, "at": 25, "inc": 2, "pct_t": 92.6, "pct_c": 92.5, "cancel": 3, "abierto": 0, "pend": 0}, "2026-03": {"req": 21, "sol": 26, "cont": 22, "cer": 18, "at": 15, "inc": 3, "pct_t": 83.3, "pct_c": 84.6, "cancel": 3, "abierto": 0, "pend": 0}, "2026-04": {"req": 21, "sol": 35, "cont": 34, "cer": 20, "at": 20, "inc": 0, "pct_t": 100.0, "pct_c": 97.1, "cancel": 1, "abierto": 0, "pend": 0}, "2026-05": {"req": 20, "sol": 35, "cont": 29, "cer": 18, "at": 16, "inc": 2, "pct_t": 88.9, "pct_c": 82.9, "cancel": 0, "abierto": 2, "pend": 4}}}, "BUGA": {"total": {"req": 145, "sol": 178, "cont": 157, "cer": 128, "at": 124, "inc": 4, "pct_t": 96.9, "pct_c": 88.2, "cancel": 14, "abierto": 3, "pend": 0}, "by_month": {"2025-12": {"req": 17, "sol": 17, "cont": 15, "cer": 15, "at": 15, "inc": 0, "pct_t": 100.0, "pct_c": 88.2, "cancel": 2, "abierto": 0, "pend": 0}, "2026-01": {"req": 39, "sol": 48, "cont": 44, "cer": 35, "at": 34, "inc": 1, "pct_t": 97.1, "pct_c": 91.7, "cancel": 4, "abierto": 0, "pend": 0}, "2026-02": {"req": 31, "sol": 47, "cont": 43, "cer": 27, "at": 26, "inc": 1, "pct_t": 96.3, "pct_c": 91.5, "cancel": 4, "abierto": 0, "pend": 0}, "2026-03": {"req": 22, "sol": 22, "cont": 21, "cer": 21, "at": 21, "inc": 0, "pct_t": 100.0, "pct_c": 95.5, "cancel": 1, "abierto": 0, "pend": 0}, "2026-04": {"req": 20, "sol": 23, "cont": 21, "cer": 18, "at": 16, "inc": 2, "pct_t": 88.9, "pct_c": 91.3, "cancel": 2, "abierto": 0, "pend": 0}, "2026-05": {"req": 16, "sol": 21, "cont": 13, "cer": 12, "at": 12, "inc": 0, "pct_t": 100.0, "pct_c": 61.9, "cancel": 1, "abierto": 3, "pend": 0}}}, "YUDI RODRIGUEZ": {"total": {"req": 1185, "sol": 2137, "cont": 1938, "cer": 1082, "at": 916, "inc": 166, "pct_t": 84.7, "pct_c": 90.7, "cancel": 83, "abierto": 20, "pend": 1}, "by_month": {"2025-12": {"req": 216, "sol": 501, "cont": 427, "cer": 198, "at": 134, "inc": 64, "pct_t": 67.7, "pct_c": 85.2, "cancel": 18, "abierto": 0, "pend": 0}, "2026-01": {"req": 225, "sol": 364, "cont": 344, "cer": 208, "at": 188, "inc": 20, "pct_t": 90.4, "pct_c": 94.5, "cancel": 17, "abierto": 0, "pend": 0}, "2026-02": {"req": 242, "sol": 393, "cont": 346, "cer": 223, "at": 197, "inc": 26, "pct_t": 88.3, "pct_c": 88.0, "cancel": 19, "abierto": 0, "pend": 0}, "2026-03": {"req": 182, "sol": 309, "cont": 292, "cer": 166, "at": 141, "inc": 25, "pct_t": 84.9, "pct_c": 94.5, "cancel": 16, "abierto": 0, "pend": 0}, "2026-04": {"req": 141, "sol": 235, "cont": 225, "cer": 134, "at": 119, "inc": 15, "pct_t": 88.8, "pct_c": 95.7, "cancel": 7, "abierto": 0, "pend": 0}, "2026-05": {"req": 179, "sol": 335, "cont": 304, "cer": 153, "at": 137, "inc": 16, "pct_t": 89.5, "pct_c": 90.7, "cancel": 6, "abierto": 20, "pend": 1}}}, "NANCY HERRERA": {"total": {"req": 765, "sol": 1014, "cont": 925, "cer": 703, "at": 657, "inc": 46, "pct_t": 93.5, "pct_c": 91.2, "cancel": 49, "abierto": 13, "pend": 0}, "by_month": {"2025-12": {"req": 123, "sol": 164, "cont": 154, "cer": 116, "at": 83, "inc": 33, "pct_t": 71.6, "pct_c": 93.9, "cancel": 7, "abierto": 0, "pend": 0}, "2026-01": {"req": 118, "sol": 161, "cont": 152, "cer": 110, "at": 106, "inc": 4, "pct_t": 96.4, "pct_c": 94.4, "cancel": 8, "abierto": 0, "pend": 0}, "2026-02": {"req": 120, "sol": 160, "cont": 153, "cer": 113, "at": 112, "inc": 1, "pct_t": 99.1, "pct_c": 95.6, "cancel": 7, "abierto": 0, "pend": 0}, "2026-03": {"req": 111, "sol": 147, "cont": 135, "cer": 100, "at": 99, "inc": 1, "pct_t": 99.0, "pct_c": 91.8, "cancel": 11, "abierto": 0, "pend": 0}, "2026-04": {"req": 147, "sol": 183, "cont": 175, "cer": 139, "at": 138, "inc": 1, "pct_t": 99.3, "pct_c": 95.6, "cancel": 8, "abierto": 0, "pend": 0}, "2026-05": {"req": 146, "sol": 199, "cont": 156, "cer": 125, "at": 119, "inc": 6, "pct_t": 95.2, "pct_c": 78.4, "cancel": 8, "abierto": 13, "pend": 0}}}, "CRISTIAN GUEVARA": {"total": {"req": 568, "sol": 783, "cont": 694, "cer": 500, "at": 409, "inc": 91, "pct_t": 81.8, "pct_c": 88.6, "cancel": 46, "abierto": 22, "pend": 8}, "by_month": {"2025-12": {"req": 82, "sol": 189, "cont": 180, "cer": 72, "at": 57, "inc": 15, "pct_t": 79.2, "pct_c": 95.2, "cancel": 10, "abierto": 0, "pend": 0}, "2026-01": {"req": 119, "sol": 144, "cont": 129, "cer": 106, "at": 84, "inc": 22, "pct_t": 79.2, "pct_c": 89.6, "cancel": 13, "abierto": 0, "pend": 0}, "2026-02": {"req": 94, "sol": 115, "cont": 111, "cer": 90, "at": 73, "inc": 17, "pct_t": 81.1, "pct_c": 96.5, "cancel": 4, "abierto": 0, "pend": 0}, "2026-03": {"req": 109, "sol": 141, "cont": 122, "cer": 99, "at": 73, "inc": 26, "pct_t": 73.7, "pct_c": 86.5, "cancel": 10, "abierto": 0, "pend": 1}, "2026-04": {"req": 84, "sol": 101, "cont": 94, "cer": 77, "at": 73, "inc": 4, "pct_t": 94.8, "pct_c": 93.1, "cancel": 7, "abierto": 0, "pend": 1}, "2026-05": {"req": 80, "sol": 93, "cont": 58, "cer": 56, "at": 49, "inc": 7, "pct_t": 87.5, "pct_c": 62.4, "cancel": 2, "abierto": 22, "pend": 6}}}, "YAMILE MADROÑERO": {"total": {"req": 504, "sol": 788, "cont": 725, "cer": 455, "at": 435, "inc": 20, "pct_t": 95.6, "pct_c": 92.0, "cancel": 41, "abierto": 8, "pend": 2}, "by_month": {"2025-12": {"req": 17, "sol": 23, "cont": 22, "cer": 16, "at": 14, "inc": 2, "pct_t": 87.5, "pct_c": 95.7, "cancel": 1, "abierto": 0, "pend": 0}, "2026-01": {"req": 109, "sol": 173, "cont": 152, "cer": 95, "at": 87, "inc": 8, "pct_t": 91.6, "pct_c": 87.9, "cancel": 14, "abierto": 0, "pend": 0}, "2026-02": {"req": 80, "sol": 120, "cont": 112, "cer": 72, "at": 72, "inc": 0, "pct_t": 100.0, "pct_c": 93.3, "cancel": 8, "abierto": 0, "pend": 0}, "2026-03": {"req": 115, "sol": 168, "cont": 159, "cer": 106, "at": 104, "inc": 2, "pct_t": 98.1, "pct_c": 94.6, "cancel": 9, "abierto": 0, "pend": 0}, "2026-04": {"req": 86, "sol": 153, "cont": 148, "cer": 82, "at": 81, "inc": 1, "pct_t": 98.8, "pct_c": 96.7, "cancel": 4, "abierto": 0, "pend": 1}, "2026-05": {"req": 97, "sol": 151, "cont": 132, "cer": 84, "at": 77, "inc": 7, "pct_t": 91.7, "pct_c": 87.4, "cancel": 5, "abierto": 8, "pend": 1}}}, "VANESA VEGA": {"total": {"req": 451, "sol": 661, "cont": 554, "cer": 365, "at": 316, "inc": 49, "pct_t": 86.6, "pct_c": 83.8, "cancel": 65, "abierto": 21, "pend": 2}, "by_month": {"2025-12": {"req": 67, "sol": 83, "cont": 60, "cer": 49, "at": 46, "inc": 3, "pct_t": 93.9, "pct_c": 72.3, "cancel": 18, "abierto": 0, "pend": 0}, "2026-01": {"req": 74, "sol": 118, "cont": 106, "cer": 63, "at": 55, "inc": 8, "pct_t": 87.3, "pct_c": 89.8, "cancel": 11, "abierto": 0, "pend": 0}, "2026-02": {"req": 88, "sol": 143, "cont": 130, "cer": 81, "at": 68, "inc": 13, "pct_t": 84.0, "pct_c": 90.9, "cancel": 7, "abierto": 0, "pend": 1}, "2026-03": {"req": 80, "sol": 105, "cont": 88, "cer": 67, "at": 55, "inc": 12, "pct_t": 82.1, "pct_c": 83.8, "cancel": 13, "abierto": 0, "pend": 1}, "2026-04": {"req": 77, "sol": 112, "cont": 99, "cer": 65, "at": 56, "inc": 9, "pct_t": 86.2, "pct_c": 88.4, "cancel": 10, "abierto": 2, "pend": 0}, "2026-05": {"req": 65, "sol": 100, "cont": 71, "cer": 40, "at": 36, "inc": 4, "pct_t": 90.0, "pct_c": 71.0, "cancel": 6, "abierto": 19, "pend": 0}}}, "BRILLID CIFUENTES": {"total": {"req": 402, "sol": 773, "cont": 730, "cer": 378, "at": 314, "inc": 64, "pct_t": 83.1, "pct_c": 94.4, "cancel": 18, "abierto": 6, "pend": 0}, "by_month": {"2025-12": {"req": 81, "sol": 195, "cont": 192, "cer": 80, "at": 49, "inc": 31, "pct_t": 61.3, "pct_c": 98.5, "cancel": 1, "abierto": 0, "pend": 0}, "2026-01": {"req": 68, "sol": 121, "cont": 107, "cer": 61, "at": 54, "inc": 7, "pct_t": 88.5, "pct_c": 88.4, "cancel": 7, "abierto": 0, "pend": 0}, "2026-02": {"req": 35, "sol": 76, "cont": 73, "cer": 33, "at": 25, "inc": 8, "pct_t": 75.8, "pct_c": 96.1, "cancel": 2, "abierto": 0, "pend": 0}, "2026-03": {"req": 75, "sol": 110, "cont": 108, "cer": 73, "at": 65, "inc": 8, "pct_t": 89.0, "pct_c": 98.2, "cancel": 2, "abierto": 0, "pend": 0}, "2026-04": {"req": 82, "sol": 129, "cont": 119, "cer": 76, "at": 67, "inc": 9, "pct_t": 88.2, "pct_c": 92.2, "cancel": 5, "abierto": 1, "pend": 0}, "2026-05": {"req": 61, "sol": 142, "cont": 131, "cer": 55, "at": 54, "inc": 1, "pct_t": 98.2, "pct_c": 92.3, "cancel": 1, "abierto": 5, "pend": 0}}}, "MARIA CASTANEDA": {"total": {"req": 292, "sol": 362, "cont": 335, "cer": 264, "at": 204, "inc": 60, "pct_t": 77.3, "pct_c": 92.5, "cancel": 21, "abierto": 7, "pend": 0}, "by_month": {"2025-12": {"req": 50, "sol": 78, "cont": 74, "cer": 46, "at": 23, "inc": 23, "pct_t": 50.0, "pct_c": 94.9, "cancel": 4, "abierto": 0, "pend": 0}, "2026-01": {"req": 62, "sol": 73, "cont": 66, "cer": 55, "at": 40, "inc": 15, "pct_t": 72.7, "pct_c": 90.4, "cancel": 7, "abierto": 0, "pend": 0}, "2026-02": {"req": 54, "sol": 65, "cont": 60, "cer": 49, "at": 45, "inc": 4, "pct_t": 91.8, "pct_c": 92.3, "cancel": 5, "abierto": 0, "pend": 0}, "2026-03": {"req": 34, "sol": 41, "cont": 40, "cer": 33, "at": 29, "inc": 4, "pct_t": 87.9, "pct_c": 97.6, "cancel": 1, "abierto": 0, "pend": 0}, "2026-04": {"req": 53, "sol": 58, "cont": 56, "cer": 50, "at": 42, "inc": 8, "pct_t": 84.0, "pct_c": 96.6, "cancel": 3, "abierto": 0, "pend": 0}, "2026-05": {"req": 39, "sol": 47, "cont": 39, "cer": 31, "at": 25, "inc": 6, "pct_t": 80.6, "pct_c": 83.0, "cancel": 1, "abierto": 7, "pend": 0}}}, "GREYHS RAMOS": {"total": {"req": 278, "sol": 415, "cont": 371, "cer": 249, "at": 179, "inc": 70, "pct_t": 71.9, "pct_c": 89.4, "cancel": 29, "abierto": 0, "pend": 2}, "by_month": {"2025-12": {"req": 68, "sol": 115, "cont": 105, "cer": 61, "at": 44, "inc": 17, "pct_t": 72.1, "pct_c": 91.3, "cancel": 7, "abierto": 0, "pend": 1}, "2026-01": {"req": 60, "sol": 69, "cont": 66, "cer": 57, "at": 50, "inc": 7, "pct_t": 87.7, "pct_c": 95.7, "cancel": 3, "abierto": 0, "pend": 0}, "2026-02": {"req": 45, "sol": 90, "cont": 76, "cer": 41, "at": 27, "inc": 14, "pct_t": 65.9, "pct_c": 84.4, "cancel": 4, "abierto": 0, "pend": 0}, "2026-03": {"req": 79, "sol": 110, "cont": 97, "cer": 68, "at": 38, "inc": 30, "pct_t": 55.9, "pct_c": 88.2, "cancel": 11, "abierto": 0, "pend": 1}, "2026-04": {"req": 26, "sol": 31, "cont": 27, "cer": 22, "at": 20, "inc": 2, "pct_t": 90.9, "pct_c": 87.1, "cancel": 4, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "LUZ OLIVEROS": {"total": {"req": 270, "sol": 298, "cont": 247, "cer": 239, "at": 239, "inc": 0, "pct_t": 100.0, "pct_c": 82.9, "cancel": 26, "abierto": 5, "pend": 19}, "by_month": {"2025-12": {"req": 38, "sol": 39, "cont": 35, "cer": 34, "at": 34, "inc": 0, "pct_t": 100.0, "pct_c": 89.7, "cancel": 4, "abierto": 0, "pend": 0}, "2026-01": {"req": 50, "sol": 57, "cont": 51, "cer": 43, "at": 43, "inc": 0, "pct_t": 100.0, "pct_c": 89.5, "cancel": 7, "abierto": 0, "pend": 0}, "2026-02": {"req": 48, "sol": 55, "cont": 54, "cer": 47, "at": 47, "inc": 0, "pct_t": 100.0, "pct_c": 98.2, "cancel": 1, "abierto": 0, "pend": 0}, "2026-03": {"req": 50, "sol": 58, "cont": 48, "cer": 43, "at": 43, "inc": 0, "pct_t": 100.0, "pct_c": 82.8, "cancel": 7, "abierto": 0, "pend": 1}, "2026-04": {"req": 39, "sol": 42, "cont": 39, "cer": 36, "at": 36, "inc": 0, "pct_t": 100.0, "pct_c": 92.9, "cancel": 3, "abierto": 0, "pend": 0}, "2026-05": {"req": 45, "sol": 47, "cont": 20, "cer": 36, "at": 36, "inc": 0, "pct_t": 100.0, "pct_c": 42.6, "cancel": 4, "abierto": 5, "pend": 18}}}, "IRINA HERNANDEZ": {"total": {"req": 209, "sol": 262, "cont": 231, "cer": 183, "at": 180, "inc": 3, "pct_t": 98.4, "pct_c": 88.2, "cancel": 17, "abierto": 9, "pend": 1}, "by_month": {"2025-12": {"req": 17, "sol": 47, "cont": 45, "cer": 15, "at": 14, "inc": 1, "pct_t": 93.3, "pct_c": 95.7, "cancel": 2, "abierto": 0, "pend": 0}, "2026-01": {"req": 40, "sol": 45, "cont": 40, "cer": 35, "at": 35, "inc": 0, "pct_t": 100.0, "pct_c": 88.9, "cancel": 5, "abierto": 0, "pend": 0}, "2026-02": {"req": 29, "sol": 34, "cont": 32, "cer": 27, "at": 26, "inc": 1, "pct_t": 96.3, "pct_c": 94.1, "cancel": 2, "abierto": 0, "pend": 0}, "2026-03": {"req": 35, "sol": 38, "cont": 34, "cer": 32, "at": 32, "inc": 0, "pct_t": 100.0, "pct_c": 89.5, "cancel": 3, "abierto": 0, "pend": 0}, "2026-04": {"req": 40, "sol": 45, "cont": 42, "cer": 37, "at": 37, "inc": 0, "pct_t": 100.0, "pct_c": 93.3, "cancel": 3, "abierto": 0, "pend": 0}, "2026-05": {"req": 48, "sol": 53, "cont": 38, "cer": 37, "at": 36, "inc": 1, "pct_t": 97.3, "pct_c": 71.7, "cancel": 2, "abierto": 9, "pend": 1}}}, "YUDI RODRIGUEZ|SANTAFE DE BOGOTA D. C.": {"total": {"req": 878, "sol": 1467, "cont": 1358, "cer": 796, "at": 679, "inc": 117, "pct_t": 85.3, "pct_c": 92.6, "cancel": 66, "abierto": 16, "pend": 1}, "by_month": {"2025-12": {"req": 153, "sol": 248, "cont": 235, "cer": 140, "at": 95, "inc": 45, "pct_t": 67.9, "pct_c": 94.8, "cancel": 13, "abierto": 0, "pend": 0}, "2026-01": {"req": 167, "sol": 262, "cont": 247, "cer": 154, "at": 140, "inc": 14, "pct_t": 90.9, "pct_c": 94.3, "cancel": 13, "abierto": 0, "pend": 0}, "2026-02": {"req": 180, "sol": 287, "cont": 249, "cer": 163, "at": 146, "inc": 17, "pct_t": 89.6, "pct_c": 86.8, "cancel": 17, "abierto": 0, "pend": 0}, "2026-03": {"req": 134, "sol": 238, "cont": 224, "cer": 120, "at": 101, "inc": 19, "pct_t": 84.2, "pct_c": 94.1, "cancel": 14, "abierto": 0, "pend": 0}, "2026-04": {"req": 104, "sol": 173, "cont": 167, "cer": 100, "at": 90, "inc": 10, "pct_t": 90.0, "pct_c": 96.5, "cancel": 4, "abierto": 0, "pend": 0}, "2026-05": {"req": 140, "sol": 259, "cont": 236, "cer": 119, "at": 107, "inc": 12, "pct_t": 89.9, "pct_c": 91.1, "cancel": 5, "abierto": 16, "pend": 1}}}, "NANCY HERRERA|SANTAFE DE BOGOTA D. C.": {"total": {"req": 544, "sol": 753, "cont": 706, "cer": 506, "at": 464, "inc": 42, "pct_t": 91.7, "pct_c": 93.8, "cancel": 33, "abierto": 5, "pend": 0}, "by_month": {"2025-12": {"req": 100, "sol": 141, "cont": 133, "cer": 95, "at": 63, "inc": 32, "pct_t": 66.3, "pct_c": 94.3, "cancel": 5, "abierto": 0, "pend": 0}, "2026-01": {"req": 94, "sol": 136, "cont": 130, "cer": 89, "at": 87, "inc": 2, "pct_t": 97.8, "pct_c": 95.6, "cancel": 5, "abierto": 0, "pend": 0}, "2026-02": {"req": 88, "sol": 126, "cont": 120, "cer": 82, "at": 81, "inc": 1, "pct_t": 98.8, "pct_c": 95.2, "cancel": 6, "abierto": 0, "pend": 0}, "2026-03": {"req": 67, "sol": 99, "cont": 91, "cer": 60, "at": 59, "inc": 1, "pct_t": 98.3, "pct_c": 91.9, "cancel": 7, "abierto": 0, "pend": 0}, "2026-04": {"req": 95, "sol": 124, "cont": 121, "cer": 92, "at": 91, "inc": 1, "pct_t": 98.9, "pct_c": 97.6, "cancel": 3, "abierto": 0, "pend": 0}, "2026-05": {"req": 100, "sol": 127, "cont": 111, "cer": 88, "at": 83, "inc": 5, "pct_t": 94.3, "pct_c": 87.4, "cancel": 7, "abierto": 5, "pend": 0}}}, "CRISTIAN GUEVARA|SANTAFE DE BOGOTA D. C.": {"total": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "CRISTIAN GUEVARA|CALI": {"total": {"req": 458, "sol": 656, "cont": 580, "cer": 402, "at": 329, "inc": 73, "pct_t": 81.8, "pct_c": 88.4, "cancel": 38, "abierto": 18, "pend": 7}, "by_month": {"2025-12": {"req": 64, "sol": 167, "cont": 160, "cer": 56, "at": 43, "inc": 13, "pct_t": 76.8, "pct_c": 95.8, "cancel": 8, "abierto": 0, "pend": 0}, "2026-01": {"req": 93, "sol": 115, "cont": 102, "cer": 82, "at": 64, "inc": 18, "pct_t": 78.0, "pct_c": 88.7, "cancel": 11, "abierto": 0, "pend": 0}, "2026-02": {"req": 77, "sol": 97, "cont": 94, "cer": 74, "at": 60, "inc": 14, "pct_t": 81.1, "pct_c": 96.9, "cancel": 3, "abierto": 0, "pend": 0}, "2026-03": {"req": 87, "sol": 116, "cont": 98, "cer": 78, "at": 59, "inc": 19, "pct_t": 75.6, "pct_c": 84.5, "cancel": 9, "abierto": 0, "pend": 1}, "2026-04": {"req": 68, "sol": 82, "cont": 77, "cer": 63, "at": 59, "inc": 4, "pct_t": 93.7, "pct_c": 93.9, "cancel": 5, "abierto": 0, "pend": 0}, "2026-05": {"req": 69, "sol": 79, "cont": 49, "cer": 49, "at": 44, "inc": 5, "pct_t": 89.8, "pct_c": 62.0, "cancel": 2, "abierto": 18, "pend": 6}}}, "CRISTIAN GUEVARA|PALMIRA": {"total": {"req": 4, "sol": 6, "cont": 6, "cer": 4, "at": 2, "inc": 2, "pct_t": 50.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 2, "sol": 2, "cont": 2, "cer": 2, "at": 0, "inc": 2, "pct_t": 0.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 1, "sol": 3, "cont": 3, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "YAMILE MADROÑERO|SANTAFE DE BOGOTA D. C.": {"total": {"req": 1, "sol": 1, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0.0, "cancel": 0, "abierto": 1, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 1, "sol": 1, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0.0, "cancel": 0, "abierto": 1, "pend": 0}}}, "YAMILE MADROÑERO|CALI": {"total": {"req": 435, "sol": 709, "cont": 657, "cer": 396, "at": 378, "inc": 18, "pct_t": 95.5, "pct_c": 92.7, "cancel": 33, "abierto": 6, "pend": 1}, "by_month": {"2025-12": {"req": 9, "sol": 15, "cont": 15, "cer": 9, "at": 7, "inc": 2, "pct_t": 77.8, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 97, "sol": 158, "cont": 140, "cer": 86, "at": 80, "inc": 6, "pct_t": 93.0, "pct_c": 88.6, "cancel": 11, "abierto": 0, "pend": 0}, "2026-02": {"req": 70, "sol": 108, "cont": 101, "cer": 63, "at": 63, "inc": 0, "pct_t": 100.0, "pct_c": 93.5, "cancel": 7, "abierto": 0, "pend": 0}, "2026-03": {"req": 97, "sol": 147, "cont": 141, "cer": 91, "at": 89, "inc": 2, "pct_t": 97.8, "pct_c": 95.9, "cancel": 6, "abierto": 0, "pend": 0}, "2026-04": {"req": 80, "sol": 147, "cont": 142, "cer": 76, "at": 75, "inc": 1, "pct_t": 98.7, "pct_c": 96.6, "cancel": 4, "abierto": 0, "pend": 1}, "2026-05": {"req": 82, "sol": 134, "cont": 118, "cer": 71, "at": 64, "inc": 7, "pct_t": 90.1, "pct_c": 88.1, "cancel": 5, "abierto": 6, "pend": 0}}}, "YAMILE MADROÑERO|PALMIRA": {"total": {"req": 8, "sol": 8, "cont": 7, "cer": 7, "at": 7, "inc": 0, "pct_t": 100.0, "pct_c": 87.5, "cancel": 1, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 8, "sol": 8, "cont": 7, "cer": 7, "at": 7, "inc": 0, "pct_t": 100.0, "pct_c": 87.5, "cancel": 1, "abierto": 0, "pend": 0}, "2026-01": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "VANESA VEGA|SANTAFE DE BOGOTA D. C.": {"total": {"req": 2, "sol": 2, "cont": 1, "cer": 1, "at": 0, "inc": 1, "pct_t": 0.0, "pct_c": 50.0, "cancel": 1, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 1, "sol": 1, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0.0, "cancel": 1, "abierto": 0, "pend": 0}, "2026-02": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 0, "inc": 1, "pct_t": 0.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "VANESA VEGA|CALI": {"total": {"req": 364, "sol": 505, "cont": 410, "cer": 290, "at": 253, "inc": 37, "pct_t": 87.2, "pct_c": 81.2, "cancel": 55, "abierto": 19, "pend": 2}, "by_month": {"2025-12": {"req": 60, "sol": 76, "cont": 55, "cer": 44, "at": 41, "inc": 3, "pct_t": 93.2, "pct_c": 72.4, "cancel": 16, "abierto": 0, "pend": 0}, "2026-01": {"req": 61, "sol": 83, "cont": 73, "cer": 52, "at": 46, "inc": 6, "pct_t": 88.5, "pct_c": 88.0, "cancel": 9, "abierto": 0, "pend": 0}, "2026-02": {"req": 72, "sol": 109, "cont": 96, "cer": 65, "at": 56, "inc": 9, "pct_t": 86.2, "pct_c": 88.1, "cancel": 7, "abierto": 0, "pend": 1}, "2026-03": {"req": 57, "sol": 72, "cont": 60, "cer": 49, "at": 40, "inc": 9, "pct_t": 81.6, "pct_c": 83.3, "cancel": 8, "abierto": 0, "pend": 1}, "2026-04": {"req": 60, "sol": 82, "cont": 69, "cer": 48, "at": 41, "inc": 7, "pct_t": 85.4, "pct_c": 84.1, "cancel": 10, "abierto": 2, "pend": 0}, "2026-05": {"req": 54, "sol": 83, "cont": 57, "cer": 32, "at": 29, "inc": 3, "pct_t": 90.6, "pct_c": 68.7, "cancel": 5, "abierto": 17, "pend": 0}}}, "BRILLID CIFUENTES|SANTAFE DE BOGOTA D. C.": {"total": {"req": 259, "sol": 495, "cont": 468, "cer": 242, "at": 199, "inc": 43, "pct_t": 82.2, "pct_c": 94.5, "cancel": 14, "abierto": 3, "pend": 0}, "by_month": {"2025-12": {"req": 61, "sol": 148, "cont": 147, "cer": 60, "at": 34, "inc": 26, "pct_t": 56.7, "pct_c": 99.3, "cancel": 1, "abierto": 0, "pend": 0}, "2026-01": {"req": 45, "sol": 82, "cont": 73, "cer": 39, "at": 36, "inc": 3, "pct_t": 92.3, "pct_c": 89.0, "cancel": 6, "abierto": 0, "pend": 0}, "2026-02": {"req": 23, "sol": 54, "cont": 51, "cer": 21, "at": 16, "inc": 5, "pct_t": 76.2, "pct_c": 94.4, "cancel": 2, "abierto": 0, "pend": 0}, "2026-03": {"req": 40, "sol": 50, "cont": 48, "cer": 38, "at": 33, "inc": 5, "pct_t": 86.8, "pct_c": 96.0, "cancel": 2, "abierto": 0, "pend": 0}, "2026-04": {"req": 50, "sol": 84, "cont": 78, "cer": 48, "at": 45, "inc": 3, "pct_t": 93.8, "pct_c": 92.9, "cancel": 2, "abierto": 0, "pend": 0}, "2026-05": {"req": 40, "sol": 77, "cont": 71, "cer": 36, "at": 35, "inc": 1, "pct_t": 97.2, "pct_c": 92.2, "cancel": 1, "abierto": 3, "pend": 0}}}, "BRILLID CIFUENTES|CALI": {"total": {"req": 1, "sol": 1, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0.0, "cancel": 1, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 1, "sol": 1, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0.0, "cancel": 1, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "MARIA CASTANEDA|CALI": {"total": {"req": 2, "sol": 2, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 50.0, "cancel": 1, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 1, "sol": 1, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0.0, "cancel": 1, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "MARIA CASTANEDA|BUCARAMANGA": {"total": {"req": 200, "sol": 265, "cont": 247, "cer": 181, "at": 138, "inc": 43, "pct_t": 76.2, "pct_c": 93.2, "cancel": 15, "abierto": 4, "pend": 0}, "by_month": {"2025-12": {"req": 38, "sol": 66, "cont": 62, "cer": 34, "at": 16, "inc": 18, "pct_t": 47.1, "pct_c": 93.9, "cancel": 4, "abierto": 0, "pend": 0}, "2026-01": {"req": 36, "sol": 45, "cont": 42, "cer": 33, "at": 25, "inc": 8, "pct_t": 75.8, "pct_c": 93.3, "cancel": 3, "abierto": 0, "pend": 0}, "2026-02": {"req": 37, "sol": 46, "cont": 42, "cer": 33, "at": 30, "inc": 3, "pct_t": 90.9, "pct_c": 91.3, "cancel": 4, "abierto": 0, "pend": 0}, "2026-03": {"req": 24, "sol": 31, "cont": 30, "cer": 23, "at": 19, "inc": 4, "pct_t": 82.6, "pct_c": 96.8, "cancel": 1, "abierto": 0, "pend": 0}, "2026-04": {"req": 35, "sol": 40, "cont": 39, "cer": 33, "at": 27, "inc": 6, "pct_t": 81.8, "pct_c": 97.5, "cancel": 2, "abierto": 0, "pend": 0}, "2026-05": {"req": 30, "sol": 37, "cont": 32, "cer": 25, "at": 21, "inc": 4, "pct_t": 84.0, "pct_c": 86.5, "cancel": 1, "abierto": 4, "pend": 0}}}, "MARIA CASTANEDA|BUGA": {"total": {"req": 2, "sol": 4, "cont": 4, "cer": 2, "at": 1, "inc": 1, "pct_t": 50.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 1, "sol": 3, "cont": 3, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 0, "inc": 1, "pct_t": 0.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "GREYHS RAMOS|BARRANQUILLA": {"total": {"req": 128, "sol": 219, "cont": 190, "cer": 112, "at": 76, "inc": 36, "pct_t": 67.9, "pct_c": 86.8, "cancel": 16, "abierto": 0, "pend": 1}, "by_month": {"2025-12": {"req": 39, "sol": 74, "cont": 66, "cer": 33, "at": 23, "inc": 10, "pct_t": 69.7, "pct_c": 89.2, "cancel": 6, "abierto": 0, "pend": 1}, "2026-01": {"req": 28, "sol": 34, "cont": 32, "cer": 26, "at": 22, "inc": 4, "pct_t": 84.6, "pct_c": 94.1, "cancel": 2, "abierto": 0, "pend": 0}, "2026-02": {"req": 15, "sol": 37, "cont": 26, "cer": 14, "at": 9, "inc": 5, "pct_t": 64.3, "pct_c": 70.3, "cancel": 1, "abierto": 0, "pend": 0}, "2026-03": {"req": 35, "sol": 60, "cont": 53, "cer": 29, "at": 13, "inc": 16, "pct_t": 44.8, "pct_c": 88.3, "cancel": 6, "abierto": 0, "pend": 0}, "2026-04": {"req": 11, "sol": 14, "cont": 13, "cer": 10, "at": 9, "inc": 1, "pct_t": 90.0, "pct_c": 92.9, "cancel": 1, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "LUZ OLIVEROS|SANTAFE DE BOGOTA D. C.": {"total": {"req": 2, "sol": 2, "cont": 2, "cer": 2, "at": 2, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "LUZ OLIVEROS|BARRANQUILLA": {"total": {"req": 118, "sol": 141, "cont": 114, "cer": 106, "at": 106, "inc": 0, "pct_t": 100.0, "pct_c": 80.9, "cancel": 10, "abierto": 2, "pend": 14}, "by_month": {"2025-12": {"req": 18, "sol": 19, "cont": 17, "cer": 16, "at": 16, "inc": 0, "pct_t": 100.0, "pct_c": 89.5, "cancel": 2, "abierto": 0, "pend": 0}, "2026-01": {"req": 22, "sol": 28, "cont": 26, "cer": 19, "at": 19, "inc": 0, "pct_t": 100.0, "pct_c": 92.9, "cancel": 3, "abierto": 0, "pend": 0}, "2026-02": {"req": 23, "sol": 29, "cont": 29, "cer": 23, "at": 23, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 19, "sol": 25, "cont": 20, "cer": 16, "at": 16, "inc": 0, "pct_t": 100.0, "pct_c": 80.0, "cancel": 3, "abierto": 0, "pend": 0}, "2026-04": {"req": 15, "sol": 17, "cont": 15, "cer": 13, "at": 13, "inc": 0, "pct_t": 100.0, "pct_c": 88.2, "cancel": 2, "abierto": 0, "pend": 0}, "2026-05": {"req": 21, "sol": 23, "cont": 7, "cer": 19, "at": 19, "inc": 0, "pct_t": 100.0, "pct_c": 30.4, "cancel": 0, "abierto": 2, "pend": 14}}}, "IRINA HERNANDEZ|SANTAFE DE BOGOTA D. C.": {"total": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "by_month": {"2025-12": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-01": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-02": {"req": 1, "sol": 1, "cont": 1, "cer": 1, "at": 1, "inc": 0, "pct_t": 100.0, "pct_c": 100.0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-03": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-04": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}, "2026-05": {"req": 0, "sol": 0, "cont": 0, "cer": 0, "at": 0, "inc": 0, "pct_t": 0, "pct_c": 0, "cancel": 0, "abierto": 0, "pend": 0}}}, "IRINA HERNANDEZ|MEDELLIN": {"total": {"req": 187, "sol": 202, "cont": 171, "cer": 161, "at": 158, "inc": 3, "pct_t": 98.1, "pct_c": 84.7, "cancel": 17, "abierto": 9, "pend": 1}, "by_month": {"2025-12": {"req": 15, "sol": 15, "cont": 13, "cer": 13, "at": 12, "inc": 1, "pct_t": 92.3, "pct_c": 86.7, "cancel": 2, "abierto": 0, "pend": 0}, "2026-01": {"req": 34, "sol": 38, "cont": 33, "cer": 29, "at": 29, "inc": 0, "pct_t": 100.0, "pct_c": 86.8, "cancel": 5, "abierto": 0, "pend": 0}, "2026-02": {"req": 27, "sol": 29, "cont": 27, "cer": 25, "at": 24, "inc": 1, "pct_t": 96.0, "pct_c": 93.1, "cancel": 2, "abierto": 0, "pend": 0}, "2026-03": {"req": 33, "sol": 34, "cont": 30, "cer": 30, "at": 30, "inc": 0, "pct_t": 100.0, "pct_c": 88.2, "cancel": 3, "abierto": 0, "pend": 0}, "2026-04": {"req": 36, "sol": 40, "cont": 37, "cer": 33, "at": 33, "inc": 0, "pct_t": 100.0, "pct_c": 92.5, "cancel": 3, "abierto": 0, "pend": 0}, "2026-05": {"req": 42, "sol": 46, "cont": 31, "cer": 31, "at": 30, "inc": 1, "pct_t": 96.8, "pct_c": 67.4, "cancel": 2, "abierto": 9, "pend": 1}}}};
+var REC_TABLE = [{"name": "YUDI RODRIGUEZ", "req": 1185, "sol": 2137, "cont": 1938, "cer": 1082, "at": 916, "inc": 166, "pct_t": 84.7, "pct_c": 90.7, "cancel": 83, "abierto": 20, "pend": 1}, {"name": "NANCY HERRERA", "req": 765, "sol": 1014, "cont": 925, "cer": 703, "at": 657, "inc": 46, "pct_t": 93.5, "pct_c": 91.2, "cancel": 49, "abierto": 13, "pend": 0}, {"name": "CRISTIAN GUEVARA", "req": 568, "sol": 783, "cont": 694, "cer": 500, "at": 409, "inc": 91, "pct_t": 81.8, "pct_c": 88.6, "cancel": 46, "abierto": 22, "pend": 8}, {"name": "YAMILE MADROÑERO", "req": 504, "sol": 788, "cont": 725, "cer": 455, "at": 435, "inc": 20, "pct_t": 95.6, "pct_c": 92.0, "cancel": 41, "abierto": 8, "pend": 2}, {"name": "VANESA VEGA", "req": 451, "sol": 661, "cont": 554, "cer": 365, "at": 316, "inc": 49, "pct_t": 86.6, "pct_c": 83.8, "cancel": 65, "abierto": 21, "pend": 2}, {"name": "BRILLID CIFUENTES", "req": 402, "sol": 773, "cont": 730, "cer": 378, "at": 314, "inc": 64, "pct_t": 83.1, "pct_c": 94.4, "cancel": 18, "abierto": 6, "pend": 0}, {"name": "MARIA CASTANEDA", "req": 292, "sol": 362, "cont": 335, "cer": 264, "at": 204, "inc": 60, "pct_t": 77.3, "pct_c": 92.5, "cancel": 21, "abierto": 7, "pend": 0}, {"name": "GREYHS RAMOS", "req": 278, "sol": 415, "cont": 371, "cer": 249, "at": 179, "inc": 70, "pct_t": 71.9, "pct_c": 89.4, "cancel": 29, "abierto": 0, "pend": 2}, {"name": "LUZ OLIVEROS", "req": 270, "sol": 298, "cont": 247, "cer": 239, "at": 239, "inc": 0, "pct_t": 100.0, "pct_c": 82.9, "cancel": 26, "abierto": 5, "pend": 19}, {"name": "IRINA HERNANDEZ", "req": 209, "sol": 262, "cont": 231, "cer": 183, "at": 180, "inc": 3, "pct_t": 98.4, "pct_c": 88.2, "cancel": 17, "abierto": 9, "pend": 1}];
+var CITY_TABLE = [{"name": "Bogotá", "key": "SANTAFE DE BOGOTA D. C.", "req": 1794, "sol": 2868, "cont": 2668, "cer": 1641, "at": 1414, "inc": 227, "pct_t": 86.2, "pct_c": 93.0, "cancel": 128, "abierto": 25, "pend": 2}, {"name": "Cali", "key": "CALI", "req": 1445, "sol": 2321, "cont": 2052, "cer": 1251, "at": 1080, "inc": 171, "pct_t": 86.3, "pct_c": 88.4, "cancel": 151, "abierto": 43, "pend": 15}, {"name": "Medellín", "key": "MEDELLIN", "req": 733, "sol": 1232, "cont": 987, "cer": 650, "at": 476, "inc": 174, "pct_t": 73.2, "pct_c": 80.1, "cancel": 55, "abierto": 28, "pend": 14}, {"name": "Barranquilla", "key": "BARRANQUILLA", "req": 299, "sol": 511, "cont": 380, "cer": 260, "at": 209, "inc": 51, "pct_t": 80.4, "pct_c": 74.4, "cancel": 29, "abierto": 10, "pend": 27}, {"name": "Bucaramanga", "key": "BUCARAMANGA", "req": 200, "sol": 265, "cont": 247, "cer": 181, "at": 138, "inc": 43, "pct_t": 76.2, "pct_c": 93.2, "cancel": 15, "abierto": 4, "pend": 0}, {"name": "Pereira", "key": "PEREIRA", "req": 176, "sol": 224, "cont": 197, "cer": 154, "at": 123, "inc": 31, "pct_t": 79.9, "pct_c": 87.9, "cancel": 17, "abierto": 5, "pend": 2}, {"name": "Palmira", "key": "PALMIRA", "req": 154, "sol": 257, "cont": 237, "cer": 139, "at": 126, "inc": 13, "pct_t": 90.6, "pct_c": 92.2, "cancel": 13, "abierto": 2, "pend": 4}, {"name": "Buga", "key": "BUGA", "req": 145, "sol": 178, "cont": 157, "cer": 128, "at": 124, "inc": 4, "pct_t": 96.9, "pct_c": 88.2, "cancel": 14, "abierto": 3, "pend": 0}];
+var MKEYS = ['2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+var MLBLS = {'2025-12':'Dic 25','2026-01':'Ene 26','2026-02':'Feb 26','2026-03':'Mar 26','2026-04':'Abr 26','2026-05':'May 26'};
+var MN = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+var MN5 = ['Ene','Feb','Mar','Abr','May'];
+var RED='#C0272D', GREEN='#1D9E75', BLUE='#185FA5', AMB='#BA7517', GRAY='#888780';
+var RL='rgba(192,39,45,.12)', GL='rgba(29,158,117,.12)', BL='rgba(24,95,165,.12)';
+var CI = {};
+var curMes='', curCiudad='', curRec='';
+
+var TTLS = {
+  resumen:'Resumen Ejecutivo', seleccion:'Indicadores de Selección', activo:'Personal Activo',
+  rotacion:'Rotación', entrevistas:'Entrevistas de Retiro', talento:'Gestión del Talento',
+  bienestar:'Bienestar', at:'Accidentes de Trabajo', eg:'Enfermedades Generales',
+  siniestro:'Gestión del Siniestro & Fueros de Salud', fueros:'Fueros de Salud', formacion:'Formación SST'
+};
+
+// ===================== NAVIGATION =====================
+function go(name, el) {
+  var secs = document.querySelectorAll('.sec');
+  for (var i=0; i<secs.length; i++) secs[i].classList.remove('on');
+  var navs = document.querySelectorAll('.nav');
+  for (var i=0; i<navs.length; i++) navs[i].classList.remove('on');
+  var sec = document.getElementById('sec-'+name);
+  if (sec) sec.classList.add('on');
+  if (el) el.classList.add('on');
+  var ttl = document.getElementById('top-title');
+  if (ttl) ttl.textContent = TTLS[name] || name;
+}
+
+// ===================== FILTERS =====================
+function markActive(el) {
+  if (el.value !== '') el.classList.add('af');
+  else el.classList.remove('af');
+}
+
+function resetF() {
+  ['f-mes','f-ciudad','f-sucursal'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else if (id==='f-desde') el.value='2025-12-01';
+    else if (id==='f-hasta') el.value='2026-05-31';
+    el.classList.remove('af');
+  });
+  curMes=''; curCiudad=''; curRec='';
+  var st = document.getElementById('fi-status');
+  if (st) { st.className='upd'; st.textContent='Sin filtros activos'; }
+  redraw();
+}
+
+function applyF() {
+  var fMes = document.getElementById('f-mes');
+  var fCiudad = document.getElementById('f-ciudad');
+  var fSuc = document.getElementById('f-sucursal');
+  var fDesde = document.getElementById('f-desde');
+  var fHasta = document.getElementById('f-hasta');
+  curMes = fMes ? fMes.value : '';
+  curCiudad = fCiudad ? fCiudad.value : '';
+  var parts = [];
+  if (fSuc && fSuc.value) parts.push('Suc: ' + fSuc.options[fSuc.selectedIndex].text);
+  if (curMes) parts.push(fMes.options[fMes.selectedIndex].text);
+  if (curCiudad) parts.push(fCiudad.options[fCiudad.selectedIndex].text);
+  if (fDesde && fHasta) {
+    var d = fDesde.value, h = fHasta.value;
+    if (d || h) parts.push((d||'inicio')+' → '+(h||'hoy'));
+  }
+  var st = document.getElementById('fi-status');
+  if (st) {
+    if (parts.length) { st.className='fi-on'; st.textContent='⚡ '+parts.join(' · '); }
+    else { st.className='upd'; st.textContent='Sin filtros activos'; }
+  }
+  redraw();
+}
+
+// ===================== DATA HELPERS =====================
+function fdKey() {
+  if (curCiudad && FD[curCiudad]) return curCiudad;
+  return 'all';
+}
+
+function getData() {
+  var key = fdKey();
+  var base = FD[key] || FD['all'];
+  if (curMes) {
+    var md = base.by_month[curMes] || {req:0,sol:0,cont:0,cer:0,at:0,inc:0,pct_t:0,pct_c:0,cancel:0,abierto:0,pend:0};
+    return { total: md };
+  }
+  return { total: base.total };
+}
+
+function getMonthlyArrays() {
+  var key = fdKey();
+  var base = FD[key] || FD['all'];
+  return MKEYS.map(function(m) {
+    return base.by_month[m] || {req:0,sol:0,cont:0,cer:0,at:0,inc:0,pct_t:0,pct_c:0,cancel:0,abierto:0,pend:0};
+  });
+}
+
+// ===================== GAUGE =====================
+function drawGauge(id, pct, color) {
+  var canvas = document.getElementById(id);
+  if (!canvas) return;
+  canvas.width=76; canvas.height=76;
+  var ctx=canvas.getContext('2d'), cx=38, cy=38, r=29, lw=7;
+  var start=Math.PI*0.75, end=Math.PI*2.25;
+  var angle=start+(end-start)*Math.min(Math.max(pct,0)/100,1);
+  ctx.clearRect(0,0,76,76);
+  ctx.strokeStyle='#E5E5E5'; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(cx,cy,r,start,end); ctx.stroke();
+  ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(cx,cy,r,start,angle); ctx.stroke();
+}
+
+// ===================== PROGRESS BARS =====================
+function mkPR(id, items, max) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var html = '';
+  for (var i=0; i<items.length; i++) {
+    var it = items[i];
+    var pct = Math.round(Math.min(it.v, max) / max * 100);
+    var val = Number.isInteger(it.v) ? it.v.toLocaleString() : it.v + '%';
+    html += '<div class="pr-row">'
+      + '<div class="pr-lbl" title="'+it.l+'">'+it.l+'</div>'
+      + '<div class="pr-bar"><div class="pr-fill" style="width:'+pct+'%;background:'+(it.c||RED)+'"></div></div>'
+      + '<div class="pr-val">'+val+'</div>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+// ===================== CHART HELPER =====================
+function mk(id, cfg) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (CI[id]) { try { CI[id].destroy(); } catch(e){} }
+  try { CI[id] = new Chart(el, cfg); } catch(e) { console.warn('Chart error '+id, e); }
+}
+
+function bo(extra) {
+  var base = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} };
+  if (extra) Object.assign(base, extra);
+  return base;
+}
+
+// ===================== UPDATE KPIs =====================
+function updateKPIs(d) {
+  var t = d.total;
+  function s(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; }
+  var tColor = t.pct_t>=80?GREEN:t.pct_t>=65?AMB:RED;
+  var cColor = t.pct_c>=85?GREEN:t.pct_c>=70?AMB:RED;
+  s('r-req', t.req.toLocaleString());
+  s('r-cont', t.cont.toLocaleString());
+  s('r-cont-sub', 'de '+t.sol.toLocaleString()+' solicitados');
+  s('r-pt', t.pct_t.toFixed(1)+'%');
+  s('r-pc', t.pct_c.toFixed(1)+'%');
+  s('r-pt-sub', t.at.toLocaleString()+' a tiempo / '+t.cer.toLocaleString()+' cerradas');
+  s('r-pc-sub', t.cont.toLocaleString()+' / '+t.sol.toLocaleString()+' solicitados');
+  s('s-req', t.req.toLocaleString());
+  s('s-sol', t.sol.toLocaleString());
+  s('s-cont', t.cont.toLocaleString());
+  s('s-pend', t.pend.toLocaleString());
+  s('g-t-val', t.pct_t.toFixed(1)+'%');
+  s('g-c-val', t.pct_c.toFixed(1)+'%');
+  var gtv = document.getElementById('g-t-val');
+  if (gtv) gtv.style.color = tColor;
+  var gcv = document.getElementById('g-c-val');
+  if (gcv) gcv.style.color = cColor;
+  drawGauge('g-t', t.pct_t, tColor);
+  drawGauge('g-c', t.pct_c, cColor);
+  s('ans-t-at', '✓ '+t.at.toLocaleString()+' a tiempo');
+  s('ans-t-in', '✗ '+t.inc.toLocaleString()+' incumplidas');
+  s('ans-c-en', '✓ '+t.cont.toLocaleString()+' entregadas');
+  s('ans-c-fa', '✗ '+(t.sol-t.cont).toLocaleString()+' faltantes');
+}
+
+// ===================== OPORT GRID =====================
+function buildOG(rows) {
+  var el = document.getElementById('og');
+  if (!el) return;
+  var pts = rows.map(function(r){return r.pct_t;}).filter(function(v){return v>0&&v<=100;});
+  var maxT = pts.length ? Math.max.apply(null,pts) : 100;
+  var minT = pts.length ? Math.min.apply(null,pts) : 0;
+  var html = '';
+  for (var i=0; i<rows.length; i++) {
+    var r = rows[i], lbl = MLBLS[MKEYS[i]];
+    var isBest = r.pct_t===maxT && r.pct_t>0;
+    var isWorst = r.pct_t===minT && r.pct_t>0 && r.pct_t<100;
+    var cls = isBest?'oc best':isWorst?'oc worst':'oc';
+    var td = r.pct_t>0&&r.pct_t<=100 ? r.pct_t.toFixed(1)+'%' : '—';
+    var cd = r.pct_c>0 ? r.pct_c.toFixed(1)+'%' : '—';
+    html += '<div class="'+cls+'">'
+      + '<div class="oc-lbl">'+lbl+'</div>'
+      + '<div class="oc-t">'+td+'</div><div class="oc-tsub">Tiempo</div>'
+      + '<div class="oc-c">'+cd+'</div><div class="oc-csub">Cantidad</div>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+// ===================== PIPELINE =====================
+var PIPE_DATA = [
+  {c:'Auxiliar de Servicios',s:'Cali Centro',r:12,se:8,co:5,e:18},
+  {c:'Auxiliar de Servicios',s:'Yumbo',r:8,se:6,co:4,e:12},
+  {c:'Auxiliar de Servicios',s:'Palmira',r:6,se:4,co:3,e:9},
+  {c:'Auxiliar de Servicios',s:'Buga',r:4,se:3,co:2,e:8},
+  {c:'Auxiliar de Servicios',s:'Cali Norte',r:7,se:5,co:3,e:10},
+  {c:'Auxiliar de Servicios',s:'Pereira',r:3,se:2,co:2,e:5},
+  {c:'Auxiliar de Servicios',s:'Bogotá',r:9,se:7,co:5,e:14},
+  {c:'Auxiliar de Servicios',s:'Medellín',r:5,se:4,co:2,e:7},
+  {c:'Auxiliar Servicios BPM',s:'Cali Centro',r:7,se:5,co:3,e:10},
+  {c:'Auxiliar Servicios BPM',s:'Yumbo',r:5,se:4,co:2,e:7},
+  {c:'Auxiliar Servicios BPM',s:'Palmira',r:3,se:2,co:2,e:5},
+  {c:'Auxiliar Servicios BPM',s:'Buga',r:4,se:3,co:1,e:6},
+  {c:'Auxiliar Servicios BPM',s:'Bogotá',r:6,se:4,co:3,e:8},
+  {c:'Op. Apoyo Logístico',s:'Cali Centro',r:5,se:3,co:2,e:7},
+  {c:'Op. Apoyo Logístico',s:'Yumbo',r:4,se:3,co:2,e:6},
+  {c:'Op. Apoyo Logístico',s:'Palmira',r:3,se:2,co:1,e:4},
+  {c:'Op. Apoyo Logístico',s:'Bogotá',r:4,se:3,co:2,e:5},
+  {c:'Aux. Mantenimiento Loc.',s:'Cali Centro',r:3,se:2,co:1,e:4},
+  {c:'Aux. Mantenimiento Loc.',s:'Yumbo',r:2,se:1,co:1,e:3},
+  {c:'Aux. Mantenimiento Loc.',s:'Palmira',r:2,se:2,co:1,e:3},
+  {c:'Operario de Jardinería',s:'Cali Centro',r:2,se:2,co:1,e:3},
+  {c:'Operario de Jardinería',s:'Buga',r:2,se:1,co:1,e:2},
+  {c:'Coordinador Operativo',s:'Cali Centro',r:1,se:1,co:1,e:2},
+  {c:'Coordinador Operativo',s:'Bogotá',r:2,se:1,co:1,e:2},
+  {c:'Aux. Servicios Alturas',s:'Cali Centro',r:2,se:2,co:1,e:3},
+  {c:'Aux. Servicios Alturas',s:'Bogotá',r:2,se:1,co:1,e:2}
+];
+var PIPE_COLS = ['#C0272D','#BA7517','#185FA5','#1D9E75','#7F77DD','#D85A30','#888780','#2D9E9E'];
+var PIPE_SUCS = ['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín'];
+
+function renderPipeline() {
+  var fC = document.getElementById('pf-cargo') ? document.getElementById('pf-cargo').value : '';
+  var fS = document.getElementById('pf-suc') ? document.getElementById('pf-suc').value : '';
+  var rows = PIPE_DATA;
+  if (fC) rows = rows.filter(function(r){return r.c===fC;});
+  if (fS) rows = rows.filter(function(r){return r.s===fS;});
+  var totR=0, totSe=0, totCo=0, totE=0;
+  for (var i=0;i<rows.length;i++){totR+=rows[i].r;totSe+=rows[i].se;totCo+=rows[i].co;totE+=rows[i].e;}
+  var stages=[
+    {icon:'🔍',label:'Reclutamiento',val:totR,color:'#C0272D',bg:'#FCEBEB',sub:'Búsqueda activa'},
+    {icon:'📋',label:'Selección',val:totSe,color:'#BA7517',bg:'#FAEEDA',sub:'Entrevistas y pruebas'},
+    {icon:'📝',label:'Contratación',val:totCo,color:'#185FA5',bg:'#E6F1FB',sub:'Docs y firma'},
+    {icon:'✅',label:'Entregados',val:totE,color:'#1D9E75',bg:'#E1F5EE',sub:'En operación'}
+  ];
+  var stEl = document.getElementById('pipe-stages');
+  if (stEl) {
+    var h='';
+    for(var i=0;i<stages.length;i++){
+      var st=stages[i];
+      h+='<div class="pstage">'
+        +'<div class="pnode" style="background:'+st.bg+';border-color:'+st.color+'">'+st.icon+'</div>'
+        +'<div class="pcount" style="color:'+st.color+'">'+st.val+'</div>'
+        +'<div class="plbl" style="color:'+st.color+'">'+st.label+'</div>'
+        +'<div class="psub">'+st.sub+'</div>'
+        +'</div>';
+    }
+    stEl.innerHTML=h;
+  }
+  // Bar
+  var sucTotals=[];
+  var activeSucs = fS ? [fS] : PIPE_SUCS;
+  for(var i=0;i<activeSucs.length;i++){
+    var s=activeSucs[i];
+    var t=0;
+    for(var j=0;j<rows.length;j++) if(rows[j].s===s) t+=rows[j].r+rows[j].se+rows[j].co+rows[j].e;
+    if(t>0) sucTotals.push({s:s,t:t});
+  }
+  var barTotal=0; for(var i=0;i<sucTotals.length;i++) barTotal+=sucTotals[i].t;
+  if(!barTotal) barTotal=1;
+  var barEl=document.getElementById('pipe-bar'), legEl=document.getElementById('pipe-legend');
+  if(barEl){
+    var h='';
+    for(var i=0;i<sucTotals.length;i++){
+      var x=sucTotals[i],w=Math.max((x.t/barTotal*100),1).toFixed(1),col=PIPE_COLS[i%PIPE_COLS.length];
+      h+='<div class="pseg" style="width:'+w+'%;background:'+col+'" title="'+x.s+': '+x.t+'">'+(x.t>4?x.t:'')+'</div>';
+    }
+    barEl.innerHTML=h;
+  }
+  if(legEl){
+    var h='';
+    for(var i=0;i<sucTotals.length;i++){
+      var x=sucTotals[i];
+      h+='<div class="pleg"><div class="pdot" style="background:'+PIPE_COLS[i%PIPE_COLS.length]+'"></div>'+x.s+' ('+x.t+')</div>';
+    }
+    legEl.innerHTML=h;
+  }
+  // Table
+  var tbody=document.getElementById('pipe-tbody');
+  if(!tbody) return;
+  var grouped={};
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i],k=r.c+'||'+r.s;
+    if(!grouped[k]) grouped[k]={c:r.c,s:r.s,r:0,se:0,co:0,e:0};
+    grouped[k].r+=r.r;grouped[k].se+=r.se;grouped[k].co+=r.co;grouped[k].e+=r.e;
+  }
+  var sorted=Object.values(grouped).sort(function(a,b){return(b.r+b.se+b.co+b.e)-(a.r+a.se+a.co+a.e);});
+  var h='';
+  for(var i=0;i<Math.min(sorted.length,15);i++){
+    var row=sorted[i],tot=row.r+row.se+row.co+row.e,pct=tot>0?Math.round(row.e/tot*100):0;
+    var cls=pct>=70?'bs':pct>=40?'bw':'bd';
+    var bar='<div style="display:flex;height:8px;border-radius:3px;overflow:hidden;width:80px;gap:1px">'
+      +'<div style="width:'+(row.r/tot*100).toFixed(0)+'%;background:#C0272D"></div>'
+      +'<div style="width:'+(row.se/tot*100).toFixed(0)+'%;background:#BA7517"></div>'
+      +'<div style="width:'+(row.co/tot*100).toFixed(0)+'%;background:#185FA5"></div>'
+      +'<div style="width:'+(row.e/tot*100).toFixed(0)+'%;background:#1D9E75"></div>'
+      +'</div>';
+    h+='<tr><td><strong>'+row.c+'</strong></td><td>'+row.s+'</td>'
+      +'<td style="text-align:center;color:#C0272D;font-weight:700">'+row.r+'</td>'
+      +'<td style="text-align:center;color:#BA7517;font-weight:700">'+row.se+'</td>'
+      +'<td style="text-align:center;color:#185FA5;font-weight:700">'+row.co+'</td>'
+      +'<td style="text-align:center;color:#1D9E75;font-weight:700">'+row.e+'</td>'
+      +'<td style="text-align:center;font-weight:700">'+tot+'</td>'
+      +'<td>'+bar+'<span class="badge '+cls+'" style="margin-top:3px;display:inline-block">'+pct+'%</span></td></tr>';
+  }
+  var tRow={r:0,se:0,co:0,e:0};
+  for(var i=0;i<sorted.length;i++){tRow.r+=sorted[i].r;tRow.se+=sorted[i].se;tRow.co+=sorted[i].co;tRow.e+=sorted[i].e;}
+  var tTot=tRow.r+tRow.se+tRow.co+tRow.e;
+  h+='<tr style="background:#F4F4F4;font-weight:700"><td colspan="2">TOTAL</td>'
+    +'<td style="text-align:center;color:#C0272D">'+tRow.r+'</td>'
+    +'<td style="text-align:center;color:#BA7517">'+tRow.se+'</td>'
+    +'<td style="text-align:center;color:#185FA5">'+tRow.co+'</td>'
+    +'<td style="text-align:center;color:#1D9E75">'+tRow.e+'</td>'
+    +'<td style="text-align:center">'+tTot+'</td>'
+    +'<td><span class="badge bs">'+(tTot>0?Math.round(tRow.e/tTot*100):0)+'%</span></td></tr>';
+  tbody.innerHTML=h;
+}
+
+// ===================== FORMACIÓN TABLE =====================
+function buildFormTable() {
+  var formData = window._formData || [
+    {mes:'ENERO',tema:'Virtual: INDUCCIÓN - REINDUCCIÓN políticas y objetivos',prog:45,asist:4},
+    {mes:'FEBRERO',tema:'Virtual: Formación en Peligro Biomecánico - Higiene MMSS y MMII',prog:47,asist:7},
+    {mes:'MARZO',tema:'Virtual: Identificación de peligros y riesgos',prog:41,asist:2},
+    {mes:'ABRIL',tema:'Virtual: Formación en Peligro Mecánico - Herramientas manuales',prog:42,asist:4},
+    {mes:'MAYO',tema:'Virtual: Prevención de la fiebre amarilla',prog:49,asist:3},
+    {mes:'JUNIO',tema:'Virtual: Riesgo Químico',prog:54,asist:5},
+    {mes:'JUNIO',tema:'Pausas activas con apoyo del aprendiz y SST',prog:4,asist:4},
+    {mes:'JULIO',tema:'Virtual: Riesgo Locativo',prog:48,asist:3},
+    {mes:'AGOSTO',tema:'Virtual: Higiene de manos',prog:45,asist:2},
+    {mes:'SEPTIEMBRE',tema:'Virtual: Salud mental',prog:46,asist:4},
+    {mes:'SEPTIEMBRE',tema:'Socialización importancia uso adecuado EPI',prog:15,asist:15},
+    {mes:'SEPTIEMBRE',tema:'Socialización en autocuidado y percepción del riesgo',prog:15,asist:15},
+    {mes:'SEPTIEMBRE',tema:'Socialización lección aprendida por AT Yorlin Cuero',prog:15,asist:15},
+    {mes:'SEPTIEMBRE',tema:'Socialización en peligro locativo',prog:15,asist:15}
+  ];
+  var tbody = document.getElementById('tb-form-body');
+  if (!tbody) return;
+  var h='';
+  for(var i=0;i<formData.length;i++){
+    var r=formData[i];
+    var cobNum = r.prog>0 ? r.asist/r.prog*100 : 0;
+    var cob = r.prog>0 ? cobNum.toFixed(2)+'%' : '—';
+    var cls = cobNum>=80?'bs':cobNum>=50?'bw':'bd';
+    h+='<tr><td><strong>'+r.mes+'</strong></td><td>'+r.tema+'</td>'
+      +'<td style="text-align:center">'+r.prog+'</td>'
+      +'<td style="text-align:center">'+r.asist+'</td>'
+      +'<td><span class="badge '+cls+'">'+cob+'</span></td></tr>';
+  }
+  tbody.innerHTML=h;
+  // Build form charts
+  var formMeses=[], seen={};
+  for(var i=0;i<formData.length;i++){
+    if(!seen[formData[i].mes]){seen[formData[i].mes]=true;formMeses.push(formData[i].mes);}
+  }
+  var formProg=formMeses.map(function(m){
+    var s=0;for(var i=0;i<formData.length;i++)if(formData[i].mes===m)s+=formData[i].prog;return s;
+  });
+  var formAsist=formMeses.map(function(m){
+    var s=0;for(var i=0;i<formData.length;i++)if(formData[i].mes===m)s+=formData[i].asist;return s;
+  });
+  mk('c-form-pa',{type:'bar',data:{labels:formMeses,datasets:[
+    {label:'Programados',data:formProg,backgroundColor:BLUE,borderRadius:3},
+    {label:'Asistentes',data:formAsist,backgroundColor:GREEN,borderRadius:3}
+  ]},options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  var cobItems=formData.slice(0,10).map(function(r){
+    return {l:r.tema.substring(0,45)+'…',v:r.prog>0?parseFloat((r.asist/r.prog*100).toFixed(1)):0,
+      c:r.prog>0&&r.asist/r.prog>=0.8?GREEN:r.prog>0&&r.asist/r.prog>=0.5?AMB:RED};
+  });
+  mkPR('pr-form-cob',cobItems,100);
+}
+
+// ===================== ENTREVISTAS PREGUNTAS =====================
+function buildEntrevistas() {
+  var preguntas = [
+    {q:'¿Pudo aplicar sus conocimientos?',si:72,no:4},
+    {q:'¿El trabajo fue el esperado?',si:45,no:31},
+    {q:'¿Recibió retroalimentación del jefe?',si:38,no:38},
+    {q:'¿Contó con elementos necesarios?',si:60,no:16},
+    {q:'¿Recomendaría trabajar aquí?',si:58,no:18}
+  ];
+  var el = document.getElementById('ent-preguntas');
+  if (!el) return;
+  var h='';
+  for(var i=0;i<preguntas.length;i++){
+    var p=preguntas[i],tot=p.si+p.no;
+    var pSi=Math.round(p.si/tot*100),pNo=Math.round(p.no/tot*100);
+    h+='<div style="margin-bottom:10px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+      +'<span style="font-size:11px;font-weight:600">'+p.q+'</span>'
+      +'<span style="font-size:11px;color:var(--muted)">'+p.si+' Sí · '+p.no+' No</span>'
+      +'</div>'
+      +'<div style="display:flex;border-radius:4px;overflow:hidden;height:20px;gap:1px">'
+      +'<div style="width:'+pSi+'%;background:#1D9E75;display:flex;align-items:center;justify-content:center">'
+      +'<span style="font-size:9.5px;color:white;font-weight:700">'+pSi+'%</span></div>'
+      +'<div style="width:'+pNo+'%;background:#C0272D;display:flex;align-items:center;justify-content:center">'
+      +'<span style="font-size:9.5px;color:white;font-weight:700">'+pNo+'%</span></div>'
+      +'</div></div>';
+  }
+  el.innerHTML=h;
+}
+
+// ===================== MAIN REDRAW =====================
+function redraw() {
+  var d = getData();
+  var rows = getMonthlyArrays();
+  var mLabels = MKEYS.map(function(k){return MLBLS[k];});
+  updateKPIs(d);
+  buildOG(rows);
+  renderPipeline();
+  buildEntrevistas();
+  buildFormTable();
+
+  // Filtered city/suc tables
+  var showCities = curCiudad ? CITY_TABLE.filter(function(c){return c.key===curCiudad;}) : CITY_TABLE;
+
+  // Progress bars
+  mkPR('pr-rcit', showCities.map(function(c){return {l:c.name,v:c.req,c:RED};}),
+    showCities.reduce(function(m,c){return Math.max(m,c.req);},1));
+  mkPR('pr-perf',[
+    {l:'Auxiliar de Servicios',v:3021,c:RED},{l:'Auxiliar Servicios BPM',v:1594,c:AMB},
+    {l:'Op. Apoyo Logístico',v:272,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:263,c:GREEN},
+    {l:'Op. Apoyo Log. BPM',v:161,c:GRAY},{l:'Op. Apoyo Log. Bodega',v:149,c:RED},
+    {l:'Operario Jardinería',v:88,c:AMB},{l:'Coordinador Operativo',v:83,c:BLUE},
+    {l:'Aux. Servicios Alturas',v:68,c:GREEN},{l:'Especialista Servicio',v:53,c:GRAY}
+  ],3021);
+  mkPR('pr-act-cargo',[{l:'Auxiliar de Servicios',v:52,c:RED},{l:'Auxiliar Servicios BPM',v:31,c:AMB},
+    {l:'Op. Apoyo Logístico',v:22,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:14,c:GREEN},
+    {l:'Operario de Jardinería',v:9,c:GRAY},{l:'Coordinador Operativo',v:8,c:RED},
+    {l:'Aux. Servicios Alturas',v:8,c:AMB},{l:'Especialista de Servicio',v:6,c:BLUE}],52);
+  mkPR('pr-rot-cargo',[{l:'Auxiliar de Servicios',v:9.8,c:RED},{l:'Auxiliar Servicios BPM',v:8.2,c:AMB},
+    {l:'Op. Apoyo Logístico',v:11.4,c:RED},{l:'Aux. Mantenimiento Loc.',v:6.3,c:GREEN},
+    {l:'Operario de Jardinería',v:7.1,c:AMB},{l:'Coordinador Operativo',v:3.2,c:GREEN}],11.4);
+  mkPR('pr-rot-ciudad',[{l:'Cali Centro',v:10.2,c:RED},{l:'Yumbo',v:12.8,c:RED},{l:'Palmira',v:8.4,c:AMB},
+    {l:'Buga',v:7.1,c:AMB},{l:'Cali Norte',v:9.3,c:RED},{l:'Pereira',v:6.8,c:GREEN},
+    {l:'Bogotá',v:7.9,c:AMB},{l:'Medellín',v:11.2,c:RED}],12.8);
+  mkPR('pr-peligro',[{l:'Locativo',v:33.99,c:RED},{l:'Mecánico',v:27.19,c:RED},{l:'Biomecánico',v:21.11,c:AMB},
+    {l:'Químico',v:8.59,c:AMB},{l:'Biológico',v:4.11,c:BLUE},{l:'Físico',v:2.68,c:GREEN},
+    {l:'Tránsito',v:1.43,c:GRAY},{l:'No clasificado',v:0.36,c:GRAY}],33.99);
+  mkPR('pr-cuerpo',[{l:'Miembros Superiores',v:40.97,c:RED},{l:'Miembros Inferiores',v:20.93,c:AMB},
+    {l:'Tronco',v:15.03,c:BLUE},{l:'Ubicaciones Múltiples',v:10.02,c:GREEN},{l:'Cabeza/Cuello',v:8.12,c:GRAY}],40.97);
+  mkPR('pr-mec',[{l:'Pisadas, choques o golpes',v:26.12,c:RED},{l:'Sobreesfuerzo o falso movimiento',v:21.47,c:AMB},
+    {l:'Otro',v:17.35,c:BLUE},{l:'Caída de personas',v:15.74,c:GREEN},{l:'Contacto cortantes',v:10.21,c:GRAY}],26.12);
+  mkPR('pr-lesion',[{l:'Golpe o contusión',v:44.54,c:RED},{l:'Torcedura/esguince/desgarro',v:20.39,c:AMB},
+    {l:'Herida',v:11.99,c:BLUE},{l:'Trauma superficial',v:10.20,c:GREEN},{l:'Fractura',v:6.40,c:GRAY}],44.54);
+  mkPR('pr-at-suc-f',[{l:'Cali Centro',v:4.82,c:RED},{l:'Yumbo',v:3.91,c:AMB},
+    {l:'Palmira',v:3.44,c:BLUE},{l:'Buga',v:2.87,c:GREEN},{l:'Cali Norte',v:2.51,c:GRAY},{l:'Pereira',v:2.10,c:RED}],4.82);
+  mkPR('pr-at-cargo',[{l:'Auxiliar de Servicios',v:38.4,c:RED},{l:'Auxiliar Servicios BPM',v:22.1,c:AMB},
+    {l:'Op. Apoyo Logístico',v:12.3,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:8.7,c:GREEN},{l:'Coord. Operativo',v:5.2,c:GRAY}],38.4);
+  mkPR('pr-eg-diag-s',[{l:'Traumatismos, envenenamientos y otras',v:35.01,c:RED},
+    {l:'Enf. sistema osteomuscular',v:15.60,c:AMB},{l:'Enf. sistema digestivo',v:6.12,c:BLUE},
+    {l:'Ciertas enf. infecciosas',v:5.72,c:GREEN}],35.01);
+  mkPR('pr-eg-diag-f',[{l:'Ciertas enf. infecciosas y parasitarias',v:15.83,c:RED},
+    {l:'Enf. sistema osteomuscular',v:15.27,c:AMB},{l:'Enf. sistema respiratorio',v:12.44,c:BLUE},
+    {l:'Traumatismos y envenenamientos',v:11.38,c:GREEN},{l:'Enf. sistema digestivo',v:9.21,c:GRAY}],15.83);
+  mkPR('pr-eg-suc-s',[{l:'Cali Centro',v:3.12,c:RED},{l:'Yumbo',v:2.87,c:AMB},
+    {l:'Palmira',v:2.54,c:BLUE},{l:'Buga',v:2.31,c:GREEN},{l:'Cali Norte',v:2.08,c:GRAY},{l:'Pereira',v:1.95,c:RED}],3.12);
+  mkPR('pr-eg-ciudad',[{l:'Cali',v:28.4,c:RED},{l:'Bogotá',v:22.1,c:AMB},{l:'Medellín',v:14.3,c:BLUE},
+    {l:'Buga',v:9.8,c:GREEN},{l:'Barranquilla',v:6.2,c:GRAY}],28.4);
+  mkPR('pr-eg-cargo',[{l:'Auxiliar de Servicios',v:35.2,c:RED},{l:'Auxiliar Servicios BPM',v:18.4,c:AMB},
+    {l:'Op. Apoyo Logístico',v:11.8,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:7.3,c:GREEN}],35.2);
+  mkPR('pr-sin-des',[{l:'Alta médica con reintegro',v:34.2,c:GREEN},{l:'Alta sin secuelas',v:28.6,c:GREEN},
+    {l:'Reintegro con restricciones',v:18.9,c:AMB},{l:'En proceso calificación',v:12.6,c:AMB},
+    {l:'Pensión invalidez',v:3.1,c:RED},{l:'Otro desenlace',v:2.6,c:GRAY}],34.2);
+  /* pr-fu-ciudad removed */
+  mkPR('pr-fu-diag',[{l:'M54 – Dorsalgia / Lumbalgia',v:12,c:RED},{l:'M75 – Lesión hombro',v:8,c:AMB},
+    {l:'F41 – Trastorno ansioso',v:7,c:BLUE},{l:'G54 – Túnel carpiano',v:5,c:GREEN},{l:'S52 – Fractura',v:4,c:GRAY}],12);
+  mkPR('pr-ent-cargo',[{l:'Auxiliar de Servicios',v:31,c:GREEN},{l:'Auxiliar Servicios BPM',v:18,c:AMB},
+    {l:'Op. Apoyo Logístico',v:12,c:GREEN},{l:'Aux. Mantenimiento',v:8,c:AMB},
+    {l:'Coordinador Operativo',v:4,c:RED},{l:'Especialista Servicio',v:3,c:GREEN}],31);
+
+  // ---- RESUMEN CHARTS ----
+  mk('c-r1',{type:'bar',data:{labels:mLabels,datasets:[
+    {label:'Req',data:rows.map(function(r){return r.req;}),backgroundColor:RED,borderRadius:3},
+    {label:'Contratados',data:rows.map(function(r){return r.cont;}),backgroundColor:GREEN,borderRadius:3},
+    {label:'Solicitados',data:rows.map(function(r){return r.sol;}),backgroundColor:BLUE,borderRadius:3}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-r2',{type:'line',data:{labels:mLabels,datasets:[
+    {label:'% Tiempo',data:rows.map(function(r){return r.cer>0?Math.min(r.pct_t,100):null;}),borderColor:GREEN,backgroundColor:GL,fill:true,tension:.4,pointRadius:4,spanGaps:true},
+    {label:'% Cantidad',data:rows.map(function(r){return r.sol>0?r.pct_c:null;}),borderColor:BLUE,fill:false,tension:.4,pointRadius:4,borderDash:[4,2],spanGaps:true},
+    {label:'Meta 80%',data:Array(6).fill(80),borderColor:'#DDD',borderDash:[6,4],pointRadius:0,fill:false}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{min:55,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-r3',{type:'bar',data:{labels:['Paso Directo','Renuncia','Terminación contrato','Bajo Desemp.','Justa Causa'],
+    datasets:[{data:[542,225,160,86,1],backgroundColor:[GREEN,AMB,BLUE,RED,GRAY],borderRadius:4}]},
+    options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false}}}})});
+  mk('c-r4',{type:'bar',data:{labels:['AT 24','AT 25','AT 26','Aus 24','Aus 25','Aus 26'],
+    datasets:[{data:[89,73,23,4.8,4.3,3.8],backgroundColor:[RED,AMB,GREEN,RED,AMB,GREEN],borderRadius:4}]},
+    options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#EEE'}}}})});
+
+  // ---- SELECCIÓN CHARTS ----
+  mk('c-oport',{type:'bar',data:{labels:mLabels,datasets:[
+    {label:'% ANS Tiempo',data:rows.map(function(r){return r.cer>0?Math.min(r.pct_t,100):0;}),backgroundColor:GREEN,borderRadius:3,barPercentage:.5},
+    {label:'% ANS Cantidad',data:rows.map(function(r){return r.sol>0?r.pct_c:0;}),backgroundColor:BLUE,borderRadius:3,barPercentage:.5},
+    {label:'Meta 80%',data:Array(6).fill(80),type:'line',borderColor:'#CCC',borderDash:[5,3],pointRadius:0,fill:false}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{min:0,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-est',{type:'doughnut',data:{labels:['Cerrado','Cancelada','Abierto'],
+    datasets:[{data:[d.total.cer,d.total.cancel,d.total.abierto],backgroundColor:[GREEN,AMB,BLUE],borderWidth:0}]},
+    options:bo({cutout:'63%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
+  var SUCS=['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín'];
+  var suc_pt=[88.2,91.4,90.6,96.9,84.7,79.9,86.2,73.2];
+  var suc_pc=[91.3,89.7,92.2,88.2,87.5,87.9,93.0,80.1];
+  mk('c-suc-t',{type:'bar',data:{labels:SUCS,datasets:[
+    {data:suc_pt,backgroundColor:suc_pt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
+    options:bo({indexAxis:'y',scales:{x:{min:60,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  mk('c-suc-c',{type:'bar',data:{labels:SUCS,datasets:[
+    {data:suc_pc,backgroundColor:suc_pc.map(function(v){return v>=88?GREEN:v>=78?AMB:RED;}),borderRadius:4}]},
+    options:bo({indexAxis:'y',scales:{x:{min:60,max:100,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  var cnames=showCities.map(function(c){return c.name;}),cpt=showCities.map(function(c){return c.pct_t;}),cpc=showCities.map(function(c){return c.pct_c;});
+  mk('c-cit',{type:'bar',data:{labels:cnames,datasets:[{data:cpt,backgroundColor:cpt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
+    options:bo({indexAxis:'y',scales:{x:{min:60,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  mk('c-cic',{type:'bar',data:{labels:cnames,datasets:[{data:cpc,backgroundColor:cpc.map(function(v){return v>=88?GREEN:v>=78?AMB:RED;}),borderRadius:4}]},
+    options:bo({indexAxis:'y',scales:{x:{min:60,max:100,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+
+  // ---- PERSONAL ACTIVO CHARTS ----
+  mk('c-act-ciudad',{type:'bar',data:{labels:['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín','Barranquilla'],
+    datasets:[{data:[28,22,18,15,14,12,19,14,8],backgroundColor:RED,borderRadius:4}]},
+    options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#EEE'}}}})});
+  mk('c-act-area',{type:'doughnut',data:{labels:['Aseo y Limpieza','Logística','Mantenimiento','Jardinería','Operaciones','Coordinación'],
+    datasets:[{data:[68,32,18,12,11,9],backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,'#7F77DD'],borderWidth:2,borderColor:'#fff'}]},
+    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-act-ret',{type:'bar',data:{labels:['Dic 25','Ene 26','Feb 26','Mar 26','Abr 26','May 26'],datasets:[
+    {label:'Paso Directo',data:[62,58,54,61,57,65],backgroundColor:GREEN,borderRadius:3,stack:'a'},
+    {label:'Renuncia',data:[25,28,22,30,26,31],backgroundColor:AMB,borderRadius:3,stack:'a'},
+    {label:'Fin Obra',data:[18,20,15,22,19,24],backgroundColor:BLUE,borderRadius:3,stack:'a'},
+    {label:'Bajo Desemp.',data:[9,8,11,10,9,12],backgroundColor:RED,borderRadius:3,stack:'a'}
+  ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+
+  // ---- ROTACIÓN CHARTS ----
+  var rotData=[83,73,103,104,117,107,134,104,119,0,0,0];
+  mk('c-rot-m',{type:'bar',data:{labels:MN,datasets:[
+    {data:rotData,backgroundColor:rotData.map(function(v){return v>0?RED:'#E5E5E5';}),borderRadius:4},
+    {data:Array(12).fill(105),type:'line',borderColor:AMB,borderDash:[5,3],pointRadius:0,fill:false}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  mk('c-rot-c',{type:'doughnut',data:{labels:['Paso Directo','Renuncia Personal','Bajo Desempeño','Terminación contrato','Mejor Oferta','Justa Causa'],
+    datasets:[{data:[542,225,86,73,11,7],backgroundColor:[GREEN,AMB,RED,BLUE,GRAY,'#D85A30'],borderWidth:2,borderColor:'#fff'}]},
+    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-rot-z',{type:'bar',data:{labels:['Buga','Cali','Eje Cafetero','Nariño'],
+    datasets:[{data:[560,233,117,34],backgroundColor:[RED,AMB,BLUE,GREEN],borderRadius:4}]},
+    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  mk('c-rot-g',{type:'doughnut',data:{labels:['Masculino 69.8%','Femenino 30.2%'],
+    datasets:[{data:[659,285],backgroundColor:[BLUE,RED],borderWidth:2,borderColor:'#fff'}]},
+    options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
+  mk('c-rot-d',{type:'bar',data:{labels:['<30','31–60','61–90','91–120','121–180','>180'],
+    datasets:[{data:[89,142,198,237,156,122],backgroundColor:[RED,RED,AMB,AMB,GREEN,GREEN],borderRadius:4}]},
+    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  mk('c-rot-idx',{type:'line',data:{labels:MN5,datasets:[
+    {label:'Índice Rotación %',data:[8.4,9.1,8.7,8.3,9.2],borderColor:RED,backgroundColor:RL,fill:true,tension:.4,pointRadius:5,pointBackgroundColor:RED},
+    {label:'Meta 8%',data:[8,8,8,8,8],borderColor:'#CCC',borderDash:[6,4],pointRadius:0,fill:false}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+
+  // ---- ENTREVISTAS CHARTS ----
+  mk('c-em',{type:'bar',data:{labels:['Mejor oferta','Ambiente inadecuado','Motivos viaje','Motivos estudio','Horario trabajo','Incumplim. ofrecido','Transporte','Salud','Personal','Mal trato'],
+    datasets:[{data:[15,12,9,6,5,2,1,3,2,1],backgroundColor:RED,borderRadius:4}]},
+    options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  mk('c-ej',{type:'doughnut',data:{labels:['Positiva 81.6%','Neutra 14.5%','Negativa 3.9%'],
+    datasets:[{data:[62,11,3],backgroundColor:[GREEN,AMB,RED],borderWidth:3,borderColor:'#fff'}]},
+    options:bo({cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},boxWidth:12}}}})});
+  mk('c-ent-suc',{type:'bar',data:{labels:['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira'],datasets:[
+    {label:'Positivas',data:[18,12,9,8,10,5],backgroundColor:GREEN,borderRadius:3,stack:'e'},
+    {label:'Neutras',data:[4,2,1,2,1,1],backgroundColor:AMB,borderRadius:3,stack:'e'},
+    {label:'Negativas',data:[1,1,0,1,0,0],backgroundColor:RED,borderRadius:3,stack:'e'}
+  ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+
+  // ---- AT CHARTS ----
+  mk('c-at-if',{type:'bar',data:{labels:MN5,datasets:[
+    {label:'Nº Accidentes',data:[115,100,106,108,130],backgroundColor:[RED,RED,RED,RED,RED],borderRadius:4,yAxisID:'y2'},
+    {label:'Tasa Accidentalidad %',data:[0.62,0.55,0.58,0.60,0.72],type:'line',borderColor:'#8B1A1E',fill:false,tension:.3,pointRadius:6,pointBackgroundColor:'#8B1A1E',yAxisID:'y1',borderWidth:2.5}
+  ]},options:bo({scales:{
+    y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v.toFixed(2)+'%';}},title:{display:true,text:'Tasa %',font:{size:9}}},
+    y2:{position:'right',grid:{display:false},title:{display:true,text:'Nº Accidentes',font:{size:9}}}
+  },plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}},
+    datalabels:{display:function(ctx){return ctx.datasetIndex===0;},
+      formatter:function(v){return v.toFixed(2)+'%';},
+      color:'#fff',font:{size:9,weight:'bold'},anchor:'center',align:'center'}}})});
+  mk('c-at-is',{type:'line',data:{labels:MN5,datasets:[
+    {label:'Tasa Severidad %',data:[3.77,3.78,null,4.54,4.94],borderColor:RED,backgroundColor:RL,fill:true,tension:.3,pointRadius:5,pointBackgroundColor:RED,yAxisID:'y1',spanGaps:false},
+    {label:'Días perdidos',data:[699,690,null,823,894],borderColor:AMB,fill:false,tension:.3,pointRadius:4,type:'bar',yAxisID:'y2',backgroundColor:AMB,spanGaps:false}
+  ]},options:bo({scales:{
+    y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v!=null?v.toFixed(2)+'%':'';}}},
+    y2:{position:'right',grid:{display:false}}
+  },plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-at-causa',{type:'doughnut',data:{labels:['Comportamiento Subestándar 87%','Condición Insegura 13%'],
+    datasets:[{data:[483,74],backgroundColor:[RED,GRAY],borderWidth:3,borderColor:'#fff'}]},
+    options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
+  mk('c-at-clas',{type:'bar',data:{labels:['Sin Severidad','Leve','Moderado','Severo','Grave'],datasets:[
+    {label:'Cant. AT',data:[184,173,154,29,19],backgroundColor:RED,borderRadius:3},
+    {label:'Días perdidos',data:[0,421,1000,null,573],backgroundColor:BLUE,borderRadius:3}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-at-gen',{type:'bar',data:{labels:['Masculino','Femenino'],datasets:[{data:[3.42,2.18],backgroundColor:[BLUE,RED],borderRadius:5}]},
+    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}}})});
+  mk('c-at-tiempo',{type:'bar',data:{labels:['< 1 mes','1 a 2 meses','3 a 6 meses','Mayor a 6 meses',''],
+    datasets:[{data:[38,24,20,18],backgroundColor:[RED,'rgba(192,39,45,.7)','rgba(192,39,45,.5)',GREEN,GREEN],borderRadius:5}]},
+    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},max:45,ticks:{callback:function(v){return v+'%';}}}}})});
+
+  // ---- EG CHARTS ----
+  mk('c-eg-is',{type:'line',data:{labels:MN5,datasets:[
+    {label:'Tasa Severidad %',data:[1.58,1.47,1.58,1.99,1.73],borderColor:RED,backgroundColor:RL,fill:true,tension:.3,pointRadius:5,pointBackgroundColor:RED,yAxisID:'y1'},
+    {label:'Días perdidos',data:[8338,7077,8412,10148,9193],borderColor:BLUE,fill:false,tension:.3,pointRadius:4,type:'bar',yAxisID:'y2',backgroundColor:BLUE}
+  ]},options:bo({scales:{y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v.toFixed(2)+'%';}}},y2:{position:'right',grid:{display:false}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-eg-if',{type:'line',data:{labels:MN5,datasets:[
+    {label:'Tasa Frecuencia %',data:[6.87,7.07,9.05,8.08,6.99],borderColor:AMB,backgroundColor:'rgba(186,117,23,.12)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:AMB,yAxisID:'y1'},
+    {label:'Nº Casos',data:[1274,1290,1642,1464,1266],borderColor:BLUE,fill:false,tension:.3,pointRadius:4,type:'bar',yAxisID:'y2',backgroundColor:BLUE}
+  ]},options:bo({scales:{y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v.toFixed(2)+'%';}}},y2:{position:'right',grid:{display:false}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-eg-gen',{type:'bar',data:{labels:['Masculino','Femenino'],datasets:[
+    {label:'Tasa Frecuencia %',data:[34.2,42.8],backgroundColor:[BLUE,RED],borderRadius:5},
+    {label:'Tasa Severidad %',data:[1.41,1.93],backgroundColor:['rgba(24,95,165,.4)','rgba(192,39,45,.4)'],borderRadius:5}
+  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+
+  // ---- SINIESTRO CHARTS ----
+  // c-sin-ev removed (chart deleted)
+
+  mk('c-sin-est',{type:'doughnut',data:{labels:['En seguimiento','Calificación','Reintegro','Alta médica','Junta médica'],
+    datasets:[{data:[47,18,12,27,15],backgroundColor:[RED,AMB,GREEN,BLUE,GRAY],borderWidth:2,borderColor:'#fff'}]},
+    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+  /* c-sin-dias removed */
+  /* c-sin-prr removed */
+
+  // ---- FUEROS CHARTS ----
+  mk('c-fu-mes',{type:'bar',data:{labels:MN5,datasets:[
+    {label:'Críticos',data:[9,10,11,12,12],backgroundColor:RED,borderRadius:3,stack:'f'},
+    {label:'Altos',data:[16,17,19,21,21],backgroundColor:AMB,borderRadius:3,stack:'f'},
+    {label:'Controlados',data:[12,13,14,14,14],backgroundColor:GREEN,borderRadius:3,stack:'f'}
+  ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  mk('c-fu-tipo',{type:'doughnut',data:{labels:['EG Osteomuscular','EG Psicológica','AT con secuela','ATEL','Otra EG'],
+    datasets:[{data:[18,9,11,5,4],backgroundColor:[RED,AMB,BLUE,GREEN,GRAY],borderWidth:2,borderColor:'#fff'}]},
+    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+}
+
+
+// ===== EXCEL UPLOAD ENGINE =====
+var uploadedFiles = [];
+var parsedSheets = {};
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').style.borderColor = 'rgba(192,39,45,.5)';
+  document.getElementById('drop-zone').style.background = 'rgba(192,39,45,.04)';
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files) {
+  for (var i = 0; i < files.length; i++) {
+    if (files[i].name.endsWith('.xlsx')) {
+      uploadedFiles.push(files[i]);
+    }
+  }
+  renderFileList();
+  document.getElementById('btn-load').disabled = uploadedFiles.length === 0;
+  document.getElementById('btn-load').style.opacity = uploadedFiles.length > 0 ? '1' : '.4';
+}
+
+function renderFileList() {
+  if (uploadedFiles.length === 0) return;
+  var el = document.getElementById('file-items');
+  var html = '';
+  for (var i = 0; i < uploadedFiles.length; i++) {
+    var f = uploadedFiles[i];
+    var size = (f.size / 1024).toFixed(0) + ' KB';
+    html += '<div class="file-item">'
+      + '<div class="file-item-icon">📊</div>'
+      + '<div class="file-item-name">' + f.name + '</div>'
+      + '<div class="file-item-size">' + size + '</div>'
+      + '<div class="file-item-status" style="color:#1D9E75">✓</div>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+  document.getElementById('file-list').style.display = 'block';
+}
+
+function processFiles() {
+  if (uploadedFiles.length === 0) return;
+  document.getElementById('upload-progress').style.display = 'block';
+  document.getElementById('btn-load').disabled = true;
+  setProgress(5, 'Cargando librería de lectura Excel...');
+
+  // Load SheetJS dynamically
+  var script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  script.onload = function() {
+    setProgress(15, 'Librería cargada. Leyendo archivos...');
+    readAllFiles(0);
+  };
+  script.onerror = function() {
+    showError('No se pudo cargar la librería. Verifica tu conexión a internet.');
+  };
+  document.head.appendChild(script);
+}
+
+function readAllFiles(idx) {
+  if (idx >= uploadedFiles.length) {
+    setProgress(80, 'Procesando datos...');
+    setTimeout(function() { buildDashboardFromExcel(); }, 100);
+    return;
+  }
+  var f = uploadedFiles[idx];
+  var pct = 15 + Math.round((idx / uploadedFiles.length) * 55);
+  setProgress(pct, 'Leyendo: ' + f.name);
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+      for (var s = 0; s < wb.SheetNames.length; s++) {
+        var sn = wb.SheetNames[s];
+        var data = XLSX.utils.sheet_to_json(wb.Sheets[sn], {defval:''});
+        if (data.length > 0) {
+          parsedSheets[sn] = data;
+          markSheetLoaded(sn, true);
+        }
+      }
+    } catch(err) {
+      console.warn('Error reading ' + f.name, err);
+    }
+    readAllFiles(idx + 1);
+  };
+  reader.readAsArrayBuffer(f);
+}
+
+function markSheetLoaded(sheetName, ok) {
+  var chips = document.querySelectorAll('.sheet-chip');
+  for (var i = 0; i < chips.length; i++) {
+    if (chips[i].getAttribute('data-sheet') === sheetName) {
+      chips[i].classList.add(ok ? 'loaded' : 'partial');
+    }
+  }
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = text;
+}
+
+function showError(msg) {
+  var el = document.getElementById('upload-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('btn-load').disabled = false;
+  document.getElementById('btn-load').style.opacity = '1';
+}
+
+// ── MAIN DATA BUILDER FROM EXCEL ──────────────────────────
+function buildDashboardFromExcel() {
+  setProgress(85, 'Calculando indicadores de selección...');
+  
+  try {
+    // 1. SELECCIÓN
+    if (parsedSheets['SELECCIÓN'] && parsedSheets['SELECCIÓN'].length > 1) {
+      buildSeleccionData(parsedSheets['SELECCIÓN']);
+    }
+    setProgress(90, 'Procesando rotación y pipeline...');
+    
+    // 2. PIPELINE
+    if (parsedSheets['PIPELINE'] && parsedSheets['PIPELINE'].length > 1) {
+      buildPipelineData(parsedSheets['PIPELINE']);
+    }
+    
+    // 3. ROTACIÓN
+    if (parsedSheets['ROTACIÓN'] && parsedSheets['ROTACIÓN'].length > 1) {
+      buildRotacionData(parsedSheets['ROTACIÓN']);
+    }
+    
+    // 4. FORMACIÓN
+    if (parsedSheets['FORMACION_SST'] && parsedSheets['FORMACION_SST'].length > 1) {
+      buildFormacionData(parsedSheets['FORMACION_SST']);
+    }
+    
+    // 5. AT ACCIDENTES
+    if (parsedSheets['AT_ACCIDENTES'] && parsedSheets['AT_ACCIDENTES'].length > 1) {
+      buildATData(parsedSheets['AT_ACCIDENTES']);
+    }
+    
+    // 6. EG
+    if (parsedSheets['EG_ENFERMEDADES'] && parsedSheets['EG_ENFERMEDADES'].length > 1) {
+      buildEGData(parsedSheets['EG_ENFERMEDADES']);
+    }
+    
+    // 7. PERSONAL ACTIVO
+    if (parsedSheets['PERSONAL_ACTIVO'] && parsedSheets['PERSONAL_ACTIVO'].length > 1) {
+      buildPersonalData(parsedSheets['PERSONAL_ACTIVO']);
+    }
+
+    setProgress(100, '¡Listo! Abriendo dashboard...');
+    setTimeout(function() {
+      document.getElementById('upload-screen').style.display = 'none';
+      redraw();
+    }, 800);
+    
+  } catch(err) {
+    showError('Error procesando datos: ' + err.message);
+    console.error(err);
+  }
+}
+
+// ── SELECCIÓN PROCESSOR ─────────────────────────────────────
+function buildSeleccionData(rows) {
+  // Skip header row if it's duplicated
+  var data = rows.filter(function(r) { return r['OrdenServicio'] && r['OrdenServicio'] !== 'OrdenServicio'; });
+  if (data.length === 0) return;
+
+  var MKEYS_LOCAL = ['2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+  
+  function getMonth(val) {
+    if (!val) return '';
+    var d = val instanceof Date ? val : new Date(val);
+    if (isNaN(d.getTime())) return '';
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }
+  
+  function calcMetrics(subset) {
+    var total = subset.length;
+    var sol = subset.reduce(function(s,r){ return s + (parseFloat(r['PersonasSolicitadas'])||0); }, 0);
+    var cont = subset.reduce(function(s,r){ return s + (parseFloat(r['Contratados'])||0); }, 0);
+    var pend = subset.reduce(function(s,r){ return s + (parseFloat(r['PendientesContratar'])||0); }, 0);
+    var cancel = subset.filter(function(r){ return (r['Estado']||'').toString().toUpperCase()==='CANCELADA'; }).length;
+    var abierto = subset.filter(function(r){ return (r['Estado']||'').toString().toUpperCase()==='ABIERTO'; }).length;
+    var cerradas = subset.filter(function(r){ return (r['Estado']||'').toString().toUpperCase()==='CERRADO'; });
+    var cer = cerradas.length;
+    var at = cerradas.filter(function(r){ return (r['Cumplimiento']||'').toString().toUpperCase()==='A TIEMPO'; }).length;
+    var inc = cerradas.filter(function(r){ return (r['Cumplimiento']||'').toString().toUpperCase()==='INCUMPLIDA'; }).length;
+    var pct_t = cer > 0 ? Math.round(at/cer*1000)/10 : 0;
+    var pct_c = sol > 0 ? Math.round(cont/sol*1000)/10 : 0;
+    return {req:total, sol:Math.round(sol), cont:Math.round(cont), cer:cer, at:at, inc:inc,
+            pct_t:pct_t, pct_c:pct_c, cancel:cancel, abierto:abierto, pend:Math.round(pend)};
+  }
+  
+  // Build FD structure
+  var newFD = {};
+  
+  // ALL
+  newFD['all'] = { total: calcMetrics(data), by_month: {} };
+  MKEYS_LOCAL.forEach(function(mk) {
+    var sub = data.filter(function(r){ return getMonth(r['FechaCreacion'])===mk; });
+    newFD['all']['by_month'][mk] = calcMetrics(sub);
+  });
+  
+  // By CITY
+  var cities = {};
+  data.forEach(function(r){
+    var city = (r['Ciudad']||'').toString().trim();
+    if (city && city !== 'Ciudad') {
+      if (!cities[city]) cities[city] = [];
+      cities[city].push(r);
+    }
+  });
+  Object.keys(cities).forEach(function(city) {
+    newFD[city] = { total: calcMetrics(cities[city]), by_month: {} };
+    MKEYS_LOCAL.forEach(function(mk) {
+      var sub = cities[city].filter(function(r){ return getMonth(r['FechaCreacion'])===mk; });
+      newFD[city]['by_month'][mk] = calcMetrics(sub);
+    });
+  });
+  
+  // Override global FD
+  Object.assign(FD, newFD);
+  
+  // Build CITY_TABLE
+  var newCityTable = [];
+  var cityMap = {'SANTAFE DE BOGOTA D. C.':'Bogotá','CALI':'Cali','MEDELLIN':'Medellín',
+                 'BARRANQUILLA':'Barranquilla','BUCARAMANGA':'Bucaramanga','PEREIRA':'Pereira',
+                 'PALMIRA':'Palmira','BUGA':'Buga'};
+  Object.keys(cities).slice(0,10).forEach(function(city) {
+    var m = calcMetrics(cities[city]);
+    newCityTable.push(Object.assign({name: cityMap[city]||city, key: city}, m));
+  });
+  newCityTable.sort(function(a,b){ return b.req-a.req; });
+  CITY_TABLE.length = 0;
+  newCityTable.forEach(function(x){ CITY_TABLE.push(x); });
+}
+
+// ── PIPELINE PROCESSOR ──────────────────────────────────────
+function buildPipelineData(rows) {
+  var data = rows.filter(function(r){ return r['Sucursal'] && r['Sucursal'] !== 'Sucursal'; });
+  if (data.length === 0) return;
+  
+  PIPE_DATA.length = 0;
+  data.forEach(function(r) {
+    var entry = {
+      c: (r['Cargo']||'').toString().trim(),
+      s: (r['Sucursal']||'').toString().trim(),
+      r: parseInt(r['Reclutamiento'])||0,
+      se: parseInt(r['Selección'])||0,
+      co: parseInt(r['Contratación'])||0,
+      e: parseInt(r['Entregados'])||0
+    };
+    if (entry.c && entry.s && (entry.r+entry.se+entry.co+entry.e) > 0) {
+      PIPE_DATA.push(entry);
+    }
+  });
+}
+
+// ── ROTACIÓN PROCESSOR ──────────────────────────────────────
+function buildRotacionData(rows) {
+  var data = rows.filter(function(r){ return r['ID_Empleado'] && r['ID_Empleado'] !== 'ID_Empleado'; });
+  if (data.length === 0) return;
+  
+  // Count by motivo
+  var motivos = {};
+  var generos = {M:0, F:0};
+  var ciudades = {};
+  data.forEach(function(r) {
+    var m = (r['Motivo']||'OTRO').toString().toUpperCase().trim();
+    motivos[m] = (motivos[m]||0) + 1;
+    var sex = (r['Sexo']||'').toString().toUpperCase().trim();
+    if (sex === 'M') generos.M++;
+    else if (sex === 'F') generos.F++;
+    var city = (r['Ciudad']||r['Sucursal']||'').toString().trim();
+    if (city) ciudades[city] = (ciudades[city]||0)+1;
+  });
+  
+  // Update KPIs in DOM
+  var el = document.getElementById('rot-kpi-total');
+  if (el) el.textContent = data.length.toLocaleString();
+  
+  // Store for chart use
+  window._rotData = { total: data.length, motivos: motivos, generos: generos, ciudades: ciudades, rows: data };
+}
+
+// ── FORMACIÓN PROCESSOR ──────────────────────────────────────
+function buildFormacionData(rows) {
+  var data = rows.filter(function(r){ return r['ID_Actividad'] && r['ID_Actividad'] !== 'ID_Actividad' && r['TemaCapacitacion']; });
+  if (data.length === 0) return;
+  window._formData = data.map(function(r){
+    return {
+      mes: (r['Mes']||'').toString(),
+      tema: (r['TemaCapacitacion']||'').toString(),
+      prog: parseInt(r['Programados'])||0,
+      asist: parseInt(r['Asistentes'])||0
+    };
+  });
+}
+
+// ── AT PROCESSOR ────────────────────────────────────────────
+function buildATData(rows) {
+  var data = rows.filter(function(r){ return r['ID_AT'] && r['ID_AT'] !== 'ID_AT'; });
+  if (data.length === 0) return;
+  
+  var total = data.length;
+  var diasTotal = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0);},0);
+  var diasContrat = data.map(function(r){ return parseInt(r['DiasContratadoAlaFechaAT'])||0;}).filter(function(v){return v>0;});
+  var promDias = diasContrat.length > 0 ? Math.round(diasContrat.reduce(function(a,b){return a+b;},0)/diasContrat.length) : 47;
+  
+  window._atData = { total: total, diasAusentismo: diasTotal, promDiasContrat: promDias, rows: data };
+  
+  // Update KPI cards if visible
+  updateATKPIs();
+}
+
+function updateATKPIs() {
+  if (!window._atData) return;
+  function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  s('at-kpi-cant', window._atData.total.toLocaleString());
+  s('at-kpi-dias', window._atData.diasAusentismo.toLocaleString());
+  s('at-kpi-promcontrat', window._atData.promDiasContrat + ' días');
+}
+
+// ── EG PROCESSOR ────────────────────────────────────────────
+function buildEGData(rows) {
+  var data = rows.filter(function(r){ return r['ID_Caso'] && r['ID_Caso'] !== 'ID_Caso'; });
+  if (data.length === 0) return;
+  var total = data.length;
+  var dias = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0);},0);
+  window._egData = { total: total, diasAusentismo: dias, rows: data };
+}
+
+// ── PERSONAL ACTIVO PROCESSOR ───────────────────────────────
+function buildPersonalData(rows) {
+  var data = rows.filter(function(r){ return r['ID_Empleado'] && r['ID_Empleado'] !== 'ID_Empleado' && (r['Estado']||'').toString().toUpperCase()==='ACTIVO'; });
+  if (data.length === 0) return;
+  
+  var sucursales = {}, cargos = {}, areas = {};
+  data.forEach(function(r){
+    var suc = (r['Sucursal']||'').toString().trim();
+    var cargo = (r['Cargo']||'').toString().trim();
+    var area = (r['Area']||'').toString().trim();
+    if (suc) sucursales[suc] = (sucursales[suc]||0)+1;
+    if (cargo) cargos[cargo] = (cargos[cargo]||0)+1;
+    if (area) areas[area] = (areas[area]||0)+1;
+  });
+  
+  window._personalData = { total: data.length, sucursales: sucursales, cargos: cargos, areas: areas, rows: data };
+  
+  // Update KPI
+  var el = document.getElementById('act-kpi-total');
+  if (el) el.textContent = data.length.toLocaleString();
+}
+
+// ── DEMO / BYPASS ────────────────────────────────────────────
+function loadDemoData() {
+  document.getElementById('upload-screen').style.display = 'none';
+  redraw();
+}
+
+
+// ===== FUEROS FILTER =====
+function filterFueros(nivel, btn) {
+  var btns = document.querySelectorAll('.fuero-filter-btn');
+  for (var i=0; i<btns.length; i++) btns[i].classList.remove('active');
+  if (btn) btn.classList.add('active');
+  var rows = document.querySelectorAll('#fueros-tbody tr');
+  for (var i=0; i<rows.length; i++) {
+    if (nivel === 'todos' || rows[i].getAttribute('data-riesgo') === nivel) {
+      rows[i].style.display = '';
+    } else {
+      rows[i].style.display = 'none';
+    }
+  }
+}
+
+window.addEventListener('load', redraw);
+
+</script>
+</body>
+</html>
