@@ -142,7 +142,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 </style>
 </head>
 <body>
-<div id="upload-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1C1C1C;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px">
+<div id="upload-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1C1C1C;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px">
   <div style="background:#242424;border-radius:16px;padding:40px 48px;max-width:860px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <!-- Logo -->
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:32px">
@@ -205,8 +205,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <!-- Buttons -->
     <div style="display:flex;gap:12px;justify-content:flex-end;align-items:center">
       <div id="upload-error" style="color:#FF6B6B;font-size:12px;flex:1;display:none"></div>
-      <button onclick="loadDemoData()" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:inherit">
-        Ver con datos de demo
+      <button onclick="document.getElementById('upload-screen').style.display='none'" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:inherit">
+        ✕ Cancelar
       </button>
       <button id="btn-load" onclick="processFiles()" disabled style="background:#C0272D;color:white;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.4">
         ▶ Cargar al Dashboard
@@ -261,6 +261,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <div class="top-title" id="top-title">Resumen Ejecutivo</div>
   <span class="live">● En vivo</span>
   <span id="fi-status" class="upd">Sin filtros activos</span>
+  <button onclick="openUploadScreen()" style="background:var(--red);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">📂 Cargar mis datos</button>
 </div>
 
 <div class="fbar">
@@ -1833,6 +1834,11 @@ function loadDemoData() {
   redraw();
 }
 
+function openUploadScreen() {
+  var s = document.getElementById('upload-screen');
+  s.style.display = 'flex';
+}
+
 
 // ===== FUEROS FILTER =====
 function filterFueros(nivel, btn) {
@@ -1849,7 +1855,7 @@ function filterFueros(nivel, btn) {
   }
 }
 
-window.addEventListener('load', redraw);
+window.addEventListener('load', function() { loadDemoData(); });
 
 </script>
 </body>
