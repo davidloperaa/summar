@@ -2002,7 +2002,32 @@ function filterFueros(nivel, btn) {
   }
 }
 
-window.addEventListener('load', function() { loadDemoData(); });
+window.addEventListener('load', function() {
+  // Check if already logged in from session
+  try {
+    var s = sessionStorage.getItem('summar_user');
+    if (s) {
+      currentUser = JSON.parse(s);
+      document.getElementById('login-screen').style.display = 'none';
+      var logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) logoutBtn.style.display = '';
+      var grp = document.getElementById('sb-admin-grp');
+      if (grp) grp.style.display = currentUser.role === 'admin' ? '' : 'none';
+      if (currentUser.role === 'client' && currentUser.cliente) {
+        curCliente = currentUser.cliente;
+        var sel = document.getElementById('f-cliente');
+        if (sel) { sel.value = currentUser.cliente; sel.disabled = true; }
+      }
+      loadDemoData();
+      renderResponsableChart(null);
+      setTimeout(function() { initChartToggles(); initChartTypeSwitchers(); updateClientesDatalist(); }, 300);
+    }
+    // else: stay on login screen, do nothing
+  } catch(e) {
+    // Session error: show login screen
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+});
 
 </script>
 
@@ -2024,22 +2049,26 @@ var currentUser = null;
 function doLogin() {
   var u = (document.getElementById('login-user').value || '').trim();
   var p = document.getElementById('login-pass').value || '';
-  var user = USERS[u];
+  // Load from localStorage first (persisted users), fall back to hardcoded
+  var allUsers = {};
+  try { var s = localStorage.getItem('summar_users_v1'); if (s) allUsers = JSON.parse(s); } catch(e) {}
+  if (!allUsers || !Object.keys(allUsers).length) allUsers = USERS;
+  var user = allUsers[u];
   if (!user || user.password !== p) {
     document.getElementById('login-error').style.display = 'block';
     return;
   }
   document.getElementById('login-error').style.display = 'none';
+  // Record last access
+  try { allUsers[u].lastAccess = Date.now(); localStorage.setItem('summar_users_v1', JSON.stringify(allUsers)); USERS = allUsers; } catch(e) {}
   currentUser = { username: u, role: user.role, cliente: user.cliente };
   try { sessionStorage.setItem('summar_user', JSON.stringify(currentUser)); } catch(e) {}
   document.getElementById('login-screen').style.display = 'none';
   var logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) logoutBtn.style.display = '';
-  // Lock cliente filter for client users
   if (user.role === 'client' && user.cliente) {
     var sel = document.getElementById('f-cliente');
     if (sel) {
-      // Add option if not exists
       var found = false;
       for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === user.cliente) { found = true; break; } }
       if (!found) { var opt = document.createElement('option'); opt.value = user.cliente; opt.textContent = user.cliente; sel.appendChild(opt); }
@@ -2048,7 +2077,12 @@ function doLogin() {
     }
     curCliente = user.cliente;
   }
+  // Show/hide admin sidebar
+  var grp = document.getElementById('sb-admin-grp');
+  if (grp) grp.style.display = user.role === 'admin' ? '' : 'none';
   loadDemoData();
+  renderResponsableChart(null);
+  setTimeout(function() { initChartToggles(); initChartTypeSwitchers(); updateClientesDatalist(); }, 300);
 }
 
 function doLogout() {
@@ -2401,14 +2435,7 @@ function updateClientesDatalist() {
   dl.innerHTML = opts;
 }
 
-// Record last access on login
-var _origDoLogin = doLogin;
-doLogin = function() {
-  var u = (document.getElementById('login-user').value || '').trim();
-  var users = loadUsers();
-  if (users[u]) { users[u].lastAccess = Date.now(); saveUsers(users); }
-  _origDoLogin();
-};
+// doLogin handles lastAccess internally
 
 // Show admin panel in sidebar only for admin role
 function updateAdminVisibility() {
@@ -2416,34 +2443,23 @@ function updateAdminVisibility() {
   if (grp) grp.style.display = (currentUser && currentUser.role === 'admin') ? '' : 'none';
 }
 
-// Patch loadDemoData to update admin UI
-var _origLoadDemo2 = loadDemoData;
-loadDemoData = function() {
-  _origLoadDemo2();
-  updateAdminVisibility();
-  updateClientesDatalist();
-};
+// loadDemoData admin updates handled in doLogin directly
 
-// Override USERS to use localStorage on startup
-var USERS_DEFAULT = USERS; // keep original defaults
-USERS = loadUsers();
-// If localStorage empty, seed with defaults
+// Initialize USERS: merge hardcoded defaults with localStorage
 (function() {
-  var stored = null;
-  try { stored = localStorage.getItem(STORAGE_KEY); } catch(e) {}
-  if (!stored) { saveUsers(USERS_DEFAULT); }
+  try {
+    var s = localStorage.getItem(STORAGE_KEY);
+    if (s) {
+      var stored = JSON.parse(s);
+      USERS = stored;
+    } else {
+      // First run: save defaults to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(USERS));
+    }
+  } catch(e) {}
 })();
 
-// Patch loadDemoData to also init toggles/switchers
-var _origLoadDemo = loadDemoData;
-loadDemoData = function() {
-  _origLoadDemo();
-  renderResponsableChart(null);
-  setTimeout(function() {
-    initChartToggles();
-    initChartTypeSwitchers();
-  }, 200);
-};
+// chart inits handled post-login
 </script>
 </body>
 </html>
