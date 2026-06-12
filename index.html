@@ -2658,20 +2658,25 @@ function updateClientsDatalist() {
 }
 
 // ── TEMPLATE DOWNLOAD ────────────────────────────────
+function ensureXLSX(callback) {
+  if (typeof XLSX !== 'undefined') { callback(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload = callback;
+  s.onerror = function() { alert('No se pudo cargar la librería de Excel. Verifica tu conexión.'); };
+  document.head.appendChild(s);
+}
+
 function downloadTemplate(type) {
-  // Use SheetJS to generate Excel on-the-fly
-  if (typeof XLSX === 'undefined') {
-    alert('SheetJS no está cargado aún. Espera un momento y vuelve a intentarlo.');
-    return;
-  }
-  var wb = XLSX.utils.book_new();
-  var sheets = getTemplateSheets(type === 'demo');
-  sheets.forEach(function(s) {
-    var ws = XLSX.utils.aoa_to_sheet(s.data);
-    // Style header row (basic)
-    XLSX.utils.book_append_sheet(wb, ws, s.name);
+  ensureXLSX(function() {
+    var wb = XLSX.utils.book_new();
+    var sheets = getTemplateSheets(type === 'demo');
+    sheets.forEach(function(s) {
+      var ws = XLSX.utils.aoa_to_sheet(s.data);
+      XLSX.utils.book_append_sheet(wb, ws, s.name);
+    });
+    XLSX.writeFile(wb, type === 'demo' ? 'Plantilla_Summar_DEMO.xlsx' : 'Plantilla_Summar_REAL.xlsx');
   });
-  XLSX.writeFile(wb, type === 'demo' ? 'Plantilla_Summar_DEMO.xlsx' : 'Plantilla_Summar_REAL.xlsx');
 }
 
 function getTemplateSheets(withDemo) {
