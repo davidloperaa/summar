@@ -946,8 +946,49 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
       </div>
     </div>
   </div>
+  <!-- CLIENTS TABLE -->
+  <div class="adm-card" style="margin-top:0">
+    <h3>🏢 Gestión de Clientes</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px">
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">NOMBRE DEL CLIENTE</div>
+        <input class="adm-inp" id="nc-nombre" placeholder="Nombre exacto del cliente">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">NIT</div>
+        <input class="adm-inp" id="nc-nit" placeholder="ej: 900.123.456-1">
+      </div>
+      <div><button class="adm-btn adm-btn-red" onclick="createClient()">+ Agregar</button></div>
+    </div>
+    <div id="nc-msg" style="font-size:11px;margin-bottom:10px;display:none"></div>
+    <div class="tscroll">
+      <table class="adm-table">
+        <thead><tr><th>Cliente</th><th>NIT</th><th>Usuarios asignados</th><th>Registrado</th><th>Acciones</th></tr></thead>
+        <tbody id="clients-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD TEMPLATES -->
+  <div class="adm-card">
+    <h3>📥 Plantillas Excel</h3>
+    <p style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Descarga las plantillas con el formato exacto requerido para cargar datos al dashboard.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="background:var(--okl);border-radius:8px;padding:14px 18px;flex:1;min-width:220px">
+        <div style="font-weight:700;font-size:12px;color:var(--ok);margin-bottom:4px">📊 Plantilla DEMO</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Con datos de ejemplo para explorar el dashboard en presentaciones.</div>
+        <button class="adm-btn" style="background:var(--ok);color:#fff" onclick="downloadTemplate('demo')">⬇ Descargar Demo</button>
+      </div>
+      <div style="background:var(--infol);border-radius:8px;padding:14px 18px;flex:1;min-width:220px">
+        <div style="font-weight:700;font-size:12px;color:var(--info);margin-bottom:4px">📋 Plantilla REAL</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Estructura vacía para cargar con datos reales de operación.</div>
+        <button class="adm-btn" style="background:var(--info);color:#fff" onclick="downloadTemplate('real')">⬇ Descargar Real</button>
+      </div>
+    </div>
+  </div>
+
   <div style="background:var(--infol);border-radius:8px;padding:14px 16px;font-size:11.5px;color:var(--info);line-height:1.6">
-    <strong>ℹ️ Nota:</strong> Los usuarios se guardan en el navegador (localStorage). Si abres el dashboard en otro dispositivo deberás crearlos de nuevo. Para sincronización multi-dispositivo, contacta al equipo técnico.
+    <strong>ℹ️ Nota:</strong> Usuarios y clientes se guardan en el navegador (localStorage). Para sincronización multi-dispositivo, contacta al equipo técnico. Los clientes también se registran automáticamente al cargar datos Excel.
   </div>
 </div>
 
@@ -2041,10 +2082,40 @@ var curEmpresa = '', curCliente = '', curResponsable = '';
 
 // ── USER SYSTEM ──────────────────────────────────────
 var USERS = {
-  'admin':        { password: 'summar2024', role: 'admin',  cliente: null },
-  'cliente_demo': { password: 'demo123',    role: 'client', cliente: 'SUMMAR PROCESOS S.A.S' }
+  'admin':      { password: 'summar2024', role: 'admin',  cliente: null },
+  'demo':       { password: 'demo2024',   role: 'demo',   cliente: null },
+  'cliente_demo':{ password: 'demo123',  role: 'client', cliente: 'CLIENTE DEMO A' }
 };
 var currentUser = null;
+var CLIENTS_KEY = 'summar_clients_v1';
+var DEFAULT_CLIENTS = [
+  { nombre: 'CLIENTE DEMO A', nit: '900.123.456-1', activo: true },
+  { nombre: 'CLIENTE DEMO B', nit: '800.456.789-2', activo: true },
+  { nombre: 'CLIENTE DEMO C', nit: '700.789.012-3', activo: true }
+];
+
+function loadClients() {
+  try { var s = localStorage.getItem(CLIENTS_KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+}
+function saveClients(clients) {
+  try { localStorage.setItem(CLIENTS_KEY, JSON.stringify(clients)); } catch(e) {}
+}
+function getClientByName(nombre) {
+  return loadClients().find(function(c){ return c.nombre === nombre; }) || null;
+}
+function autoRegisterClient(nombre, nit) {
+  if (!nombre) return;
+  var clients = loadClients();
+  var exists = clients.find(function(c){ return c.nombre === nombre; });
+  if (!exists) {
+    clients.push({ nombre: nombre, nit: nit || '', activo: true });
+    saveClients(clients);
+  } else if (nit && !exists.nit) {
+    exists.nit = nit;
+    saveClients(clients);
+  }
+}
 
 function doLogin() {
   var u = (document.getElementById('login-user').value || '').trim();
@@ -2080,9 +2151,18 @@ function doLogin() {
   // Show/hide admin sidebar
   var grp = document.getElementById('sb-admin-grp');
   if (grp) grp.style.display = user.role === 'admin' ? '' : 'none';
-  loadDemoData();
+  if (user.role === 'demo') {
+    // Demo mode: load pre-built demo data
+    loadDemoData();
+  } else {
+    // Real mode: show upload screen (no data yet)
+    loadDemoData(); // still init UI
+    if (user.role !== 'admin') {
+      // non-admin clients see upload screen
+    }
+  }
   renderResponsableChart(null);
-  setTimeout(function() { initChartToggles(); initChartTypeSwitchers(); updateClientesDatalist(); }, 300);
+  setTimeout(function() { initChartToggles(); initChartTypeSwitchers(); updateClientesDatalist(); updateClientsDatalist(); }, 300);
 }
 
 function doLogout() {
@@ -2437,6 +2517,151 @@ function updateClientesDatalist() {
 
 // doLogin handles lastAccess internally
 
+// ── CLIENT MANAGEMENT ────────────────────────────────
+function renderClientsTable() {
+  var clients = loadClients();
+  var users = loadUsers();
+  var tbody = document.getElementById('clients-tbody');
+  if (!tbody) return;
+  if (!clients.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No hay clientes registrados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = clients.map(function(c, idx) {
+    // Count users assigned to this client
+    var assigned = Object.values(users).filter(function(u){ return u.cliente === c.nombre; }).length;
+    var autoTag = c.autoRegistered ? '<span style="font-size:9px;background:var(--okl);color:var(--ok);padding:1px 5px;border-radius:4px;margin-left:4px">auto</span>' : '';
+    return '<tr>'
+      + '<td><strong>' + c.nombre + '</strong>' + autoTag + '</td>'
+      + '<td><code style="font-size:11px">' + (c.nit || '—') + '</code></td>'
+      + '<td><span class="badge bi">' + assigned + ' usuario(s)</span></td>'
+      + '<td style="font-size:10px;color:var(--muted)">' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString('es-CO') : 'Predefinido') + '</td>'
+      + '<td><button class="adm-btn-del" onclick="deleteClient(' + idx + ')">🗑️ Eliminar</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function createClient() {
+  var nombre = (document.getElementById('nc-nombre').value || '').trim();
+  var nit = (document.getElementById('nc-nit').value || '').trim();
+  var msgEl = document.getElementById('nc-msg');
+  if (!nombre) { msgEl.style.display=''; msgEl.style.color='var(--red)'; msgEl.textContent='El nombre del cliente es obligatorio'; return; }
+  var clients = loadClients();
+  if (clients.find(function(c){ return c.nombre === nombre; })) {
+    msgEl.style.display=''; msgEl.style.color='var(--red)'; msgEl.textContent='Ya existe un cliente con ese nombre';
+    return;
+  }
+  clients.push({ nombre: nombre, nit: nit, activo: true, createdAt: Date.now() });
+  saveClients(clients);
+  document.getElementById('nc-nombre').value = '';
+  document.getElementById('nc-nit').value = '';
+  msgEl.style.display=''; msgEl.style.color='var(--ok)'; msgEl.textContent='✅ Cliente "' + nombre + '" registrado';
+  renderClientsTable();
+  updateClientesDatalist();
+  updateClientsDatalist();
+}
+
+function deleteClient(idx) {
+  var clients = loadClients();
+  if (!clients[idx]) return;
+  if (!confirm('¿Eliminar el cliente "' + clients[idx].nombre + '"?')) return;
+  clients.splice(idx, 1);
+  saveClients(clients);
+  renderClientsTable();
+}
+
+function updateClientsDatalist() {
+  // Populate the clientes-list datalist with registered clients
+  var clients = loadClients();
+  var dl = document.getElementById('clientes-list');
+  if (dl) dl.innerHTML = clients.map(function(c){ return '<option value="' + c.nombre + '">'; }).join('');
+  // Also update f-cliente select
+  var sel = document.getElementById('f-cliente');
+  if (sel && !sel.disabled) {
+    var cur = sel.value;
+    // Remove non-default options
+    while (sel.options.length > 1) sel.remove(1);
+    clients.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.nombre;
+      opt.textContent = c.nombre + (c.nit ? ' (' + c.nit + ')' : '');
+      sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+  }
+}
+
+// ── TEMPLATE DOWNLOAD ────────────────────────────────
+function downloadTemplate(type) {
+  // Use SheetJS to generate Excel on-the-fly
+  if (typeof XLSX === 'undefined') {
+    alert('SheetJS no está cargado aún. Espera un momento y vuelve a intentarlo.');
+    return;
+  }
+  var wb = XLSX.utils.book_new();
+  var sheets = getTemplateSheets(type === 'demo');
+  sheets.forEach(function(s) {
+    var ws = XLSX.utils.aoa_to_sheet(s.data);
+    // Style header row (basic)
+    XLSX.utils.book_append_sheet(wb, ws, s.name);
+  });
+  XLSX.writeFile(wb, type === 'demo' ? 'Plantilla_Summar_DEMO.xlsx' : 'Plantilla_Summar_REAL.xlsx');
+}
+
+function getTemplateSheets(withDemo) {
+  var clients = loadClients();
+  var cli1 = clients[0] ? clients[0].nombre : 'CLIENTE DEMO A';
+  var nit1 = clients[0] ? clients[0].nit : '900.123.456-1';
+
+  var baseHdr = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1","Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable","OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio","TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas","PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio","HOY","Diferencia","Cumplimiento","Pendiente por contratar","RETRO CLIENTE"];
+  var paHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa","Estado","ObservacionTemporalidad"];
+  var rotHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","FechaRetiro","DiasLaborados","CausalRetiro","TipoRetiro","Genero","ObservacionRetiro"];
+  var entHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","FechaRetiro","FechaEntrevista","Entrevistador","Responsable","P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion","P4_Herramientas","P5_AplicoConocimientos","MotivoRetiro","PercepcionGeneral","Comentarios"];
+  var atHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad","FechaAccidente","TipoAccidente","MecanismoAccidente","AgenteCausa","ParteCuerpoAfectada","TipoLesion","DiasIncapacidad","Peligro","Estado","Descripcion"];
+  var egHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad","FechaInicio","FechaFin","DiasIncapacidad","Diagnostico","GrupoDiagnostico","TipoIncapacidad","Genero","Edad"];
+  var formHdr = ["Empresa","NIT","Cliente","Sucursal","Ciudad","FechaFormacion","Tema","Modalidad","Duración (hrs)","PersonasProgramadas","PersonasAsistentes","Responsable","Observaciones"];
+  var sinHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","FechaCalificacion","TipoSiniestro","Estado","Calificacion","PorcentajePerdida","EntidadCalificadora","DiasCalificacion","Observaciones"];
+  var fuHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","TipoFuero","FechaInicio","FechaFin","NivelRiesgo","EstadoGestion","Observaciones"];
+
+  var sheets = [
+    { name: 'BASE', data: [baseHdr] },
+    { name: 'PERSONAL_ACTIVO', data: [paHdr] },
+    { name: 'ROTACIÓN', data: [rotHdr] },
+    { name: 'ENTREVISTAS_RETIRO', data: [entHdr] },
+    { name: 'AT_ACCIDENTES', data: [atHdr] },
+    { name: 'EG_ENFERMEDADES', data: [egHdr] },
+    { name: 'FORMACION_SST', data: [formHdr] },
+    { name: 'SINIESTRO', data: [sinHdr] },
+    { name: 'FUEROS_SALUD', data: [fuHdr] }
+  ];
+
+  if (withDemo) {
+    // Add 3 demo rows to BASE
+    sheets[0].data.push(
+      ["SUMMAR PROCESOS S.A.S","SUMMAR PROCESOS CALI","CC001",nit1,cli1,"S001","CALI","C001","Centro Costo 1",1500000,"CALI","Ana García","OS-1001","2026-01-15","Sistema","CERRADO","01","CONTRATACION DIRECTA","Auxiliar de Servicios","2026-01-25",3,0,3,"2026-01-24","Normal","2026-06-12",-1,"A TIEMPO",0,"Conforme"],
+      ["SUMMAR PROCESOS S.A.S","SUMMAR PROCESOS BOGOTA","CC002",nit1,cli1,"S002","BOGOTA","C002","Centro Costo 2",1800000,"BOGOTA","Carlos Pérez","OS-1002","2026-02-01","Sistema","CERRADO","01","CONTRATACION DIRECTA","Auxiliar Servicios BPM","2026-02-10",5,0,4,"2026-02-15","Normal","2026-06-12",5,"INCUMPLIDA",1,"En proceso"],
+      ["SUMMAR TEMPORALES S.A.S","SUMMAR TEMPORALES MEDELLIN","CC003",nit1,cli1,"S003","MEDELLIN","C003","Centro Costo 3",1600000,"MEDELLIN","María López","OS-1003","2026-03-10","Sistema","ABIERTO","01","CONTRATACION DIRECTA","Op. Apoyo Logístico","2026-03-20",2,2,0,"","Normal","2026-06-12","","",2,"Pendiente"]
+    );
+  }
+  return sheets;
+}
+
+// Auto-register clients when parsing BASE sheet
+var _origParseBase = parseBaseSheet;
+parseBaseSheet = function(sheet) {
+  var rows = _origParseBase(sheet);
+  if (rows) {
+    rows.forEach(function(r) {
+      if (r.cliente) autoRegisterClient(r.cliente, r.nit || '');
+    });
+    updateClientsDatalist();
+  }
+  return rows;
+};
+
+// Patch go() to also render clients table
+
+
 // Show admin panel in sidebar only for admin role
 function updateAdminVisibility() {
   var grp = document.getElementById('sb-admin-grp');
@@ -2453,9 +2678,13 @@ function updateAdminVisibility() {
       var stored = JSON.parse(s);
       USERS = stored;
     } else {
-      // First run: save defaults to localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(USERS));
     }
+  } catch(e) {}
+  // Initialize clients
+  try {
+    var cs = localStorage.getItem(CLIENTS_KEY);
+    if (!cs) localStorage.setItem(CLIENTS_KEY, JSON.stringify(DEFAULT_CLIENTS));
   } catch(e) {}
 })();
 
