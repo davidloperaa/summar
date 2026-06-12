@@ -2080,6 +2080,48 @@ window.addEventListener('load', function() {
 // Global filter state for new filters
 var curEmpresa = '', curCliente = '', curResponsable = '';
 
+// ── SUPABASE CONFIG ──────────────────────────────────
+var SB_URL = 'https://uaxtoceqxxcrappvpsod.supabase.co';
+var SB_KEY = 'sb_publishable_zuHpVv13P-QhAFXQoqnKCw_cce8ua4M';
+
+function sbFetch(table, opts) {
+  opts = opts || {};
+  var url = SB_URL + '/rest/v1/' + table;
+  if (opts.params) url += '?' + opts.params;
+  return fetch(url, {
+    method: opts.method || 'GET',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation'
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+}
+
+function syncFromSupabase(callback) {
+  var pending = 2;
+  function done() { if (--pending === 0 && callback) callback(); }
+  sbFetch('usuarios')
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if (!Array.isArray(rows) || !rows.length) { done(); return; }
+      var obj = {};
+      rows.forEach(function(u){ obj[u.username] = { password: u.password, role: u.role, cliente: u.nit || null }; });
+      try { localStorage.setItem('summar_users_v1', JSON.stringify(obj)); USERS = obj; } catch(e) {}
+      done();
+    }).catch(done);
+  sbFetch('clientes')
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if (!Array.isArray(rows) || !rows.length) { done(); return; }
+      var arr = rows.map(function(c){ return { nombre: c.nombre, nit: c.nit, activo: true }; });
+      try { localStorage.setItem('summar_clients_v1', JSON.stringify(arr)); } catch(e) {}
+      done();
+    }).catch(done);
+}
+
 // ── USER SYSTEM ──────────────────────────────────────
 var USERS = {
   'admin':      { password: 'summar2024', role: 'admin',  cliente: null },
@@ -2100,6 +2142,15 @@ function loadClients() {
 }
 function saveClients(clients) {
   try { localStorage.setItem(CLIENTS_KEY, JSON.stringify(clients)); } catch(e) {}
+  // Sync to Supabase
+  clients.forEach(function(c) {
+    if (!c.nombre) return;
+    sbFetch('clientes', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      body: { nit: c.nit || c.nombre, nombre: c.nombre }
+    }).catch(function(){});
+  });
 }
 function getClientByName(nombre) {
   return loadClients().find(function(c){ return c.nombre === nombre; }) || null;
@@ -2120,7 +2171,11 @@ function autoRegisterClient(nombre, nit) {
 function doLogin() {
   var u = (document.getElementById('login-user').value || '').trim();
   var p = document.getElementById('login-pass').value || '';
-  // Load from localStorage first (persisted users), fall back to hardcoded
+  document.getElementById('login-error').style.display = 'none';
+  syncFromSupabase(function(){ _doLoginLocal(u, p); });
+}
+
+function _doLoginLocal(u, p) {
   var allUsers = {};
   try { var s = localStorage.getItem('summar_users_v1'); if (s) allUsers = JSON.parse(s); } catch(e) {}
   if (!allUsers || !Object.keys(allUsers).length) allUsers = USERS;
@@ -2380,8 +2435,16 @@ function loadUsers() {
 
 function saveUsers(users) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(users)); } catch(e) {}
-  // Sync runtime USERS object
   USERS = users;
+  // Sync to Supabase
+  Object.keys(users).forEach(function(uname) {
+    var ud = users[uname];
+    sbFetch('usuarios', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      body: { username: uname, password: ud.password, role: ud.role, nit: ud.cliente || null }
+    }).catch(function(){});
+  });
 }
 
 function renderUsersTable() {
@@ -2461,7 +2524,10 @@ function deleteUser(u) {
   if (!confirm('¿Eliminar el usuario "' + u + '"? Esta acción no se puede deshacer.')) return;
   var users = loadUsers();
   delete users[u];
-  saveUsers(users);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(users)); } catch(e) {}
+  USERS = users;
+  // Delete from Supabase
+  sbFetch('usuarios', { method: 'DELETE', params: 'username=eq.' + encodeURIComponent(u), prefer: 'return=minimal' }).catch(function(){});
   renderUsersTable();
 }
 
