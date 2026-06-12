@@ -2326,8 +2326,8 @@ function renderUsersTable() {
       + '<td>' + clienteText + '</td>'
       + '<td>' + lastAccess + '</td>'
       + '<td style="display:flex;gap:6px">'
-      + '<button class="adm-btn-edit" onclick="openEditModal('' + u + '')">✏️ Editar</button>'
-      + (isSelf ? '' : '<button class="adm-btn-del" onclick="deleteUser('' + u + '')">🗑️ Eliminar</button>')
+      + '<button class="adm-btn-edit" onclick="openEditModal(\'' + u + '\')">✏️ Editar</button>'
+      + (isSelf ? '' : '<button class="adm-btn-del" onclick="deleteUser(\'' + u + '\')">🗑️ Eliminar</button>')
       + '</td>'
       + '</tr>';
   }).join('');
