@@ -142,6 +142,30 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 </style>
 </head>
 <body>
+<div id="login-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1C1C1C;z-index:10000;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#242424;border-radius:16px;padding:40px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+      <div style="width:44px;height:44px;background:#C0272D;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="24" height="24" viewBox="0 0 20 20" fill="none"><path d="M2 16L7 4L12 13L15 8L18 16H2Z" fill="white" opacity=".9"/><path d="M10 3L16 16H4L10 3Z" fill="white" opacity=".4"/></svg>
+      </div>
+      <div>
+        <div style="color:white;font-size:17px;font-weight:800">SUMMAR PRODUCTIVIDAD</div>
+        <div style="color:#C0272D;font-size:10px;font-weight:600;letter-spacing:1px">ACCESO AL DASHBOARD</div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="color:rgba(255,255,255,.5);font-size:11px;font-weight:600;margin-bottom:5px">USUARIO</div>
+      <input id="login-user" type="text" placeholder="Ingresa tu usuario" autocomplete="username" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:10px 13px;color:white;font-size:13px;font-family:inherit">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="color:rgba(255,255,255,.5);font-size:11px;font-weight:600;margin-bottom:5px">CONTRASEÑA</div>
+      <input id="login-pass" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:10px 13px;color:white;font-size:13px;font-family:inherit" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-error" style="color:#FF6B6B;font-size:12px;margin-bottom:12px;display:none">Usuario o contraseña incorrectos</div>
+    <button onclick="doLogin()" style="width:100%;background:#C0272D;color:white;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Ingresar al Dashboard</button>
+    <div style="margin-top:16px;color:rgba(255,255,255,.2);font-size:10px;text-align:center">Datos procesados localmente · Acceso seguro</div>
+  </div>
+</div>
 <div id="upload-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1C1C1C;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px">
   <div style="background:#242424;border-radius:16px;padding:40px 48px;max-width:860px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <!-- Logo -->
@@ -229,6 +253,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 .file-item-name{color:white;font-size:12.5px;font-weight:600;flex:1}
 .file-item-size{color:rgba(255,255,255,.4);font-size:11px}
 .file-item-status{font-size:11px;font-weight:700}
+
+/* Chart toggle & type switcher */
+.chart-toggle-btn{background:none;border:1px solid var(--graym);border-radius:4px;padding:1px 7px;font-size:10px;cursor:pointer;color:var(--muted);margin-left:6px;white-space:nowrap}
+.chart-type-sel{border:1px solid var(--graym);border-radius:4px;padding:1px 4px;font-size:10px;background:var(--grayl);color:var(--muted);cursor:pointer;height:20px;margin-left:6px}
+.cc.chart-hidden .cw,.cc.chart-hidden canvas{display:none}
+.cc.chart-hidden{opacity:.7}
+/* Login screen */
+#login-screen input:focus{border-color:#C0272D!important;outline:none}
 </style>
 
 <nav class="sb">
@@ -262,6 +294,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <span class="live">● En vivo</span>
   <span id="fi-status" class="upd">Sin filtros activos</span>
   <button onclick="openUploadScreen()" style="background:var(--red);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">📂 Cargar mis datos</button>
+  <button onclick="doLogout()" id="btn-logout" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 14px;font-size:11.5px;cursor:pointer;font-family:inherit;display:none">⏻ Salir</button>
 </div>
 
 <div class="fbar">
@@ -302,6 +335,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <option value="BUGA">Buga</option>
   </select>
   <input type="hidden" id="f-rec" value="">
+  <select class="fsel" id="f-empresa" onchange="markActive(this)">
+    <option value="">Todas las empresas</option>
+    <option value="SUMMAR PROCESOS">SUMMAR PROCESOS</option>
+    <option value="SUMMAR TEMPORALES">SUMMAR TEMPORALES</option>
+  </select>
+  <select class="fsel" id="f-cliente" onchange="markActive(this)">
+    <option value="">Todos los clientes</option>
+  </select>
+  <select class="fsel" id="f-responsable" onchange="markActive(this)">
+    <option value="">Todos los responsables</option>
+  </select>
   <button class="btn-reset" onclick="resetF()">↺ Limpiar</button>
   <button class="btn-apply" onclick="applyF()">▶ Aplicar</button>
 </div>
@@ -411,6 +455,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Tiempo por Ciudad</div></div><div class="cw" style="height:210px"><canvas id="c-cit"></canvas></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Cantidad por Ciudad</div></div><div class="cw" style="height:210px"><canvas id="c-cic"></canvas></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title">Top 10 Perfiles Solicitados</div></div><div id="pr-perf"></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title">% ANS por Responsable (Analista de Selección)</div><span class="cc-tag">Top 10</span></div><div class="cw" style="height:220px"><canvas id="c-responsable"></canvas></div></div>
   </div>
 </div>
 
@@ -856,15 +903,15 @@ function markActive(el) {
 }
 
 function resetF() {
-  ['f-mes','f-ciudad','f-sucursal'].forEach(function(id) {
+  ['f-mes','f-ciudad','f-sucursal','f-empresa','f-cliente','f-responsable'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (!el) return;
+    if (!el || el.disabled) return;
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
     else if (id==='f-desde') el.value='2025-12-01';
     else if (id==='f-hasta') el.value='2026-05-31';
     el.classList.remove('af');
   });
-  curMes=''; curCiudad=''; curRec='';
+  curMes=''; curCiudad=''; curRec=''; curEmpresa=''; curCliente=''; curResponsable='';
   var st = document.getElementById('fi-status');
   if (st) { st.className='upd'; st.textContent='Sin filtros activos'; }
   redraw();
@@ -876,12 +923,21 @@ function applyF() {
   var fSuc = document.getElementById('f-sucursal');
   var fDesde = document.getElementById('f-desde');
   var fHasta = document.getElementById('f-hasta');
+  var fEmpresa = document.getElementById('f-empresa');
+  var fCliente = document.getElementById('f-cliente');
+  var fResponsable = document.getElementById('f-responsable');
   curMes = fMes ? fMes.value : '';
   curCiudad = fCiudad ? fCiudad.value : '';
+  curEmpresa = fEmpresa ? fEmpresa.value : '';
+  curCliente = fCliente ? fCliente.value : '';
+  curResponsable = fResponsable ? fResponsable.value : '';
   var parts = [];
   if (fSuc && fSuc.value) parts.push('Suc: ' + fSuc.options[fSuc.selectedIndex].text);
   if (curMes) parts.push(fMes.options[fMes.selectedIndex].text);
   if (curCiudad) parts.push(fCiudad.options[fCiudad.selectedIndex].text);
+  if (curEmpresa) parts.push('Empresa: ' + curEmpresa);
+  if (curCliente) parts.push('Cliente: ' + curCliente);
+  if (curResponsable) parts.push('Resp: ' + curResponsable);
   if (fDesde && fHasta) {
     var d = fDesde.value, h = fHasta.value;
     if (d || h) parts.push((d||'inicio')+' → '+(h||'hoy'));
@@ -1857,6 +1913,260 @@ function filterFueros(nivel, btn) {
 
 window.addEventListener('load', function() { loadDemoData(); });
 
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// MULTI-CLIENT SYSTEM, USER LOGIN, CHART CONTROLS
+// ═══════════════════════════════════════════════════════
+
+// Global filter state for new filters
+var curEmpresa = '', curCliente = '', curResponsable = '';
+
+// ── USER SYSTEM ──────────────────────────────────────
+var USERS = {
+  'admin':        { password: 'summar2024', role: 'admin',  cliente: null },
+  'cliente_demo': { password: 'demo123',    role: 'client', cliente: 'SUMMAR PROCESOS S.A.S' }
+};
+var currentUser = null;
+
+function doLogin() {
+  var u = (document.getElementById('login-user').value || '').trim();
+  var p = document.getElementById('login-pass').value || '';
+  var user = USERS[u];
+  if (!user || user.password !== p) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+  currentUser = { username: u, role: user.role, cliente: user.cliente };
+  try { sessionStorage.setItem('summar_user', JSON.stringify(currentUser)); } catch(e) {}
+  document.getElementById('login-screen').style.display = 'none';
+  var logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) logoutBtn.style.display = '';
+  // Lock cliente filter for client users
+  if (user.role === 'client' && user.cliente) {
+    var sel = document.getElementById('f-cliente');
+    if (sel) {
+      // Add option if not exists
+      var found = false;
+      for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === user.cliente) { found = true; break; } }
+      if (!found) { var opt = document.createElement('option'); opt.value = user.cliente; opt.textContent = user.cliente; sel.appendChild(opt); }
+      sel.value = user.cliente;
+      sel.disabled = true;
+    }
+    curCliente = user.cliente;
+  }
+  loadDemoData();
+}
+
+function doLogout() {
+  try { sessionStorage.removeItem('summar_user'); } catch(e) {}
+  currentUser = null;
+  var logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) logoutBtn.style.display = 'none';
+  var sel = document.getElementById('f-cliente');
+  if (sel) { sel.disabled = false; sel.selectedIndex = 0; }
+  curCliente = '';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ── CHART TOGGLES ────────────────────────────────────
+function initChartToggles() {
+  document.querySelectorAll('.cc').forEach(function(card) {
+    var canvas = card.querySelector('canvas');
+    if (!canvas) return;
+    var h = card.querySelector('.cc-h');
+    if (!h) return;
+    var id = canvas.id;
+    // Avoid double init
+    if (h.querySelector('.chart-toggle-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'chart-toggle-btn';
+    btn.title = 'Mostrar/Ocultar gráfico';
+    // Restore from localStorage
+    var hidden = false;
+    try { hidden = localStorage.getItem('cht_' + id) === '0'; } catch(e) {}
+    if (hidden) { card.classList.add('chart-hidden'); btn.textContent = '👁 Mostrar'; }
+    else { btn.textContent = '👁 Ocultar'; }
+    btn.onclick = function() {
+      card.classList.toggle('chart-hidden');
+      var isHidden = card.classList.contains('chart-hidden');
+      btn.textContent = isHidden ? '👁 Mostrar' : '👁 Ocultar';
+      try { localStorage.setItem('cht_' + id, isHidden ? '0' : '1'); } catch(e) {}
+    };
+    h.appendChild(btn);
+  });
+}
+
+// ── CHART TYPE SWITCHER ──────────────────────────────
+function initChartTypeSwitchers() {
+  document.querySelectorAll('.cc').forEach(function(card) {
+    var canvas = card.querySelector('canvas');
+    if (!canvas) return;
+    var h = card.querySelector('.cc-h');
+    if (!h) return;
+    if (h.querySelector('.chart-type-sel')) return;
+    var sel = document.createElement('select');
+    sel.className = 'chart-type-sel';
+    sel.title = 'Cambiar tipo de gráfico';
+    sel.innerHTML = '<option value="bar">Barras</option><option value="line">Línea</option><option value="pie">Torta</option><option value="doughnut">Dona</option>';
+    sel.onchange = function() {
+      var chartId = canvas.id;
+      if (window.CI && window.CI[chartId]) {
+        var ch = window.CI[chartId];
+        ch.config.type = this.value;
+        // Pie/doughnut need different data structure — just try
+        try { ch.update('none'); } catch(e) { try { ch.destroy(); } catch(e2){} }
+      }
+    };
+    h.insertBefore(sel, h.querySelector('.cc-tag') || h.querySelector('.chart-toggle-btn') || null);
+  });
+}
+
+// ── DYNAMIC DROPDOWNS FROM DATA ──────────────────────
+function populateClientDropdowns(rows) {
+  if (!rows || !rows.length) return;
+  var clientes = {}, responsables = {};
+  rows.forEach(function(r) {
+    if (r.cliente) clientes[r.cliente] = 1;
+    if (r.responsable) responsables[r.responsable] = 1;
+  });
+  var cSel = document.getElementById('f-cliente');
+  var rSel = document.getElementById('f-responsable');
+  if (cSel && !cSel.disabled) {
+    var curVal = cSel.value;
+    cSel.innerHTML = '<option value="">Todos los clientes</option>';
+    Object.keys(clientes).sort().forEach(function(c) {
+      var opt = document.createElement('option'); opt.value = c; opt.textContent = c; cSel.appendChild(opt);
+    });
+    if (curVal) cSel.value = curVal;
+  }
+  if (rSel) {
+    var curVal2 = rSel.value;
+    rSel.innerHTML = '<option value="">Todos los responsables</option>';
+    Object.keys(responsables).sort().forEach(function(r) {
+      var opt = document.createElement('option'); opt.value = r; opt.textContent = r; rSel.appendChild(opt);
+    });
+    if (curVal2) rSel.value = curVal2;
+  }
+}
+
+// ── RESPONSABLE CHART ────────────────────────────────
+function renderResponsableChart(rawRows) {
+  // rawRows: array of parsed selection rows with {responsable, cumplimiento, solicitados, contratados}
+  if (!rawRows || !rawRows.length) {
+    // Demo data
+    rawRows = [
+      {responsable:'Ana García', pct_t:91.2, pct_c:89.4},
+      {responsable:'Carlos Pérez', pct_t:88.7, pct_c:86.1},
+      {responsable:'María López', pct_t:85.3, pct_c:83.8},
+      {responsable:'John Martínez', pct_t:82.1, pct_c:80.5},
+      {responsable:'Laura Gómez', pct_t:79.6, pct_c:77.2},
+      {responsable:'Diego Ramírez', pct_t:76.4, pct_c:74.9},
+      {responsable:'Sandra Torres', pct_t:73.8, pct_c:72.1},
+      {responsable:'Felipe Castro', pct_t:71.2, pct_c:69.8}
+    ];
+  }
+  // Sort by pct_t desc, take top 10
+  rawRows.sort(function(a,b){ return (b.pct_t||0)-(a.pct_t||0); });
+  var top = rawRows.slice(0, 10);
+  mk('c-responsable', {
+    type: 'bar',
+    data: {
+      labels: top.map(function(r){ return r.responsable; }),
+      datasets: [
+        { label: '% ANS Tiempo', data: top.map(function(r){ return +(r.pct_t||0).toFixed(1); }), backgroundColor: '#1D9E75', borderRadius: 4 },
+        { label: '% ANS Cantidad', data: top.map(function(r){ return +(r.pct_c||0).toFixed(1); }), backgroundColor: '#185FA5', borderRadius: 4 }
+      ]
+    },
+    options: bo({
+      plugins: { legend: { display: true, position: 'top', labels: { font: { size: 10 } } } },
+      scales: { y: { min: 0, max: 100, ticks: { callback: function(v){ return v+'%'; } } } }
+    })
+  });
+}
+
+// ── BASE SHEET PARSER ────────────────────────────────
+// Maps real Excel columns (BASE sheet) to internal format
+function parseBaseSheet(sheet) {
+  if (!sheet) return null;
+  var rows = [];
+  var headers = null;
+  sheet.forEach(function(row, ri) {
+    if (ri === 0) { headers = row.map(function(h){ return (h||'').toString().trim(); }); return; }
+    if (!headers) return;
+    var obj = {};
+    headers.forEach(function(h, ci) { obj[h] = row[ci]; });
+    function d(v) {
+      if (!v) return null;
+      if (v instanceof Date) return v;
+      var s = v.toString().trim();
+      if (!s) return null;
+      var parts = s.split(/[\/\-]/);
+      if (parts.length === 3) {
+        var y = parts[0].length === 4 ? +parts[0] : +parts[2];
+        var mo = parts[0].length === 4 ? +parts[1]-1 : +parts[1]-1;
+        var dy = parts[0].length === 4 ? +parts[2] : +parts[0];
+        return new Date(y, mo, dy);
+      }
+      var n = parseFloat(s);
+      if (!isNaN(n) && n > 40000) return new Date((n - 25569) * 86400 * 1000);
+      return null;
+    }
+    rows.push({
+      empresa:      (obj['Empresa']||'').toString().trim(),
+      sucursal:     (obj['Sucursal']||'').toString().trim(),
+      cliente:      (obj['Cliente']||'').toString().trim(),
+      sucursalCli:  (obj['Sucursal1']||'').toString().trim(),
+      ciudad:       (obj['Ciudad']||'').toString().trim(),
+      responsable:  (obj['Responsable']||'').toString().trim(),
+      perfil:       (obj['PerfilCargo']||'').toString().trim(),
+      estado:       (obj['Estado']||'').toString().trim(),
+      solicitados:  +(obj['PersonasSolicitadas']||0),
+      contratados:  +(obj['Contratados']||0),
+      fecha:        d(obj['FechaCreacion']),
+      prometida:    d(obj['FechaPrometida']),
+      cierre:       d(obj['FechaCierre']),
+      cumplimiento: (obj['Cumplimiento']||'').toString().trim().toUpperCase(),
+      tipoOrden:    (obj['TipoOrdenServicio']||'').toString().trim(),
+      id:           obj['OrdenServicio']
+    });
+  });
+  // Populate dropdowns
+  populateClientDropdowns(rows);
+  return rows;
+}
+
+// ── INIT ON LOAD ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Check session
+  try {
+    var s = sessionStorage.getItem('summar_user');
+    if (s) {
+      currentUser = JSON.parse(s);
+      document.getElementById('login-screen').style.display = 'none';
+      var logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) logoutBtn.style.display = '';
+      if (currentUser.role === 'client' && currentUser.cliente) {
+        curCliente = currentUser.cliente;
+        var sel = document.getElementById('f-cliente');
+        if (sel) { sel.value = currentUser.cliente; sel.disabled = true; }
+      }
+    }
+  } catch(e) {}
+});
+
+// Patch loadDemoData to also init toggles/switchers
+var _origLoadDemo = loadDemoData;
+loadDemoData = function() {
+  _origLoadDemo();
+  renderResponsableChart(null);
+  setTimeout(function() {
+    initChartToggles();
+    initChartTypeSwitchers();
+  }, 200);
+};
 </script>
 </body>
 </html>
