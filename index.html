@@ -1394,13 +1394,15 @@ function buildFormTable() {
 
 // ===================== ENTREVISTAS PREGUNTAS =====================
 function buildEntrevistas() {
-  var preguntas = [
-    {q:'¿Pudo aplicar sus conocimientos?',si:72,no:4},
-    {q:'¿El trabajo fue el esperado?',si:45,no:31},
-    {q:'¿Recibió retroalimentación del jefe?',si:38,no:38},
-    {q:'¿Contó con elementos necesarios?',si:60,no:16},
-    {q:'¿Recomendaría trabajar aquí?',si:58,no:18}
-  ];
+  var preguntas = window._entData && window._entData.preguntas && window._entData.preguntas.some(function(p){return p.si+p.no>0;})
+    ? window._entData.preguntas
+    : [
+      {q:'¿Pudo aplicar sus conocimientos?',si:72,no:4},
+      {q:'¿El trabajo fue el esperado?',si:45,no:31},
+      {q:'¿Recibió retroalimentación del jefe?',si:38,no:38},
+      {q:'¿Contó con elementos necesarios?',si:60,no:16},
+      {q:'¿Recomendaría trabajar aquí?',si:58,no:18}
+    ];
   var el = document.getElementById('ent-preguntas');
   if (!el) return;
   var h='';
@@ -1446,21 +1448,48 @@ function redraw() {
     {l:'Operario Jardinería',v:88,c:AMB},{l:'Coordinador Operativo',v:83,c:BLUE},
     {l:'Aux. Servicios Alturas',v:68,c:GREEN},{l:'Especialista Servicio',v:53,c:GRAY}
   ],3021);
-  mkPR('pr-act-cargo',[{l:'Auxiliar de Servicios',v:52,c:RED},{l:'Auxiliar Servicios BPM',v:31,c:AMB},
-    {l:'Op. Apoyo Logístico',v:22,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:14,c:GREEN},
-    {l:'Operario de Jardinería',v:9,c:GRAY},{l:'Coordinador Operativo',v:8,c:RED},
-    {l:'Aux. Servicios Alturas',v:8,c:AMB},{l:'Especialista de Servicio',v:6,c:BLUE}],52);
+  (function(){
+    var colors=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE];
+    if (window._personalData && Object.keys(window._personalData.cargos).length) {
+      var c=window._personalData.cargos;
+      var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,8);
+      var items=sorted.map(function(k,i){return {l:k,v:c[k],c:colors[i%colors.length]};});
+      mkPR('pr-act-cargo',items,items[0]?items[0].v:1);
+    } else {
+      mkPR('pr-act-cargo',[{l:'Auxiliar de Servicios',v:52,c:RED},{l:'Auxiliar Servicios BPM',v:31,c:AMB},
+        {l:'Op. Apoyo Logístico',v:22,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:14,c:GREEN},
+        {l:'Operario de Jardinería',v:9,c:GRAY},{l:'Coordinador Operativo',v:8,c:RED}],52);
+    }
+  })();
   mkPR('pr-rot-cargo',[{l:'Auxiliar de Servicios',v:9.8,c:RED},{l:'Auxiliar Servicios BPM',v:8.2,c:AMB},
     {l:'Op. Apoyo Logístico',v:11.4,c:RED},{l:'Aux. Mantenimiento Loc.',v:6.3,c:GREEN},
     {l:'Operario de Jardinería',v:7.1,c:AMB},{l:'Coordinador Operativo',v:3.2,c:GREEN}],11.4);
   mkPR('pr-rot-ciudad',[{l:'Cali Centro',v:10.2,c:RED},{l:'Yumbo',v:12.8,c:RED},{l:'Palmira',v:8.4,c:AMB},
     {l:'Buga',v:7.1,c:AMB},{l:'Cali Norte',v:9.3,c:RED},{l:'Pereira',v:6.8,c:GREEN},
     {l:'Bogotá',v:7.9,c:AMB},{l:'Medellín',v:11.2,c:RED}],12.8);
-  mkPR('pr-peligro',[{l:'Locativo',v:33.99,c:RED},{l:'Mecánico',v:27.19,c:RED},{l:'Biomecánico',v:21.11,c:AMB},
-    {l:'Químico',v:8.59,c:AMB},{l:'Biológico',v:4.11,c:BLUE},{l:'Físico',v:2.68,c:GREEN},
-    {l:'Tránsito',v:1.43,c:GRAY},{l:'No clasificado',v:0.36,c:GRAY}],33.99);
-  mkPR('pr-cuerpo',[{l:'Miembros Superiores',v:40.97,c:RED},{l:'Miembros Inferiores',v:20.93,c:AMB},
-    {l:'Tronco',v:15.03,c:BLUE},{l:'Ubicaciones Múltiples',v:10.02,c:GREEN},{l:'Cabeza/Cuello',v:8.12,c:GRAY}],40.97);
+  (function(){
+    var colors=[RED,RED,AMB,AMB,BLUE,GREEN,GRAY,GRAY];
+    if (window._atData && Object.keys(window._atData.peligros).length) {
+      var p=window._atData.peligros; var tot=window._atData.total||1;
+      var sorted=Object.keys(p).sort(function(a,b){return p[b]-p[a];}).slice(0,8);
+      var items=sorted.map(function(k,i){return {l:k,v:Math.round(p[k]/tot*10000)/100,c:colors[i%colors.length]};});
+      mkPR('pr-peligro',items,items[0]?items[0].v:1);
+    } else {
+      mkPR('pr-peligro',[{l:'Locativo',v:33.99,c:RED},{l:'Mecánico',v:27.19,c:RED},{l:'Biomecánico',v:21.11,c:AMB},
+        {l:'Químico',v:8.59,c:AMB},{l:'Biológico',v:4.11,c:BLUE},{l:'Físico',v:2.68,c:GREEN}],33.99);
+    }
+  })();
+  (function(){
+    if (window._atData && Object.keys(window._atData.cuerpos).length) {
+      var c=window._atData.cuerpos; var tot=window._atData.total||1;
+      var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,5);
+      var items=sorted.map(function(k,i){return {l:k,v:Math.round(c[k]/tot*10000)/100,c:[RED,AMB,BLUE,GREEN,GRAY][i]};});
+      mkPR('pr-cuerpo',items,items[0]?items[0].v:1);
+    } else {
+      mkPR('pr-cuerpo',[{l:'Miembros Superiores',v:40.97,c:RED},{l:'Miembros Inferiores',v:20.93,c:AMB},
+        {l:'Tronco',v:15.03,c:BLUE},{l:'Ubicaciones Múltiples',v:10.02,c:GREEN},{l:'Cabeza/Cuello',v:8.12,c:GRAY}],40.97);
+    }
+  })();
   mkPR('pr-mec',[{l:'Pisadas, choques o golpes',v:26.12,c:RED},{l:'Sobreesfuerzo o falso movimiento',v:21.47,c:AMB},
     {l:'Otro',v:17.35,c:BLUE},{l:'Caída de personas',v:15.74,c:GREEN},{l:'Contacto cortantes',v:10.21,c:GRAY}],26.12);
   mkPR('pr-lesion',[{l:'Golpe o contusión',v:44.54,c:RED},{l:'Torcedura/esguince/desgarro',v:20.39,c:AMB},
@@ -1477,19 +1506,49 @@ function redraw() {
     {l:'Traumatismos y envenenamientos',v:11.38,c:GREEN},{l:'Enf. sistema digestivo',v:9.21,c:GRAY}],15.83);
   mkPR('pr-eg-suc-s',[{l:'Cali Centro',v:3.12,c:RED},{l:'Yumbo',v:2.87,c:AMB},
     {l:'Palmira',v:2.54,c:BLUE},{l:'Buga',v:2.31,c:GREEN},{l:'Cali Norte',v:2.08,c:GRAY},{l:'Pereira',v:1.95,c:RED}],3.12);
-  mkPR('pr-eg-ciudad',[{l:'Cali',v:28.4,c:RED},{l:'Bogotá',v:22.1,c:AMB},{l:'Medellín',v:14.3,c:BLUE},
-    {l:'Buga',v:9.8,c:GREEN},{l:'Barranquilla',v:6.2,c:GRAY}],28.4);
-  mkPR('pr-eg-cargo',[{l:'Auxiliar de Servicios',v:35.2,c:RED},{l:'Auxiliar Servicios BPM',v:18.4,c:AMB},
-    {l:'Op. Apoyo Logístico',v:11.8,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:7.3,c:GREEN}],35.2);
+  (function(){
+    if (window._egData && Object.keys(window._egData.ciudades).length) {
+      var c=window._egData.ciudades; var tot=window._egData.total||1;
+      var sc=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,5);
+      mkPR('pr-eg-ciudad',sc.map(function(k,i){return {l:k,v:Math.round(c[k]/tot*1000)/10,c:[RED,AMB,BLUE,GREEN,GRAY][i]};}),100);
+    } else {
+      mkPR('pr-eg-ciudad',[{l:'Cali',v:28.4,c:RED},{l:'Bogotá',v:22.1,c:AMB},{l:'Medellín',v:14.3,c:BLUE},{l:'Buga',v:9.8,c:GREEN},{l:'Barranquilla',v:6.2,c:GRAY}],28.4);
+    }
+    if (window._egData && Object.keys(window._egData.cargos).length) {
+      var c=window._egData.cargos; var tot=window._egData.total||1;
+      var sc=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,5);
+      mkPR('pr-eg-cargo',sc.map(function(k,i){return {l:k,v:Math.round(c[k]/tot*1000)/10,c:[RED,AMB,BLUE,GREEN,GRAY][i]};}),100);
+    } else {
+      mkPR('pr-eg-cargo',[{l:'Auxiliar de Servicios',v:35.2,c:RED},{l:'Auxiliar Servicios BPM',v:18.4,c:AMB},{l:'Op. Apoyo Logístico',v:11.8,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:7.3,c:GREEN}],35.2);
+    }
+  })();
   mkPR('pr-sin-des',[{l:'Alta médica con reintegro',v:34.2,c:GREEN},{l:'Alta sin secuelas',v:28.6,c:GREEN},
     {l:'Reintegro con restricciones',v:18.9,c:AMB},{l:'En proceso calificación',v:12.6,c:AMB},
     {l:'Pensión invalidez',v:3.1,c:RED},{l:'Otro desenlace',v:2.6,c:GRAY}],34.2);
   /* pr-fu-ciudad removed */
-  mkPR('pr-fu-diag',[{l:'M54 – Dorsalgia / Lumbalgia',v:12,c:RED},{l:'M75 – Lesión hombro',v:8,c:AMB},
-    {l:'F41 – Trastorno ansioso',v:7,c:BLUE},{l:'G54 – Túnel carpiano',v:5,c:GREEN},{l:'S52 – Fractura',v:4,c:GRAY}],12);
-  mkPR('pr-ent-cargo',[{l:'Auxiliar de Servicios',v:31,c:GREEN},{l:'Auxiliar Servicios BPM',v:18,c:AMB},
-    {l:'Op. Apoyo Logístico',v:12,c:GREEN},{l:'Aux. Mantenimiento',v:8,c:AMB},
-    {l:'Coordinador Operativo',v:4,c:RED},{l:'Especialista Servicio',v:3,c:GREEN}],31);
+  (function(){
+    if (window._fuerosData && Object.keys(window._fuerosData.diagnosticos).length) {
+      var d=window._fuerosData.diagnosticos;
+      var sorted=Object.keys(d).sort(function(a,b){return d[b]-d[a];}).slice(0,5);
+      var items=sorted.map(function(k,i){return {l:k,v:d[k],c:[RED,AMB,BLUE,GREEN,GRAY][i]};});
+      mkPR('pr-fu-diag',items,items[0]?items[0].v:1);
+    } else {
+      mkPR('pr-fu-diag',[{l:'M54 – Dorsalgia / Lumbalgia',v:12,c:RED},{l:'M75 – Lesión hombro',v:8,c:AMB},
+        {l:'F41 – Trastorno ansioso',v:7,c:BLUE},{l:'G54 – Túnel carpiano',v:5,c:GREEN},{l:'S52 – Fractura',v:4,c:GRAY}],12);
+    }
+  })();
+  (function(){
+    var colors=[GREEN,AMB,BLUE,RED,GRAY,GREEN];
+    if (window._entData && Object.keys(window._entData.cargos).length) {
+      var c=window._entData.cargos;
+      var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,6);
+      var items=sorted.map(function(k,i){return {l:k,v:c[k],c:colors[i%colors.length]};});
+      mkPR('pr-ent-cargo',items,items[0]?items[0].v:1);
+    } else {
+      mkPR('pr-ent-cargo',[{l:'Auxiliar de Servicios',v:31,c:GREEN},{l:'Auxiliar Servicios BPM',v:18,c:AMB},
+        {l:'Op. Apoyo Logístico',v:12,c:GREEN},{l:'Aux. Mantenimiento',v:8,c:AMB}],31);
+    }
+  })();
 
   // ---- RESUMEN CHARTS ----
   mk('c-r1',{type:'bar',data:{labels:mLabels,datasets:[
@@ -1504,12 +1563,26 @@ function redraw() {
     {label:'Meta 80%',data:Array(6).fill(80),borderColor:'#DDD',borderDash:[6,4],pointRadius:0,fill:false}
   ]},options:bo({scales:{x:{grid:{display:false}},y:{min:55,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
     plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-r3',{type:'bar',data:{labels:['Paso Directo','Renuncia','Terminación contrato','Bajo Desemp.','Justa Causa'],
-    datasets:[{data:[542,225,160,86,1],backgroundColor:[GREEN,AMB,BLUE,RED,GRAY],borderRadius:4}]},
-    options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false}}}})});
-  mk('c-r4',{type:'bar',data:{labels:['AT 24','AT 25','AT 26','Aus 24','Aus 25','Aus 26'],
-    datasets:[{data:[89,73,23,4.8,4.3,3.8],backgroundColor:[RED,AMB,GREEN,RED,AMB,GREEN],borderRadius:4}]},
-    options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#EEE'}}}})});
+  (function(){
+    var rLabels, rData;
+    if (window._rotData && Object.keys(window._rotData.motivos).length) {
+      var m=window._rotData.motivos;
+      var sorted=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,6);
+      rLabels=sorted; rData=sorted.map(function(k){return m[k];});
+    } else {
+      rLabels=['Paso Directo','Renuncia','Terminación contrato','Bajo Desemp.','Justa Causa'];
+      rData=[542,225,160,86,1];
+    }
+    mk('c-r3',{type:'bar',data:{labels:rLabels,datasets:[{data:rData,backgroundColor:[GREEN,AMB,BLUE,RED,GRAY,RL],borderRadius:4}]},
+      options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false}}}})});
+  })();
+  (function(){
+    var atV = window._atData ? window._atData.total : 23;
+    var egV = window._egData ? window._egData.total : 0;
+    mk('c-r4',{type:'bar',data:{labels:['AT (cargados)','EG (cargadas)'],
+      datasets:[{data:[atV,egV],backgroundColor:[RED,BLUE],borderRadius:4}]},
+      options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#EEE'}}}})});
+  })();
 
   // ---- SELECCIÓN CHARTS ----
   mk('c-oport',{type:'bar',data:{labels:mLabels,datasets:[
@@ -1537,12 +1610,27 @@ function redraw() {
     options:bo({indexAxis:'y',scales:{x:{min:60,max:100,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
 
   // ---- PERSONAL ACTIVO CHARTS ----
-  mk('c-act-ciudad',{type:'bar',data:{labels:['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín','Barranquilla'],
-    datasets:[{data:[28,22,18,15,14,12,19,14,8],backgroundColor:RED,borderRadius:4}]},
-    options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#EEE'}}}})});
-  mk('c-act-area',{type:'doughnut',data:{labels:['Aseo y Limpieza','Logística','Mantenimiento','Jardinería','Operaciones','Coordinación'],
-    datasets:[{data:[68,32,18,12,11,9],backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,'#7F77DD'],borderWidth:2,borderColor:'#fff'}]},
-    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    var acLabels, acData;
+    if (window._personalData && Object.keys(window._personalData.sucursales).length) {
+      var s=window._personalData.sucursales;
+      var sorted=Object.keys(s).sort(function(a,b){return s[b]-s[a];}).slice(0,9);
+      acLabels=sorted; acData=sorted.map(function(k){return s[k];});
+    } else { acLabels=['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín','Barranquilla']; acData=[28,22,18,15,14,12,19,14,8]; }
+    mk('c-act-ciudad',{type:'bar',data:{labels:acLabels,datasets:[{data:acData,backgroundColor:RED,borderRadius:4}]},
+      options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#EEE'}}}})});
+  })();
+  (function(){
+    var aaLabels, aaData;
+    if (window._personalData && Object.keys(window._personalData.areas).length) {
+      var a=window._personalData.areas;
+      var sorted=Object.keys(a).sort(function(x,y){return a[y]-a[x];}).slice(0,6);
+      aaLabels=sorted; aaData=sorted.map(function(k){return a[k];});
+    } else { aaLabels=['Aseo y Limpieza','Logística','Mantenimiento','Jardinería','Operaciones','Coordinación']; aaData=[68,32,18,12,11,9]; }
+    mk('c-act-area',{type:'doughnut',data:{labels:aaLabels,datasets:[{data:aaData,
+      backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,'#7F77DD'],borderWidth:2,borderColor:'#fff'}]},
+      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
+  })();
   mk('c-act-ret',{type:'bar',data:{labels:['Dic 25','Ene 26','Feb 26','Mar 26','Abr 26','May 26'],datasets:[
     {label:'Paso Directo',data:[62,58,54,61,57,65],backgroundColor:GREEN,borderRadius:3,stack:'a'},
     {label:'Renuncia',data:[25,28,22,30,26,31],backgroundColor:AMB,borderRadius:3,stack:'a'},
@@ -1557,15 +1645,38 @@ function redraw() {
     {data:rotData,backgroundColor:rotData.map(function(v){return v>0?RED:'#E5E5E5';}),borderRadius:4},
     {data:Array(12).fill(105),type:'line',borderColor:AMB,borderDash:[5,3],pointRadius:0,fill:false}
   ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
-  mk('c-rot-c',{type:'doughnut',data:{labels:['Paso Directo','Renuncia Personal','Bajo Desempeño','Terminación contrato','Mejor Oferta','Justa Causa'],
-    datasets:[{data:[542,225,86,73,11,7],backgroundColor:[GREEN,AMB,RED,BLUE,GRAY,'#D85A30'],borderWidth:2,borderColor:'#fff'}]},
-    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-rot-z',{type:'bar',data:{labels:['Buga','Cali','Eje Cafetero','Nariño'],
-    datasets:[{data:[560,233,117,34],backgroundColor:[RED,AMB,BLUE,GREEN],borderRadius:4}]},
-    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
-  mk('c-rot-g',{type:'doughnut',data:{labels:['Masculino 69.8%','Femenino 30.2%'],
-    datasets:[{data:[659,285],backgroundColor:[BLUE,RED],borderWidth:2,borderColor:'#fff'}]},
-    options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
+  (function(){
+    var rcLabels, rcData;
+    if (window._rotData && Object.keys(window._rotData.motivos).length) {
+      var m=window._rotData.motivos;
+      var sorted=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,6);
+      rcLabels=sorted; rcData=sorted.map(function(k){return m[k];});
+    } else {
+      rcLabels=['Paso Directo','Renuncia Personal','Bajo Desempeño','Terminación contrato','Mejor Oferta','Justa Causa'];
+      rcData=[542,225,86,73,11,7];
+    }
+    mk('c-rot-c',{type:'doughnut',data:{labels:rcLabels,datasets:[{data:rcData,
+      backgroundColor:[GREEN,AMB,RED,BLUE,GRAY,'#D85A30'],borderWidth:2,borderColor:'#fff'}]},
+      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
+  })();
+  (function(){
+    var rzLabels, rzData;
+    if (window._rotData && Object.keys(window._rotData.ciudades).length) {
+      var c=window._rotData.ciudades;
+      var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,6);
+      rzLabels=sorted; rzData=sorted.map(function(k){return c[k];});
+    } else { rzLabels=['Buga','Cali','Eje Cafetero','Nariño']; rzData=[560,233,117,34]; }
+    mk('c-rot-z',{type:'bar',data:{labels:rzLabels,datasets:[{data:rzData,backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,RL],borderRadius:4}]},
+      options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  })();
+  (function(){
+    var gM=window._rotData?window._rotData.generos.M:659;
+    var gF=window._rotData?window._rotData.generos.F:285;
+    var tot=gM+gF||1;
+    mk('c-rot-g',{type:'doughnut',data:{labels:['Masculino '+Math.round(gM/tot*100)+'%','Femenino '+Math.round(gF/tot*100)+'%'],
+      datasets:[{data:[gM,gF],backgroundColor:[BLUE,RED],borderWidth:2,borderColor:'#fff'}]},
+      options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})}); 
+  })();
   mk('c-rot-d',{type:'bar',data:{labels:['<30','31–60','61–90','91–120','121–180','>180'],
     datasets:[{data:[89,142,198,237,156,122],backgroundColor:[RED,RED,AMB,AMB,GREEN,GREEN],borderRadius:4}]},
     options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
@@ -1576,12 +1687,23 @@ function redraw() {
     plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
 
   // ---- ENTREVISTAS CHARTS ----
-  mk('c-em',{type:'bar',data:{labels:['Mejor oferta','Ambiente inadecuado','Motivos viaje','Motivos estudio','Horario trabajo','Incumplim. ofrecido','Transporte','Salud','Personal','Mal trato'],
-    datasets:[{data:[15,12,9,6,5,2,1,3,2,1],backgroundColor:RED,borderRadius:4}]},
-    options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
-  mk('c-ej',{type:'doughnut',data:{labels:['Positiva 81.6%','Neutra 14.5%','Negativa 3.9%'],
-    datasets:[{data:[62,11,3],backgroundColor:[GREEN,AMB,RED],borderWidth:3,borderColor:'#fff'}]},
-    options:bo({cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},boxWidth:12}}}})});
+  (function(){
+    var emLabels, emData;
+    if (window._entData && Object.keys(window._entData.motivos).length) {
+      var m=window._entData.motivos;
+      var sorted=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,10);
+      emLabels=sorted; emData=sorted.map(function(k){return m[k];});
+    } else { emLabels=['Mejor oferta','Ambiente inadecuado','Motivos viaje','Motivos estudio','Horario trabajo','Incumplim. ofrecido','Transporte','Salud','Personal','Mal trato']; emData=[15,12,9,6,5,2,1,3,2,1]; }
+    mk('c-em',{type:'bar',data:{labels:emLabels,datasets:[{data:emData,backgroundColor:RED,borderRadius:4}]},
+      options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  })();
+  (function(){
+    var ep=window._entData?window._entData.percepcion:{Positiva:62,Neutra:11,Negativa:3};
+    var tot=(ep.Positiva+ep.Neutra+ep.Negativa)||1;
+    mk('c-ej',{type:'doughnut',data:{labels:['Positiva '+Math.round(ep.Positiva/tot*100)+'%','Neutra '+Math.round(ep.Neutra/tot*100)+'%','Negativa '+Math.round(ep.Negativa/tot*100)+'%'],
+      datasets:[{data:[ep.Positiva,ep.Neutra,ep.Negativa],backgroundColor:[GREEN,AMB,RED],borderWidth:3,borderColor:'#fff'}]},
+      options:bo({cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},boxWidth:12}}}})}); 
+  })();
   mk('c-ent-suc',{type:'bar',data:{labels:['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira'],datasets:[
     {label:'Positivas',data:[18,12,9,8,10,5],backgroundColor:GREEN,borderRadius:3,stack:'e'},
     {label:'Neutras',data:[4,2,1,2,1,1],backgroundColor:AMB,borderRadius:3,stack:'e'},
@@ -1641,9 +1763,17 @@ function redraw() {
   // ---- SINIESTRO CHARTS ----
   // c-sin-ev removed (chart deleted)
 
-  mk('c-sin-est',{type:'doughnut',data:{labels:['En seguimiento','Calificación','Reintegro','Alta médica','Junta médica'],
-    datasets:[{data:[47,18,12,27,15],backgroundColor:[RED,AMB,GREEN,BLUE,GRAY],borderWidth:2,borderColor:'#fff'}]},
-    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    var seLabels, seData;
+    if (window._sinData && Object.keys(window._sinData.estados).length) {
+      var e=window._sinData.estados;
+      var sorted=Object.keys(e).sort(function(a,b){return e[b]-e[a];});
+      seLabels=sorted; seData=sorted.map(function(k){return e[k];});
+    } else { seLabels=['En seguimiento','Calificación','Reintegro','Alta médica','Junta médica']; seData=[47,18,12,27,15]; }
+    mk('c-sin-est',{type:'doughnut',data:{labels:seLabels,datasets:[{data:seData,
+      backgroundColor:[RED,AMB,GREEN,BLUE,GRAY],borderWidth:2,borderColor:'#fff'}]},
+      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
+  })();
   /* c-sin-dias removed */
   /* c-sin-prr removed */
 
@@ -1654,9 +1784,17 @@ function redraw() {
     {label:'Controlados',data:[12,13,14,14,14],backgroundColor:GREEN,borderRadius:3,stack:'f'}
   ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
     plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-fu-tipo',{type:'doughnut',data:{labels:['EG Osteomuscular','EG Psicológica','AT con secuela','ATEL','Otra EG'],
-    datasets:[{data:[18,9,11,5,4],backgroundColor:[RED,AMB,BLUE,GREEN,GRAY],borderWidth:2,borderColor:'#fff'}]},
-    options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    var ftLabels, ftData;
+    if (window._fuerosData && Object.keys(window._fuerosData.tipos).length) {
+      var t=window._fuerosData.tipos;
+      var sorted=Object.keys(t).sort(function(a,b){return t[b]-t[a];});
+      ftLabels=sorted; ftData=sorted.map(function(k){return t[k];});
+    } else { ftLabels=['EG Osteomuscular','EG Psicológica','AT con secuela','ATEL','Otra EG']; ftData=[18,9,11,5,4]; }
+    mk('c-fu-tipo',{type:'doughnut',data:{labels:ftLabels,datasets:[{data:ftData,
+      backgroundColor:[RED,AMB,BLUE,GREEN,GRAY],borderWidth:2,borderColor:'#fff'}]},
+      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
+  })();
 }
 
 
@@ -1773,50 +1911,56 @@ function showError(msg) {
 // ── MAIN DATA BUILDER FROM EXCEL ──────────────────────────
 function buildDashboardFromExcel() {
   setProgress(85, 'Calculando indicadores de selección...');
-  
   try {
-    // 1. SELECCIÓN
-    if (parsedSheets['SELECCIÓN'] && parsedSheets['SELECCIÓN'].length > 1) {
-      buildSeleccionData(parsedSheets['SELECCIÓN']);
+    // 1. SELECCIÓN / BASE (acepta ambos nombres)
+    var selRows = parsedSheets['SELECCIÓN'] || parsedSheets['BASE'];
+    if (selRows && selRows.length > 1) {
+      buildSeleccionData(selRows);
+      buildPipelineFromBase(selRows); // genera pipeline desde BASE
     }
-    setProgress(90, 'Procesando rotación y pipeline...');
-    
-    // 2. PIPELINE
+    setProgress(88, 'Procesando pipeline y rotación...');
+    // Pipeline sheet explícito (sobreescribe si existe)
     if (parsedSheets['PIPELINE'] && parsedSheets['PIPELINE'].length > 1) {
       buildPipelineData(parsedSheets['PIPELINE']);
     }
-    
     // 3. ROTACIÓN
     if (parsedSheets['ROTACIÓN'] && parsedSheets['ROTACIÓN'].length > 1) {
       buildRotacionData(parsedSheets['ROTACIÓN']);
     }
-    
+    setProgress(91, 'Procesando personal y SST...');
     // 4. FORMACIÓN
     if (parsedSheets['FORMACION_SST'] && parsedSheets['FORMACION_SST'].length > 1) {
       buildFormacionData(parsedSheets['FORMACION_SST']);
     }
-    
-    // 5. AT ACCIDENTES
+    // 5. AT
     if (parsedSheets['AT_ACCIDENTES'] && parsedSheets['AT_ACCIDENTES'].length > 1) {
       buildATData(parsedSheets['AT_ACCIDENTES']);
     }
-    
     // 6. EG
     if (parsedSheets['EG_ENFERMEDADES'] && parsedSheets['EG_ENFERMEDADES'].length > 1) {
       buildEGData(parsedSheets['EG_ENFERMEDADES']);
     }
-    
     // 7. PERSONAL ACTIVO
     if (parsedSheets['PERSONAL_ACTIVO'] && parsedSheets['PERSONAL_ACTIVO'].length > 1) {
       buildPersonalData(parsedSheets['PERSONAL_ACTIVO']);
     }
-
+    // 8. ENTREVISTAS
+    if (parsedSheets['ENTREVISTAS_RETIRO'] && parsedSheets['ENTREVISTAS_RETIRO'].length > 1) {
+      buildEntrevistasData(parsedSheets['ENTREVISTAS_RETIRO']);
+    }
+    // 9. SINIESTRO
+    if (parsedSheets['SINIESTRO'] && parsedSheets['SINIESTRO'].length > 1) {
+      buildSiniestroData(parsedSheets['SINIESTRO']);
+    }
+    // 10. FUEROS
+    if (parsedSheets['FUEROS_SALUD'] && parsedSheets['FUEROS_SALUD'].length > 1) {
+      buildFuerosData(parsedSheets['FUEROS_SALUD']);
+    }
     setProgress(100, '¡Listo! Abriendo dashboard...');
     setTimeout(function() {
       document.getElementById('upload-screen').style.display = 'none';
       redraw();
     }, 800);
-    
   } catch(err) {
     showError('Error procesando datos: ' + err.message);
     console.error(err);
@@ -1922,58 +2066,78 @@ function buildPipelineData(rows) {
 
 // ── ROTACIÓN PROCESSOR ──────────────────────────────────────
 function buildRotacionData(rows) {
-  var data = rows.filter(function(r){ return r['ID_Empleado'] && r['ID_Empleado'] !== 'ID_Empleado'; });
+  function v(r,a,b){ return r[a]||r[b]||''; }
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['ID_Empleado']||r['NumDocumento'];
+    return id && id !== 'Numdocumento' && id !== 'ID_Empleado';
+  });
   if (data.length === 0) return;
-  
-  // Count by motivo
   var motivos = {};
-  var generos = {M:0, F:0};
+  var generos = {M:0, F:0, Masculino:0, Femenino:0};
   var ciudades = {};
   data.forEach(function(r) {
-    var m = (r['Motivo']||'OTRO').toString().toUpperCase().trim();
-    motivos[m] = (motivos[m]||0) + 1;
-    var sex = (r['Sexo']||'').toString().toUpperCase().trim();
-    if (sex === 'M') generos.M++;
-    else if (sex === 'F') generos.F++;
+    var m = (v(r,'CausalRetiro','Motivo')||'OTRO').toString().toUpperCase().trim();
+    if (m) motivos[m] = (motivos[m]||0) + 1;
+    var sex = (v(r,'Genero','Sexo')||'').toString().toUpperCase().trim();
+    if (sex==='M'||sex==='MASCULINO') generos.M++;
+    else if (sex==='F'||sex==='FEMENINO') generos.F++;
     var city = (r['Ciudad']||r['Sucursal']||'').toString().trim();
     if (city) ciudades[city] = (ciudades[city]||0)+1;
   });
-  
-  // Update KPIs in DOM
   var el = document.getElementById('rot-kpi-total');
   if (el) el.textContent = data.length.toLocaleString();
-  
-  // Store for chart use
   window._rotData = { total: data.length, motivos: motivos, generos: generos, ciudades: ciudades, rows: data };
 }
 
 // ── FORMACIÓN PROCESSOR ──────────────────────────────────────
 function buildFormacionData(rows) {
-  var data = rows.filter(function(r){ return r['ID_Actividad'] && r['ID_Actividad'] !== 'ID_Actividad' && r['TemaCapacitacion']; });
+  var data = rows.filter(function(r){
+    var t = r['Tema']||r['TemaCapacitacion']||r['ID_Actividad'];
+    return t && t !== 'Tema' && t !== 'TemaCapacitacion' && t !== 'ID_Actividad';
+  });
   if (data.length === 0) return;
   window._formData = data.map(function(r){
+    var fechaVal = r['FechaFormacion']||r['Mes']||'';
+    var mes = '';
+    if (fechaVal) {
+      var d = fechaVal instanceof Date ? fechaVal : new Date(fechaVal);
+      if (!isNaN(d.getTime())) mes = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      else mes = fechaVal.toString();
+    }
     return {
-      mes: (r['Mes']||'').toString(),
-      tema: (r['TemaCapacitacion']||'').toString(),
-      prog: parseInt(r['Programados'])||0,
-      asist: parseInt(r['Asistentes'])||0
+      mes: mes,
+      tema: (r['Tema']||r['TemaCapacitacion']||'').toString(),
+      prog: parseInt(r['PersonasProgramadas']||r['Programados'])||0,
+      asist: parseInt(r['PersonasAsistentes']||r['Asistentes'])||0,
+      responsable: (r['Responsable']||'').toString(),
+      ciudad: (r['Ciudad']||'').toString()
     };
   });
 }
 
 // ── AT PROCESSOR ────────────────────────────────────────────
 function buildATData(rows) {
-  var data = rows.filter(function(r){ return r['ID_AT'] && r['ID_AT'] !== 'ID_AT'; });
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['ID_AT']||r['NumDocumento']||r['Nombres'];
+    return id && id !== 'Numdocumento' && id !== 'ID_AT';
+  });
   if (data.length === 0) return;
-  
   var total = data.length;
-  var diasTotal = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0);},0);
-  var diasContrat = data.map(function(r){ return parseInt(r['DiasContratadoAlaFechaAT'])||0;}).filter(function(v){return v>0;});
-  var promDias = diasContrat.length > 0 ? Math.round(diasContrat.reduce(function(a,b){return a+b;},0)/diasContrat.length) : 47;
-  
-  window._atData = { total: total, diasAusentismo: diasTotal, promDiasContrat: promDias, rows: data };
-  
-  // Update KPI cards if visible
+  var diasTotal = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0); }, 0);
+  var diasContrat = data.map(function(r){ return parseInt(r['DiasContratadoAlaFechaAT'])||0; }).filter(function(v){return v>0;});
+  var promDias = diasContrat.length > 0 ? Math.round(diasContrat.reduce(function(a,b){return a+b;},0)/diasContrat.length) : 0;
+  // Build breakdowns
+  var peligros = {}, cuerpos = {}, mecanismos = {}, lesiones = {}, sucursales = {}, cargos = {}, generos = {M:0,F:0};
+  data.forEach(function(r){
+    function cnt(obj,key){ var v=(r[key]||'').toString().trim(); if(v) obj[v]=(obj[v]||0)+1; }
+    cnt(peligros,'Peligro'); cnt(cuerpos,'ParteCuerpoAfectada'); cnt(mecanismos,'MecanismoAccidente');
+    cnt(lesiones,'TipoLesion'); cnt(sucursales,'Sucursal'); cnt(cargos,'Cargo');
+    var sex=(r['Genero']||r['Sexo']||'').toString().toUpperCase().trim();
+    if(sex==='M'||sex==='MASCULINO') generos.M++; else if(sex==='F'||sex==='FEMENINO') generos.F++;
+  });
+  window._atData = { total:total, diasAusentismo:diasTotal, promDiasContrat:promDias,
+    peligros:peligros, cuerpos:cuerpos, mecanismos:mecanismos, lesiones:lesiones,
+    sucursales:sucursales, cargos:cargos, generos:generos, rows:data };
   updateATKPIs();
 }
 
@@ -1987,33 +2151,192 @@ function updateATKPIs() {
 
 // ── EG PROCESSOR ────────────────────────────────────────────
 function buildEGData(rows) {
-  var data = rows.filter(function(r){ return r['ID_Caso'] && r['ID_Caso'] !== 'ID_Caso'; });
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['ID_Caso']||r['NumDocumento']||r['Nombres'];
+    return id && id !== 'Numdocumento' && id !== 'ID_Caso';
+  });
   if (data.length === 0) return;
   var total = data.length;
-  var dias = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0);},0);
-  window._egData = { total: total, diasAusentismo: dias, rows: data };
+  var dias = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0); }, 0);
+  var diagnosticos = {}, generos = {M:0,F:0}, ciudades = {}, cargos = {};
+  data.forEach(function(r){
+    function cnt(obj,key){ var v=(r[key]||'').toString().trim(); if(v) obj[v]=(obj[v]||0)+1; }
+    cnt(diagnosticos,'GrupoDiagnostico'); cnt(ciudades,'Ciudad'); cnt(cargos,'Cargo');
+    var sex=(r['Genero']||r['Sexo']||'').toString().toUpperCase().trim();
+    if(sex==='M'||sex==='MASCULINO') generos.M++; else if(sex==='F'||sex==='FEMENINO') generos.F++;
+  });
+  window._egData = { total:total, diasAusentismo:dias,
+    diagnosticos:diagnosticos, generos:generos, ciudades:ciudades, cargos:cargos, rows:data };
 }
 
 // ── PERSONAL ACTIVO PROCESSOR ───────────────────────────────
 function buildPersonalData(rows) {
-  var data = rows.filter(function(r){ return r['ID_Empleado'] && r['ID_Empleado'] !== 'ID_Empleado' && (r['Estado']||'').toString().toUpperCase()==='ACTIVO'; });
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['ID_Empleado']||r['NumDocumento'];
+    var est = (r['Estado']||'').toString().toUpperCase();
+    return id && id !== 'Numdocumento' && id !== 'ID_Empleado' && est === 'ACTIVO';
+  });
+  if (data.length === 0) {
+    // Accept all rows if none match ACTIVO (maybe Estado has different values)
+    data = rows.filter(function(r){ return r['Numdocumento']||r['ID_Empleado']||r['Nombres']; });
+    if (data.length && data[0]['Numdocumento']==='Numdocumento') data.shift();
+  }
   if (data.length === 0) return;
-  
   var sucursales = {}, cargos = {}, areas = {};
   data.forEach(function(r){
-    var suc = (r['Sucursal']||'').toString().trim();
+    var suc = (r['Ciudad']||r['Sucursal']||'').toString().trim();
     var cargo = (r['Cargo']||'').toString().trim();
-    var area = (r['Area']||'').toString().trim();
+    var area = (r['AreaOperativa']||r['Area']||'').toString().trim();
     if (suc) sucursales[suc] = (sucursales[suc]||0)+1;
     if (cargo) cargos[cargo] = (cargos[cargo]||0)+1;
     if (area) areas[area] = (areas[area]||0)+1;
   });
-  
   window._personalData = { total: data.length, sucursales: sucursales, cargos: cargos, areas: areas, rows: data };
-  
-  // Update KPI
   var el = document.getElementById('act-kpi-total');
   if (el) el.textContent = data.length.toLocaleString();
+}
+
+// ── PIPELINE DESDE BASE ──────────────────────────────────────
+function buildPipelineFromBase(rows) {
+  var data = rows.filter(function(r){ return r['OrdenServicio'] && r['OrdenServicio'] !== 'OrdenServicio'; });
+  if (data.length === 0) return;
+  PIPE_DATA.length = 0;
+  // Agrupar por PerfilCargo + Sucursal
+  var grupos = {};
+  data.forEach(function(r){
+    var cargo = (r['PerfilCargo']||r['Cargo']||'').toString().trim();
+    var suc = (r['Sucursal1']||r['Sucursal']||r['Ciudad']||'').toString().trim();
+    if (!cargo || !suc) return;
+    var key = cargo + '||' + suc;
+    if (!grupos[key]) grupos[key] = {c:cargo, s:suc, r:0, se:0, co:0, e:0};
+    var estado = (r['Estado']||'').toString().toUpperCase().trim();
+    var pend = parseInt(r['PendientesContratar'])||parseInt(r['Pendiente por contratar'])||0;
+    var cont = parseInt(r['Contratados'])||0;
+    if (estado === 'ABIERTO') {
+      grupos[key].r += Math.max(0, pend);
+      grupos[key].co += cont;
+    } else if (estado === 'CERRADO') {
+      grupos[key].e += cont;
+    } else {
+      grupos[key].se += pend > 0 ? pend : cont;
+    }
+  });
+  Object.values(grupos).forEach(function(g){
+    if ((g.r+g.se+g.co+g.e) > 0) PIPE_DATA.push(g);
+  });
+}
+
+// ── ENTREVISTAS PARSER ────────────────────────────────────────
+function buildEntrevistasData(rows) {
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['Nombres']||r['ID'];
+    return id && id !== 'Numdocumento';
+  });
+  if (data.length === 0) return;
+  // Calcular promedios de preguntas P1-P5
+  var pCols = ['P1_TratoJefe','P2_TrabajoEsperado','P3_Retroalimentacion','P4_Herramientas','P5_AplicoConocimientos'];
+  var pLabels = ['¿Trato adecuado del jefe?','¿El trabajo fue el esperado?','¿Recibió retroalimentación?','¿Contó con herramientas?','¿Aplicó sus conocimientos?'];
+  var preguntas = pCols.map(function(col, i){
+    var si=0, no=0;
+    data.forEach(function(r){
+      var v = parseInt(r[col]);
+      if (!isNaN(v)) { if(v >= 3) si++; else no++; }
+    });
+    return {q: pLabels[i], si: si, no: no};
+  });
+  // Motivos y percepción
+  var motivos = {}, percepcion = {Positiva:0, Neutra:0, Negativa:0};
+  var cargos = {}, sucursales = {};
+  data.forEach(function(r){
+    var m = (r['MotivoRetiro']||'').toString().trim();
+    if (m) motivos[m] = (motivos[m]||0)+1;
+    var p = (r['PercepcionGeneral']||'').toString().toUpperCase().trim();
+    if (p.includes('POS')||p.includes('BUEN')||p.includes('EXCE')) percepcion.Positiva++;
+    else if (p.includes('REG')||p.includes('NEU')) percepcion.Neutra++;
+    else if (p.includes('MAL')||p.includes('NEG')||p.includes('PESIM')) percepcion.Negativa++;
+    var cargo = (r['Cargo']||'').toString().trim();
+    if (cargo) cargos[cargo] = (cargos[cargo]||0)+1;
+    var suc = (r['Sucursal']||r['Ciudad']||'').toString().trim();
+    if (suc) sucursales[suc] = (sucursales[suc]||0)+1;
+  });
+  window._entData = { total: data.length, preguntas: preguntas, motivos: motivos,
+    percepcion: percepcion, cargos: cargos, sucursales: sucursales, rows: data };
+}
+
+// ── SINIESTRO PARSER ──────────────────────────────────────────
+function buildSiniestroData(rows) {
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['Nombres']||r['ID'];
+    return id && id !== 'Numdocumento';
+  });
+  if (data.length === 0) return;
+  var estados = {}, tipos = {}, desenlaces = {};
+  data.forEach(function(r){
+    function cnt(obj,key){ var v=(r[key]||'').toString().trim(); if(v) obj[v]=(obj[v]||0)+1; }
+    cnt(estados,'Estado'); cnt(tipos,'TipoSiniestro'); cnt(desenlaces,'Calificacion');
+  });
+  var total = data.length;
+  var cerrados = data.filter(function(r){ return (r['Estado']||'').toString().toUpperCase().includes('CALIFICAD'); }).length;
+  window._sinData = { total: total, cerrados: cerrados, estados: estados, tipos: tipos, desenlaces: desenlaces, rows: data };
+  // Actualizar KPIs de siniestro
+  var labTotal = document.querySelector('#sec-siniestro .kc-val');
+  if (labTotal) labTotal.textContent = total;
+}
+
+// ── FUEROS PARSER ────────────────────────────────────────────
+function buildFuerosData(rows) {
+  var data = rows.filter(function(r){
+    var id = r['Numdocumento']||r['Nombres']||r['ID'];
+    return id && id !== 'Numdocumento';
+  });
+  if (data.length === 0) return;
+  var tipos = {}, diagnosticos = {}, riesgos = {Critico:0, Alto:0, Controlado:0};
+  data.forEach(function(r){
+    var t = (r['TipoFuero']||'').toString().trim();
+    if (t) tipos[t] = (tipos[t]||0)+1;
+    var d = (r['Observaciones']||'').toString().substring(0,30).trim();
+    if (d) diagnosticos[d] = (diagnosticos[d]||0)+1;
+    var nivel = (r['NivelRiesgo']||'').toString().toUpperCase().trim();
+    if (nivel.includes('CRITI')) riesgos.Critico++;
+    else if (nivel.includes('ALTO')) riesgos.Alto++;
+    else riesgos.Controlado++;
+  });
+  window._fuerosData = { total: data.length, tipos: tipos, diagnosticos: diagnosticos, riesgos: riesgos, rows: data };
+  renderFuerosTable(data);
+  // Actualizar KPI badges
+  function setKPI(sel, val){ var e=document.querySelector(sel); if(e) e.textContent=val; }
+}
+
+function renderFuerosTable(rows) {
+  var tbody = document.getElementById('fueros-tbody');
+  if (!tbody || !rows || !rows.length) return;
+  tbody.innerHTML = rows.map(function(r, i){
+    var nivel = (r['NivelRiesgo']||'').toString().toUpperCase();
+    var riesgo = nivel.includes('CRITI') ? 'critico' : nivel.includes('ALTO') ? 'alto' : 'control';
+    var badgeCls = riesgo==='critico' ? 'bd' : riesgo==='alto' ? 'bw' : 'bs';
+    var riesgoLabel = riesgo==='critico' ? '🔴 Crítico' : riesgo==='alto' ? '🟡 Alto' : '🟢 Control';
+    var tipo = (r['TipoFuero']||'').toString();
+    var tipoBadge = tipo.toUpperCase().includes('AT') ? 'bd' : 'bi';
+    var cargo = (r['Cargo']||'').toString();
+    var suc = (r['Sucursal']||r['Ciudad']||'').toString();
+    var obs = (r['Observaciones']||'—').toString();
+    var fi = (r['FechaInicio']||'').toString().substring(0,10);
+    var ff = (r['FechaFin']||'').toString().substring(0,10);
+    var doc = r['Numdocumento']||r['Nombres']||('F-'+(i+1));
+    return '<tr data-riesgo="'+riesgo+'">'
+      +'<td>'+doc+'</td>'
+      +'<td><span class="badge '+tipoBadge+'">'+tipo+'</span></td>'
+      +'<td>'+cargo+'</td>'
+      +'<td>'+suc+'</td>'
+      +'<td>'+obs+'</td>'
+      +'<td>'+fi+'</td>'
+      +'<td>—</td><td>—</td>'
+      +'<td><span class="badge '+badgeCls+'">Activo</span></td>'
+      +'<td>'+(ff||'—')+'</td>'
+      +'<td><span class="badge '+badgeCls+'">'+riesgoLabel+'</span></td>'
+      +'<td>'+(r['EstadoGestion']||'—')+'</td>'
+      +'</tr>';
+  }).join('');
 }
 
 // ── DEMO / BYPASS ────────────────────────────────────────────
