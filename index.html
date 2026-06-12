@@ -261,6 +261,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 .cc.chart-hidden{opacity:.7}
 /* Login screen */
 #login-screen input:focus{border-color:#C0272D!important;outline:none}
+/* Admin panel */
+.adm-card{background:#fff;border-radius:9px;border:1px solid var(--graym);padding:18px;margin-bottom:16px}
+.adm-card h3{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.adm-table{width:100%;border-collapse:collapse;font-size:12px}
+.adm-table th{background:var(--grayl);padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--graym)}
+.adm-table td{padding:8px 10px;border-bottom:.5px solid var(--graym);vertical-align:middle}
+.adm-table tr:hover td{background:var(--grayl)}
+.adm-inp{border:1px solid var(--graym);border-radius:6px;padding:5px 9px;font-size:12px;background:var(--grayl);color:var(--text);outline:none;font-family:inherit;width:100%}
+.adm-inp:focus{border-color:var(--red)}
+.adm-btn{border:none;border-radius:6px;padding:5px 13px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.adm-btn-red{background:var(--red);color:#fff}
+.adm-btn-gray{background:var(--grayl);color:var(--gray);border:1px solid var(--graym)}
+.adm-btn-del{background:var(--redl);color:var(--red2);border:none;border-radius:5px;padding:3px 9px;font-size:10.5px;font-weight:700;cursor:pointer}
+.adm-btn-edit{background:var(--infol);color:var(--info);border:none;border-radius:5px;padding:3px 9px;font-size:10.5px;font-weight:700;cursor:pointer}
+.adm-role-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.adm-role-admin{background:var(--redl);color:var(--red2)}
+.adm-role-client{background:var(--infol);color:var(--info)}
 </style>
 
 <nav class="sb">
@@ -285,7 +302,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="nav" onclick="go('siniestro',this)"><span class="nav-ic">🩺</span><span>Siniestro &amp; Fueros</span></div>
     <div class="nav" onclick="go('formacion',this)"><span class="nav-ic">📚</span><span>Formación SST</span></div>
   </div>
-  <div class="sb-foot">v4.0 · Datos reales · Jun 2026</div>
+  <div class="sb-grp" id="sb-admin-grp" style="display:none"><div class="sb-grp-lbl">Administración</div>
+    <div class="nav" onclick="go('admin',this)"><span class="nav-ic">⚙️</span><span>Gestión de Usuarios</span></div>
+  </div>
+  <div class="sb-foot">v4.1 · Datos reales · Jun 2026</div>
 </nav>
 
 <div class="main">
@@ -857,6 +877,77 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <div class="cg t23">
     <div class="cc"><div class="cc-h"><div class="cc-title">Programados vs Asistentes por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-form-pa"></canvas></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title">% Cobertura por Tema</div></div><div id="pr-form-cob"></div></div>
+  </div>
+</div>
+
+<!-- ADMIN USUARIOS -->
+<div class="sec" id="sec-admin">
+  <div class="sh"><div class="sh-ic">⚙️</div><div><h2>Gestión de Usuarios</h2><p>Crea, edita y elimina usuarios del dashboard</p></div></div>
+  <div class="adm-card">
+    <h3>➕ Nuevo Usuario</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">USUARIO</div>
+        <input class="adm-inp" id="nu-user" placeholder="ej: cliente_abc" autocomplete="off">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">CONTRASEÑA</div>
+        <input class="adm-inp" id="nu-pass" type="password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">ROL</div>
+        <select class="adm-inp" id="nu-role" onchange="toggleClienteField()">
+          <option value="client">Cliente</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div id="nu-cliente-wrap">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">CLIENTE ASIGNADO</div>
+        <input class="adm-inp" id="nu-cliente" placeholder="Nombre exacto del cliente" list="clientes-list">
+        <datalist id="clientes-list"></datalist>
+      </div>
+      <div><button class="adm-btn adm-btn-red" onclick="createUser()">Crear Usuario</button></div>
+    </div>
+    <div id="nu-error" style="color:var(--red);font-size:11px;margin-top:8px;display:none"></div>
+    <div id="nu-ok" style="color:var(--ok);font-size:11px;margin-top:8px;display:none"></div>
+  </div>
+  <div class="adm-card">
+    <h3>👥 Usuarios Activos <span id="users-count" style="font-size:10px;font-weight:400;color:var(--muted)"></span></h3>
+    <div class="tscroll">
+      <table class="adm-table">
+        <thead><tr><th>Usuario</th><th>Rol</th><th>Cliente Asignado</th><th>Último acceso</th><th>Acciones</th></tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="edit-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:5000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:480px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.2)">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:18px">✏️ Editar Usuario: <span id="edit-username"></span></h3>
+      <div style="display:grid;gap:12px">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">NUEVA CONTRASEÑA <span style="font-weight:400">(dejar vacío para no cambiar)</span></div>
+          <input class="adm-inp" id="edit-pass" type="password" placeholder="Nueva contraseña">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">ROL</div>
+          <select class="adm-inp" id="edit-role" onchange="toggleEditClienteField()">
+            <option value="client">Cliente</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div id="edit-cliente-wrap">
+          <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px">CLIENTE ASIGNADO</div>
+          <input class="adm-inp" id="edit-cliente" placeholder="Nombre exacto del cliente" list="clientes-list">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+        <button class="adm-btn adm-btn-gray" onclick="closeEditModal()">Cancelar</button>
+        <button class="adm-btn adm-btn-red" onclick="saveEditUser()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+  <div style="background:var(--infol);border-radius:8px;padding:14px 16px;font-size:11.5px;color:var(--info);line-height:1.6">
+    <strong>ℹ️ Nota:</strong> Los usuarios se guardan en el navegador (localStorage). Si abres el dashboard en otro dispositivo deberás crearlos de nuevo. Para sincronización multi-dispositivo, contacta al equipo técnico.
   </div>
 </div>
 
@@ -2156,6 +2247,192 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {}
 });
+
+
+// ═══════════════════════════════════════════════════════
+// ADMIN USER MANAGEMENT
+// ═══════════════════════════════════════════════════════
+
+var STORAGE_KEY = 'summar_users_v1';
+
+function loadUsers() {
+  try {
+    var s = localStorage.getItem(STORAGE_KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  // Default users
+  return JSON.parse(JSON.stringify(USERS_DEFAULT));
+}
+
+function saveUsers(users) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(users)); } catch(e) {}
+  // Sync runtime USERS object
+  USERS = users;
+}
+
+function renderUsersTable() {
+  var users = loadUsers();
+  var keys = Object.keys(users);
+  var tbody = document.getElementById('users-tbody');
+  var countEl = document.getElementById('users-count');
+  if (countEl) countEl.textContent = '(' + keys.length + ' usuarios)';
+  if (!tbody) return;
+  if (!keys.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No hay usuarios registrados</td></tr>'; return; }
+  tbody.innerHTML = keys.map(function(u) {
+    var ud = users[u];
+    var roleBadge = ud.role === 'admin'
+      ? '<span class="adm-role-badge adm-role-admin">Admin</span>'
+      : '<span class="adm-role-badge adm-role-client">Cliente</span>';
+    var clienteText = ud.cliente || '<span style="color:var(--muted)">— Todos</span>';
+    var lastAccess = ud.lastAccess ? new Date(ud.lastAccess).toLocaleString('es-CO', {dateStyle:'short',timeStyle:'short'}) : '<span style="color:var(--muted)">Nunca</span>';
+    var isSelf = currentUser && currentUser.username === u;
+    return '<tr>'
+      + '<td><strong>' + u + '</strong>' + (isSelf ? ' <span style="font-size:9px;color:var(--ok);font-weight:700">← tú</span>' : '') + '</td>'
+      + '<td>' + roleBadge + '</td>'
+      + '<td>' + clienteText + '</td>'
+      + '<td>' + lastAccess + '</td>'
+      + '<td style="display:flex;gap:6px">'
+      + '<button class="adm-btn-edit" onclick="openEditModal('' + u + '')">✏️ Editar</button>'
+      + (isSelf ? '' : '<button class="adm-btn-del" onclick="deleteUser('' + u + '')">🗑️ Eliminar</button>')
+      + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function toggleClienteField() {
+  var role = document.getElementById('nu-role').value;
+  var wrap = document.getElementById('nu-cliente-wrap');
+  if (wrap) wrap.style.display = role === 'admin' ? 'none' : '';
+}
+
+function toggleEditClienteField() {
+  var role = document.getElementById('edit-role').value;
+  var wrap = document.getElementById('edit-cliente-wrap');
+  if (wrap) wrap.style.display = role === 'admin' ? 'none' : '';
+}
+
+function createUser() {
+  var uEl = document.getElementById('nu-user');
+  var pEl = document.getElementById('nu-pass');
+  var rEl = document.getElementById('nu-role');
+  var cEl = document.getElementById('nu-cliente');
+  var errEl = document.getElementById('nu-error');
+  var okEl = document.getElementById('nu-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  var u = (uEl.value || '').trim().toLowerCase().replace(/\s+/g,'_');
+  var p = (pEl.value || '').trim();
+  var r = rEl.value;
+  var c = (cEl.value || '').trim();
+
+  if (!u) { errEl.textContent = 'El nombre de usuario es obligatorio'; errEl.style.display=''; return; }
+  if (u.length < 3) { errEl.textContent = 'El usuario debe tener al menos 3 caracteres'; errEl.style.display=''; return; }
+  if (!p || p.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres'; errEl.style.display=''; return; }
+  if (r === 'client' && !c) { errEl.textContent = 'Debes asignar un cliente para el rol Cliente'; errEl.style.display=''; return; }
+
+  var users = loadUsers();
+  if (users[u]) { errEl.textContent = 'Ya existe un usuario con ese nombre'; errEl.style.display=''; return; }
+
+  users[u] = { password: p, role: r, cliente: r === 'admin' ? null : c };
+  saveUsers(users);
+
+  okEl.textContent = '✅ Usuario "' + u + '" creado correctamente';
+  okEl.style.display = '';
+  uEl.value = ''; pEl.value = ''; cEl.value = '';
+  renderUsersTable();
+  updateClientesDatalist();
+}
+
+function deleteUser(u) {
+  if (!confirm('¿Eliminar el usuario "' + u + '"? Esta acción no se puede deshacer.')) return;
+  var users = loadUsers();
+  delete users[u];
+  saveUsers(users);
+  renderUsersTable();
+}
+
+var _editingUser = null;
+function openEditModal(u) {
+  _editingUser = u;
+  var users = loadUsers();
+  var ud = users[u];
+  if (!ud) return;
+  document.getElementById('edit-username').textContent = u;
+  document.getElementById('edit-pass').value = '';
+  document.getElementById('edit-role').value = ud.role || 'client';
+  document.getElementById('edit-cliente').value = ud.cliente || '';
+  toggleEditClienteField();
+  var modal = document.getElementById('edit-modal');
+  modal.style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+  _editingUser = null;
+}
+
+function saveEditUser() {
+  if (!_editingUser) return;
+  var users = loadUsers();
+  var ud = users[_editingUser];
+  if (!ud) return;
+  var newPass = (document.getElementById('edit-pass').value || '').trim();
+  var newRole = document.getElementById('edit-role').value;
+  var newCliente = (document.getElementById('edit-cliente').value || '').trim();
+  if (newRole === 'client' && !newCliente) { alert('Debes asignar un cliente para el rol Cliente'); return; }
+  if (newPass && newPass.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
+  if (newPass) ud.password = newPass;
+  ud.role = newRole;
+  ud.cliente = newRole === 'admin' ? null : newCliente;
+  saveUsers(users);
+  closeEditModal();
+  renderUsersTable();
+}
+
+function updateClientesDatalist() {
+  var dl = document.getElementById('clientes-list');
+  if (!dl) return;
+  var sel = document.getElementById('f-cliente');
+  if (!sel) return;
+  var opts = '';
+  for (var i = 1; i < sel.options.length; i++) {
+    opts += '<option value="' + sel.options[i].value + '">';
+  }
+  dl.innerHTML = opts;
+}
+
+// Record last access on login
+var _origDoLogin = doLogin;
+doLogin = function() {
+  var u = (document.getElementById('login-user').value || '').trim();
+  var users = loadUsers();
+  if (users[u]) { users[u].lastAccess = Date.now(); saveUsers(users); }
+  _origDoLogin();
+};
+
+// Show admin panel in sidebar only for admin role
+function updateAdminVisibility() {
+  var grp = document.getElementById('sb-admin-grp');
+  if (grp) grp.style.display = (currentUser && currentUser.role === 'admin') ? '' : 'none';
+}
+
+// Patch loadDemoData to update admin UI
+var _origLoadDemo2 = loadDemoData;
+loadDemoData = function() {
+  _origLoadDemo2();
+  updateAdminVisibility();
+  updateClientesDatalist();
+};
+
+// Override USERS to use localStorage on startup
+var USERS_DEFAULT = USERS; // keep original defaults
+USERS = loadUsers();
+// If localStorage empty, seed with defaults
+(function() {
+  var stored = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch(e) {}
+  if (!stored) { saveUsers(USERS_DEFAULT); }
+})();
 
 // Patch loadDemoData to also init toggles/switchers
 var _origLoadDemo = loadDemoData;
