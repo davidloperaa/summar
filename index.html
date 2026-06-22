@@ -1938,7 +1938,17 @@ function readAllFiles(idx) {
 
 function markSheetLoaded(sheetName, ok) {
   // BASE es el alias de SELECCIÓN en el nuevo template
-  var aliases = { 'SELECCIÓN': 'SELECCION', 'SELECCION': 'SELECCIÓN' };
+  var aliases = {
+    'SELECCIÓN': 'SELECCION', 'SELECCION': 'SELECCIÓN',
+    'ROTACION': 'ROTACIÓN', 'ROTACIÓN': 'ROTACION',
+    'FORMACION': 'FORMACION_SST', 'FORMACIÓN': 'FORMACION_SST',
+    'AT': 'AT_ACCIDENTES', 'AT_ACCIDENTES': 'AT',
+    'EG': 'EG_ENFERMEDADES', 'EG_ENFERMEDADES': 'EG',
+    'PERSONAL': 'PERSONAL_ACTIVO', 'PERSONAL_ACTIVO': 'PERSONAL',
+    'ENTREVISTAS': 'ENTREVISTAS_RETIRO', 'ENTREVISTAS_RETIRO': 'ENTREVISTAS',
+    'SINIESTROS': 'SINIESTRO', 'SINIESTRO': 'SINIESTROS',
+    'FUEROS': 'FUEROS_SALUD', 'FUEROS_SALUD': 'FUEROS'
+  };
   var chips = document.querySelectorAll('.sheet-chip');
   for (var i = 0; i < chips.length; i++) {
     var ds = chips[i].getAttribute('data-sheet');
@@ -1980,39 +1990,31 @@ function buildDashboardFromExcel() {
     if (parsedSheets['PIPELINE'] && parsedSheets['PIPELINE'].length > 1) {
       buildPipelineData(parsedSheets['PIPELINE']);
     }
-    // 3. ROTACIÓN
-    if (parsedSheets['ROTACIÓN'] && parsedSheets['ROTACIÓN'].length > 1) {
-      buildRotacionData(parsedSheets['ROTACIÓN']);
-    }
+    // 3. ROTACIÓN (acepta variantes de nombre)
+    var rotRows = parsedSheets['ROTACIÓN'] || parsedSheets['ROTACION'];
+    if (rotRows && rotRows.length > 1) { buildRotacionData(rotRows); }
     setProgress(91, 'Procesando personal y SST...');
     // 4. FORMACIÓN
-    if (parsedSheets['FORMACION_SST'] && parsedSheets['FORMACION_SST'].length > 1) {
-      buildFormacionData(parsedSheets['FORMACION_SST']);
-    }
+    var formRows = parsedSheets['FORMACION_SST'] || parsedSheets['FORMACION'] || parsedSheets['FORMACIÓN'];
+    if (formRows && formRows.length > 1) { buildFormacionData(formRows); }
     // 5. AT
-    if (parsedSheets['AT_ACCIDENTES'] && parsedSheets['AT_ACCIDENTES'].length > 1) {
-      buildATData(parsedSheets['AT_ACCIDENTES']);
-    }
+    var atRows = parsedSheets['AT_ACCIDENTES'] || parsedSheets['AT'];
+    if (atRows && atRows.length > 1) { buildATData(atRows); }
     // 6. EG
-    if (parsedSheets['EG_ENFERMEDADES'] && parsedSheets['EG_ENFERMEDADES'].length > 1) {
-      buildEGData(parsedSheets['EG_ENFERMEDADES']);
-    }
+    var egRows = parsedSheets['EG_ENFERMEDADES'] || parsedSheets['EG'];
+    if (egRows && egRows.length > 1) { buildEGData(egRows); }
     // 7. PERSONAL ACTIVO
-    if (parsedSheets['PERSONAL_ACTIVO'] && parsedSheets['PERSONAL_ACTIVO'].length > 1) {
-      buildPersonalData(parsedSheets['PERSONAL_ACTIVO']);
-    }
+    var perRows = parsedSheets['PERSONAL_ACTIVO'] || parsedSheets['PERSONAL'];
+    if (perRows && perRows.length > 1) { buildPersonalData(perRows); }
     // 8. ENTREVISTAS
-    if (parsedSheets['ENTREVISTAS_RETIRO'] && parsedSheets['ENTREVISTAS_RETIRO'].length > 1) {
-      buildEntrevistasData(parsedSheets['ENTREVISTAS_RETIRO']);
-    }
+    var entRows = parsedSheets['ENTREVISTAS_RETIRO'] || parsedSheets['ENTREVISTAS'];
+    if (entRows && entRows.length > 1) { buildEntrevistasData(entRows); }
     // 9. SINIESTRO
-    if (parsedSheets['SINIESTRO'] && parsedSheets['SINIESTRO'].length > 1) {
-      buildSiniestroData(parsedSheets['SINIESTRO']);
-    }
+    var sinRows = parsedSheets['SINIESTRO'] || parsedSheets['SINIESTROS'];
+    if (sinRows && sinRows.length > 1) { buildSiniestroData(sinRows); }
     // 10. FUEROS
-    if (parsedSheets['FUEROS_SALUD'] && parsedSheets['FUEROS_SALUD'].length > 1) {
-      buildFuerosData(parsedSheets['FUEROS_SALUD']);
-    }
+    var fueRows = parsedSheets['FUEROS_SALUD'] || parsedSheets['FUEROS'];
+    if (fueRows && fueRows.length > 1) { buildFuerosData(fueRows); }
     setProgress(100, '¡Listo! Abriendo dashboard...');
     setTimeout(function() {
       document.getElementById('upload-screen').style.display = 'none';
@@ -3111,37 +3113,97 @@ function downloadTemplate(type) {
 
 function getTemplateSheets(withDemo) {
   var clients = loadClients();
-  var cli1 = clients[0] ? clients[0].nombre : 'CLIENTE DEMO A';
-  var nit1 = clients[0] ? clients[0].nit : '900.123.456-1';
+  var cli1 = clients[0] ? clients[0].nombre : 'Mi Empresa S.A.S';
 
-  var selHdr = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1","Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable","OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio","TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas","PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio","HOY","Diferencia","Cumplimiento","RETRO CLIENTE"];
-  var paHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa","Estado","ObservacionTemporalidad"];
-  var rotHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","FechaRetiro","DiasLaborados","CausalRetiro","TipoRetiro","Genero","ObservacionRetiro"];
-  var entHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","FechaRetiro","FechaEntrevista","Entrevistador","Responsable","P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion","P4_Herramientas","P5_AplicoConocimientos","MotivoRetiro","PercepcionGeneral","Comentarios"];
-  var atHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad","FechaAccidente","TipoAccidente","MecanismoAccidente","AgenteCausa","ParteCuerpoAfectada","TipoLesion","DiasIncapacidad","Peligro","Estado","Descripcion"];
-  var egHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad","FechaInicio","FechaFin","DiasIncapacidad","Diagnostico","GrupoDiagnostico","TipoIncapacidad","Genero","Edad"];
-  var formHdr = ["Empresa","NIT","Cliente","Sucursal","Ciudad","FechaFormacion","Tema","Modalidad","Duración (hrs)","PersonasProgramadas","PersonasAsistentes","Responsable","Observaciones"];
-  var sinHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","FechaCalificacion","TipoSiniestro","Estado","Calificacion","PorcentajePerdida","EntidadCalificadora","DiasCalificacion","Observaciones"];
-  var fuHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","TipoFuero","FechaInicio","FechaFin","NivelRiesgo","EstadoGestion","Observaciones"];
+  // INSTRUCCIONES sheet (always first)
+  var instrData = [
+    ["PLANTILLA SUMMAR - DASHBOARD OPERATIVO HR"],
+    [],
+    ["HOJA","DESCRIPCIÓN","COLUMNAS CLAVE PARA EL DASHBOARD"],
+    ["SELECCION","Órdenes de servicio. Alimenta: Resumen Ejecutivo, Pipeline, Módulo Selección","OrdenServicio, Empresa, Ciudad, Responsable, PersonasSolicitadas, Contratados, PendientesContratar, Estado, EnReclutamiento, EnSeleccion, EnContratacion"],
+    ["ROTACION","Retiros de personal. Alimenta: Módulo Rotación y Personal Activo","Numdocumento, CausalRetiro, Genero, Ciudad, FechaRetiro, DiasLaborados"],
+    ["PERSONAL_ACTIVO","Plantilla activa. Alimenta: Módulo Personal Activo","Numdocumento, Estado (debe ser ACTIVO), Cargo, Ciudad, AreaOperativa"],
+    ["AT_ACCIDENTES","Accidentes de trabajo. Alimenta: Módulo AT","Numdocumento, DiasIncapacidad, Peligro, ParteCuerpoAfectada, MecanismoAccidente, TipoLesion, Sucursal, Cargo, Genero"],
+    ["EG_ENFERMEDADES","Incapacidades por enfermedad general. Alimenta: Módulo EG","Numdocumento, DiasIncapacidad, GrupoDiagnostico, Ciudad, Cargo, Genero"],
+    ["FORMACION_SST","Capacitaciones. Alimenta: Módulo Formación","Tema, FechaFormacion, PersonasProgramadas, PersonasAsistentes, Responsable, Ciudad"],
+    ["ENTREVISTAS_RETIRO","Entrevistas de salida. Alimenta: Módulo Entrevistas","Numdocumento, P1_TratoJefe..P5_AplicoConocimientos (escala 1-5), MotivoRetiro, PercepcionGeneral, Cargo, Sucursal"],
+    ["SINIESTRO","Siniestros laborales. Alimenta: Módulo Siniestros","Numdocumento, Estado, TipoSiniestro, Calificacion"],
+    ["FUEROS_SALUD","Trabajadores con fuero. Alimenta: Módulo Fueros","Numdocumento, TipoFuero, NivelRiesgo, Observaciones, Cargo, Sucursal, FechaInicio, FechaFin, EstadoGestion"],
+    [],
+    ["NOTAS IMPORTANTES:"],
+    ["• No renombres ni elimines hojas. La primera fila de cada hoja es el encabezado (no borrar)."],
+    ["• En PERSONAL_ACTIVO: columna Estado debe contener exactamente 'ACTIVO' (mayúsculas)."],
+    ["• En ENTREVISTAS_RETIRO: PercepcionGeneral = 'Positiva', 'Neutral' o 'Negativa'."],
+    ["• En SELECCION: Estado válidos = 'En proceso', 'Completada', 'Cancelada'."],
+    ["• El Pipeline se calcula automáticamente desde SELECCION usando EnReclutamiento, EnSeleccion, EnContratacion."],
+  ];
+
+  // Column headers that exactly match what each parser reads
+  var selHdr  = ["OrdenServicio","FechaCreacion","Empresa","Cliente","Responsable","Ciudad","PersonasSolicitadas","Contratados","PendientesContratar","Estado","Cumplimiento","EnReclutamiento","EnSeleccion","EnContratacion","PerfilCargo","Sucursal"];
+  var rotHdr  = ["Numdocumento","NombreEmpleado","Cargo","Ciudad","Sucursal","FechaIngreso","FechaRetiro","CausalRetiro","Genero","DiasLaborados","Empresa"];
+  var paHdr   = ["Numdocumento","NombreEmpleado","Cargo","Ciudad","Sucursal","AreaOperativa","Estado","Empresa"];
+  var atHdr   = ["Numdocumento","Nombres","Cargo","Sucursal","Ciudad","Genero","DiasIncapacidad","Peligro","ParteCuerpoAfectada","MecanismoAccidente","TipoLesion"];
+  var egHdr   = ["Numdocumento","Nombres","Cargo","Ciudad","Genero","DiasIncapacidad","GrupoDiagnostico"];
+  var formHdr = ["Tema","FechaFormacion","PersonasProgramadas","PersonasAsistentes","Responsable","Ciudad"];
+  var entHdr  = ["Numdocumento","Nombres","Cargo","Sucursal","MotivoRetiro","P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion","P4_Herramientas","P5_AplicoConocimientos","PercepcionGeneral"];
+  var sinHdr  = ["Numdocumento","Nombres","Estado","TipoSiniestro","Calificacion","Ciudad"];
+  var fuHdr   = ["Numdocumento","Nombres","Cargo","Sucursal","TipoFuero","FechaInicio","FechaFin","EstadoGestion","NivelRiesgo","Observaciones"];
 
   var sheets = [
-    { name: 'SELECCION', data: [selHdr] },
-    { name: 'PERSONAL_ACTIVO', data: [paHdr] },
-    { name: 'ROTACIÓN', data: [rotHdr] },
+    { name: 'INSTRUCCIONES', data: instrData },
+    { name: 'SELECCION',       data: [selHdr]  },
+    { name: 'ROTACION',        data: [rotHdr]  },
+    { name: 'PERSONAL_ACTIVO', data: [paHdr]   },
+    { name: 'AT_ACCIDENTES',   data: [atHdr]   },
+    { name: 'EG_ENFERMEDADES', data: [egHdr]   },
+    { name: 'FORMACION_SST',   data: [formHdr] },
     { name: 'ENTREVISTAS_RETIRO', data: [entHdr] },
-    { name: 'AT_ACCIDENTES', data: [atHdr] },
-    { name: 'EG_ENFERMEDADES', data: [egHdr] },
-    { name: 'FORMACION_SST', data: [formHdr] },
-    { name: 'SINIESTRO', data: [sinHdr] },
-    { name: 'FUEROS_SALUD', data: [fuHdr] }
+    { name: 'SINIESTRO',       data: [sinHdr]  },
+    { name: 'FUEROS_SALUD',    data: [fuHdr]   }
   ];
 
   if (withDemo) {
-    // Add 3 demo rows to BASE
-    sheets[0].data.push(
-      ["SUMMAR PROCESOS S.A.S","SUMMAR PROCESOS CALI","CC001",nit1,cli1,"S001","CALI","C001","Centro Costo 1",1500000,"CALI","Ana García","OS-1001","2026-01-15","Sistema","CERRADO","01","CONTRATACION DIRECTA","Auxiliar de Servicios","2026-01-25",3,0,3,"2026-01-24","Normal","2026-06-12",-1,"A TIEMPO",0,"Conforme"],
-      ["SUMMAR PROCESOS S.A.S","SUMMAR PROCESOS BOGOTA","CC002",nit1,cli1,"S002","BOGOTA","C002","Centro Costo 2",1800000,"BOGOTA","Carlos Pérez","OS-1002","2026-02-01","Sistema","CERRADO","01","CONTRATACION DIRECTA","Auxiliar Servicios BPM","2026-02-10",5,0,4,"2026-02-15","Normal","2026-06-12",5,"INCUMPLIDA",1,"En proceso"],
-      ["SUMMAR TEMPORALES S.A.S","SUMMAR TEMPORALES MEDELLIN","CC003",nit1,cli1,"S003","MEDELLIN","C003","Centro Costo 3",1600000,"MEDELLIN","María López","OS-1003","2026-03-10","Sistema","ABIERTO","01","CONTRATACION DIRECTA","Op. Apoyo Logístico","2026-03-20",2,2,0,"","Normal","2026-06-12","","",2,"Pendiente"]
+    // Demo rows for SELECCION (index 1)
+    sheets[1].data.push(
+      ["OS-2025-001","2025-01-15",cli1,cli1,"Ana Torres","Bogotá",5,5,0,"Completada",100,0,0,5,"Auxiliar Operativo","Sucursal Norte"],
+      ["OS-2025-002","2025-02-01",cli1,cli1,"Carlos Ruiz","Medellín",8,4,4,"En proceso",50,2,1,1,"Operario","Sucursal Sur"],
+      ["OS-2025-003","2025-03-10",cli1,cli1,"María López","Cali",3,0,3,"En proceso",0,1,2,0,"Técnico","Sucursal Centro"]
+    );
+    // Demo rows for ROTACION (index 2)
+    sheets[2].data.push(
+      ["1012345678","Juan García","Operario","Bogotá","Sucursal Norte","2023-01-10","2025-03-15","Renuncia voluntaria","M",780,cli1],
+      ["1087654321","María Pérez","Auxiliar","Medellín","Sucursal Sur","2022-06-01","2025-04-20","Terminación contrato","F",670,cli1]
+    );
+    // Demo rows for PERSONAL_ACTIVO (index 3)
+    sheets[3].data.push(
+      ["1011223344","Pedro López","Operario","Bogotá","Sucursal Norte","Operaciones","ACTIVO",cli1],
+      ["1099887766","Laura Soto","Técnico","Medellín","Sucursal Sur","Producción","ACTIVO",cli1]
+    );
+    // Demo rows for AT_ACCIDENTES (index 4)
+    sheets[4].data.push(
+      ["1012345678","Juan García","Operario","Sucursal Norte","Bogotá","M",5,"Biomecánico","Mano","Golpe","Contusión"]
+    );
+    // Demo rows for EG_ENFERMEDADES (index 5)
+    sheets[5].data.push(
+      ["1087654321","María Pérez","Auxiliar","Medellín","F",3,"Sistema Musculoesquelético"]
+    );
+    // Demo rows for FORMACION_SST (index 6)
+    sheets[6].data.push(
+      ["Seguridad Industrial","2025-03-05",10,9,"Ana Torres","Bogotá"],
+      ["Primeros Auxilios","2025-04-12",15,14,"Carlos Ruiz","Medellín"]
+    );
+    // Demo rows for ENTREVISTAS_RETIRO (index 7)
+    sheets[7].data.push(
+      ["1012345678","Juan García","Operario","Sucursal Norte","Mejor oferta económica",4,3,4,5,4,"Positiva"],
+      ["1087654321","María Pérez","Auxiliar","Sucursal Sur","Razones personales",2,3,2,3,4,"Neutral"]
+    );
+    // Demo rows for SINIESTRO (index 8)
+    sheets[8].data.push(
+      ["1012345678","Juan García","Activo","AT","Total Temporal","Bogotá"]
+    );
+    // Demo rows for FUEROS_SALUD (index 9)
+    sheets[9].data.push(
+      ["1099887766","Laura Soto","Técnico","Sucursal Sur","Maternidad","2025-01-01","2025-10-01","Activo","Controlado","Sin novedad"]
     );
   }
   return sheets;
