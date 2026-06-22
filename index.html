@@ -215,6 +215,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
         <div class="sheet-chip" data-sheet="SINIESTRO">📋 SINIESTRO</div>
         <div class="sheet-chip" data-sheet="FUEROS_SALUD">🛡️ FUEROS_SALUD</div>
         <div class="sheet-chip" data-sheet="FORMACION_SST">📚 FORMACION_SST</div>
+        <div class="sheet-chip" data-sheet="TALENTO_DISCIPLINARIO">🏆 TALENTO_DISCIPLINARIO</div>
+        <div class="sheet-chip" data-sheet="BIENESTAR_ACTIVIDADES">🌿 BIENESTAR_ACTIVIDADES</div>
       </div>
     </div>
 
@@ -483,11 +485,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="sec" id="sec-activo">
   <div class="sh"><div class="sh-ic">👥</div><div><h2>Personal Activo</h2><p>Estado de fuerza laboral · Jun 2026</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Activos</div><div class="kc-val">150</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Sucursales Activas</div><div class="kc-val">9</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Cargos Diferentes</div><div class="kc-val">14</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Activos</div><div class="kc-val" id="act-kpi-total">—</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Sucursales Activas</div><div class="kc-val" id="act-kpi-suc">—</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Cargos Diferentes</div><div class="kc-val" id="act-kpi-cargo">—</div></div>
     <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Contratos &gt;1 Año</div><div class="kc-val">12</div><div class="kc-sub">En revisión temporalidad</div></div>
-    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Áreas Operativas</div><div class="kc-val">6</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Áreas Operativas</div><div class="kc-val" id="act-kpi-areas">—</div></div>
   </div>
   <div class="cg">
     <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Sucursal / Ciudad</div></div><div class="cw" style="height:220px"><canvas id="c-act-ciudad"></canvas></div></div>
@@ -522,8 +524,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <div class="sh"><div class="sh-ic">🔄</div><div><h2>Índice de Rotación</h2><p>Análisis de retiros, causas y tendencias</p></div></div>
   <div class="kg">
     <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Retiros</div><div class="kc-val">944</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Paso Directo</div><div class="kc-val">541</div><div class="kc-sub">57.3%</div><div class="kc-d d-up">▲ Positivo</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Renuncias</div><div class="kc-val">240</div><div class="kc-sub">25.4%</div><div class="kc-d d-dn">▼ Intervención</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Paso Directo</div><div class="kc-val" id="rot-kpi-directo">—</div><div class="kc-sub">57.3%</div><div class="kc-d d-up">▲ Positivo</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Renuncias</div><div class="kc-val" id="rot-kpi-renuncias">—</div><div class="kc-sub">25.4%</div><div class="kc-d d-dn">▼ Intervención</div></div>
     <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Terminación de contrato</div><div class="kc-val">160</div><div class="kc-sub">16.9%</div></div>
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Masculino</div><div class="kc-val">69.8%</div><div class="kc-sub">659 personas</div></div>
     <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Femenino</div><div class="kc-val">30.2%</div><div class="kc-sub">285 personas</div></div>
@@ -581,16 +583,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <div class="sh"><div class="sh-ic">🏆</div><div><h2>Gestión del Talento</h2><p>Procesos disciplinarios y temporalidad</p></div></div>
   <div class="cc" style="margin-bottom:14px">
     <div class="cc-h"><div class="cc-title">Procesos Disciplinarios</div></div>
-    <table class="tbl"><thead><tr><th>Mes</th><th>Nombre</th><th>Cargo</th><th>Motivo</th><th>Acción</th></tr></thead>
-    <tbody><tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros en el período</td></tr></tbody></table>
+    <table class="tbl"><thead><tr><th>Fecha</th><th>Nombre</th><th>Cargo</th><th>Motivo</th><th>Acción</th><th>Estado</th></tr></thead>
+    <tbody id="talento-disc-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja TALENTO_DISCIPLINARIO para ver los procesos</td></tr></tbody></table>
   </div>
-  <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Control de la Temporalidad</div></div>
-    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Ciudad</th><th>Fecha Ingreso</th></tr></thead><tbody>
-      <tr><td>Carlos Andrés Pérez</td><td>Auxiliar de Servicios</td><td>Bogotá</td><td>Mar 2024</td></tr>
-      <tr><td>María del Carmen López</td><td>Operario Logístico</td><td>Cali</td><td>Ene 2024</td></tr>
-      <tr><td>Jhon Fredy Martínez</td><td>Auxiliar Servicios BPM</td><td>Medellín</td><td>Feb 2024</td></tr>
-    </tbody></table>
-    <p style="font-size:10.5px;color:var(--muted);margin-top:11px;font-style:italic">De cara al año 2026, renovamos nuestro compromiso con la excelencia, proyectando trabajo colaborativo enfocado en la mejora continua, la innovación y la generación de mayor valor.</p>
+  <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Control de la Temporalidad</div><span class="cc-tag" id="talento-temp-count"></span></div>
+    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Ciudad</th><th>Fecha Ingreso</th><th>Días</th><th>Contrato</th></tr></thead>
+    <tbody id="talento-temp-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja PERSONAL_ACTIVO para ver temporalidad</td></tr></tbody></table>
   </div>
 </div>
 
@@ -598,20 +596,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="sec" id="sec-bienestar">
   <div class="sh"><div class="sh-ic">🌿</div><div><h2>Actividades de Bienestar</h2><p>Plan de bienestar laboral 2026</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Actividades Ejecutadas</div><div class="kc-val">8</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Personas Beneficiadas</div><div class="kc-val">487</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% Impacto Promedio</div><div class="kc-val">76%</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Actividades Ejecutadas</div><div class="kc-val" id="bie-kpi-activ">—</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Personas Beneficiadas</div><div class="kc-val" id="bie-kpi-personas">—</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% Impacto Promedio</div><div class="kc-val" id="bie-kpi-impacto">—</div></div>
   </div>
   <div class="cc"><div class="tscroll"><table class="tbl">
     <thead><tr><th>Mes</th><th>Fecha</th><th>Actividad</th><th>Medio</th><th>Personas</th><th>% Impacto</th></tr></thead>
-    <tbody>
-      <tr><td>Ene</td><td>15/01/26</td><td>Bienvenida 2026 — Celebración inicio de año</td><td>Presencial</td><td>72</td><td><span class="badge bs">82%</span></td></tr>
-      <tr><td>Feb</td><td>14/02/26</td><td>Día de la Amistad — Integración virtual</td><td>Virtual</td><td>85</td><td><span class="badge bs">78%</span></td></tr>
-      <tr><td>Mar</td><td>08/03/26</td><td>Día de la Mujer — Reconocimiento y charla</td><td>Híbrido</td><td>63</td><td><span class="badge bw">71%</span></td></tr>
-      <tr><td>Abr</td><td>22/04/26</td><td>Pausas activas saludables</td><td>Presencial</td><td>91</td><td><span class="badge bs">85%</span></td></tr>
-      <tr><td>May</td><td>15/05/26</td><td>Celebración Día de la Madre</td><td>Virtual</td><td>78</td><td><span class="badge bs">80%</span></td></tr>
-      <tr><td>May</td><td>28/05/26</td><td>Taller Bienestar Emocional y Estrés</td><td>Virtual</td><td>54</td><td><span class="badge bw">65%</span></td></tr>
-    </tbody>
+    <tbody id="bienestar-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja BIENESTAR_ACTIVIDADES para ver las actividades</td></tr></tbody>
   </table></div></div>
 </div>
 
@@ -1947,7 +1938,9 @@ function markSheetLoaded(sheetName, ok) {
     'PERSONAL': 'PERSONAL_ACTIVO', 'PERSONAL_ACTIVO': 'PERSONAL',
     'ENTREVISTAS': 'ENTREVISTAS_RETIRO', 'ENTREVISTAS_RETIRO': 'ENTREVISTAS',
     'SINIESTROS': 'SINIESTRO', 'SINIESTRO': 'SINIESTROS',
-    'FUEROS': 'FUEROS_SALUD', 'FUEROS_SALUD': 'FUEROS'
+    'FUEROS': 'FUEROS_SALUD', 'FUEROS_SALUD': 'FUEROS',
+    'TALENTO': 'TALENTO_DISCIPLINARIO', 'TALENTO_DISCIPLINARIO': 'TALENTO',
+    'BIENESTAR': 'BIENESTAR_ACTIVIDADES', 'BIENESTAR_ACTIVIDADES': 'BIENESTAR'
   };
   var chips = document.querySelectorAll('.sheet-chip');
   for (var i = 0; i < chips.length; i++) {
@@ -2015,6 +2008,12 @@ function buildDashboardFromExcel() {
     // 10. FUEROS
     var fueRows = parsedSheets['FUEROS_SALUD'] || parsedSheets['FUEROS'];
     if (fueRows && fueRows.length > 1) { buildFuerosData(fueRows); }
+    // 11. TALENTO
+    var talRows = parsedSheets['TALENTO_DISCIPLINARIO'] || parsedSheets['TALENTO'];
+    if (talRows && talRows.length > 1) { buildTalentoData(talRows); }
+    // 12. BIENESTAR
+    var bieRows = parsedSheets['BIENESTAR_ACTIVIDADES'] || parsedSheets['BIENESTAR'];
+    if (bieRows && bieRows.length > 1) { buildBienestarData(bieRows); }
     setProgress(100, '¡Listo! Abriendo dashboard...');
     setTimeout(function() {
       document.getElementById('upload-screen').style.display = 'none';
@@ -2180,6 +2179,16 @@ function buildRotacionData(rows) {
   var el = document.getElementById('rot-kpi-total');
   if (el) el.textContent = data.length.toLocaleString();
   window._rotData = { total: data.length, motivos: motivos, generos: generos, ciudades: ciudades, rows: data };
+  var el = document.getElementById('rot-kpi-total');
+  if (el) el.textContent = data.length.toLocaleString();
+  // Extra KPIs
+  var directo = data.filter(function(r){ return (r['TipoRetiro']||'').toString().toUpperCase().includes('DIRECTO'); }).length;
+  var renuncias = data.filter(function(r){ var m=(r['CausalRetiro']||r['Motivo']||'').toString().toUpperCase(); return m.includes('RENUNCI'); }).length;
+  var termina = data.filter(function(r){ var m=(r['CausalRetiro']||r['Motivo']||'').toString().toUpperCase(); return m.includes('TERMINACI'); }).length;
+  function sr(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  sr('rot-kpi-directo', directo||'—');
+  sr('rot-kpi-renuncias', renuncias);
+  sr('rot-kpi-termina', termina);
 }
 
 // ── FORMACIÓN PROCESSOR ──────────────────────────────────────
@@ -2266,7 +2275,7 @@ function buildPersonalData(rows) {
   var data = rows.filter(function(r){
     var id = r['Numdocumento']||r['ID_Empleado']||r['NumDocumento'];
     var est = (r['Estado']||'').toString().toUpperCase();
-    return id && id !== 'Numdocumento' && id !== 'ID_Empleado' && est === 'ACTIVO';
+    return id && id !== 'Numdocumento' && id !== 'ID_Empleado' && (est === 'ACTIVO' || est === 'ACTIVO' || est.includes('ACTIV'));
   });
   if (data.length === 0) {
     // Accept all rows if none match ACTIVO (maybe Estado has different values)
@@ -2284,8 +2293,12 @@ function buildPersonalData(rows) {
     if (area) areas[area] = (areas[area]||0)+1;
   });
   window._personalData = { total: data.length, sucursales: sucursales, cargos: cargos, areas: areas, rows: data };
-  var el = document.getElementById('act-kpi-total');
-  if (el) el.textContent = data.length.toLocaleString();
+  function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  s('act-kpi-total', data.length.toLocaleString());
+  s('act-kpi-suc', Object.keys(sucursales).length);
+  s('act-kpi-cargo', Object.keys(cargos).length);
+  s('act-kpi-areas', Object.keys(areas).length);
+  renderTemporalidadTable(data);
 }
 
 // ── PIPELINE DESDE SELECCION ─────────────────────────────────
@@ -3274,6 +3287,100 @@ function updateAdminVisibility() {
 })();
 
 // chart inits handled post-login
+
+// ── TALENTO PARSER ────────────────────────────────────────
+function buildTalentoData(rows) {
+  // Procesos disciplinarios
+  var disc = rows.filter(function(r){
+    return r['Nombre'] || r['Numdocumento'];
+  });
+  var tbody = document.getElementById('talento-disc-tbody');
+  if (tbody) {
+    if (disc.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros en el período</td></tr>';
+    } else {
+      tbody.innerHTML = disc.map(function(r){
+        var fecha = (r['Fecha']||r['Mes']||'').toString().substring(0,10);
+        var nombre = (r['Nombre']||r['Nombres']||'').toString();
+        var cargo = (r['Cargo']||'').toString();
+        var motivo = (r['Motivo']||'').toString();
+        var accion = (r['Acción']||r['Accion']||'').toString();
+        var estado = (r['Estado']||'').toString();
+        var cls = estado.toUpperCase().includes('CERR') ? 'bs' : estado.toUpperCase().includes('ARCH') ? 'bd' : 'bw';
+        return '<tr><td>'+fecha+'</td><td>'+nombre+'</td><td>'+cargo+'</td><td>'+motivo+'</td><td>'+accion+'</td><td><span class="badge '+cls+'">'+estado+'</span></td></tr>';
+      }).join('');
+    }
+  }
+}
+
+// Temporalidad desde PERSONAL_ACTIVO (llamada desde buildPersonalData)
+function renderTemporalidadTable(rows) {
+  var hoy = new Date();
+  var tbody = document.getElementById('talento-temp-tbody');
+  var countEl = document.getElementById('talento-temp-count');
+  if (!tbody) return;
+  // Filter employees with more than 1 year
+  var conTiempo = rows.filter(function(r){
+    var fi = r['FechaIngreso']||'';
+    if (!fi) return false;
+    var d = fi instanceof Date ? fi : new Date(fi);
+    if (isNaN(d.getTime())) return false;
+    var dias = (hoy - d) / (1000*60*60*24);
+    return dias >= 365;
+  }).sort(function(a,b){
+    var da = new Date(a['FechaIngreso']||0), db = new Date(b['FechaIngreso']||0);
+    return da - db;
+  });
+  if (countEl) countEl.textContent = conTiempo.length + ' empleados';
+  if (conTiempo.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin empleados con más de 1 año</td></tr>';
+    return;
+  }
+  tbody.innerHTML = conTiempo.slice(0,20).map(function(r){
+    var fi = r['FechaIngreso']||'';
+    var d = fi instanceof Date ? fi : new Date(fi);
+    var dias = isNaN(d.getTime()) ? 0 : Math.floor((hoy-d)/(1000*60*60*24));
+    var meses = Math.floor(dias/30);
+    var nombre = (r['Nombres']||r['NombreEmpleado']||'').toString()+' '+(r['Apellidos']||'').toString();
+    var ciudad = (r['Ciudad']||r['Sucursal']||'').toString();
+    var contrato = (r['TipoContrato']||'').toString();
+    return '<tr><td>'+nombre.trim()+'</td><td>'+(r['Cargo']||'')+'</td><td>'+ciudad+'</td><td>'+fi.toString().substring(0,10)+'</td><td>'+dias+' días</td><td>'+contrato+'</td></tr>';
+  }).join('');
+  var el = document.getElementById('act-kpi-temporalidad');
+  if (el) el.textContent = conTiempo.length;
+}
+
+// ── BIENESTAR PARSER ──────────────────────────────────────
+function buildBienestarData(rows) {
+  var data = rows.filter(function(r){
+    return r['Actividad'] || r['Tema'];
+  });
+  if (data.length === 0) return;
+  var totalPersonas = 0, totalImpacto = 0, count = 0;
+  data.forEach(function(r){
+    totalPersonas += parseInt(r['Personas']||r['PersonasAsistentes'])||0;
+    var imp = parseFloat((r['Impacto']||r['PorcentajeImpacto']||'0').toString().replace('%',''))||0;
+    if (imp > 0) { totalImpacto += imp; count++; }
+  });
+  var promImpacto = count > 0 ? Math.round(totalImpacto/count) : 0;
+  function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  s('bie-kpi-activ', data.length);
+  s('bie-kpi-personas', totalPersonas.toLocaleString());
+  s('bie-kpi-impacto', promImpacto+'%');
+  var tbody = document.getElementById('bienestar-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = data.map(function(r){
+    var fecha = (r['Fecha']||'').toString().substring(0,10);
+    var mes = (r['Mes']||fecha.substring(5,7)||'').toString();
+    var act = (r['Actividad']||r['Tema']||'').toString();
+    var medio = (r['Medio']||r['Modalidad']||'').toString();
+    var personas = parseInt(r['Personas']||r['PersonasAsistentes'])||0;
+    var imp = parseFloat((r['Impacto']||r['PorcentajeImpacto']||'0').toString().replace('%',''))||0;
+    var cls = imp>=80?'bs':imp>=65?'bw':'bd';
+    return '<tr><td>'+mes+'</td><td>'+fecha+'</td><td>'+act+'</td><td>'+medio+'</td><td>'+personas+'</td><td><span class="badge '+cls+'">'+imp+'%</span></td></tr>';
+  }).join('');
+}
+
 </script>
 </body>
 </html>
