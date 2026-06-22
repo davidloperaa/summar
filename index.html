@@ -3138,15 +3138,38 @@ function getTemplateSheets(withDemo) {
   ];
 
   // Column headers that exactly match what each parser reads
-  var selHdr  = ["OrdenServicio","FechaCreacion","Empresa","Cliente","Responsable","Ciudad","PersonasSolicitadas","Contratados","PendientesContratar","Estado","Cumplimiento","EnReclutamiento","EnSeleccion","EnContratacion","PerfilCargo","Sucursal"];
-  var rotHdr  = ["Numdocumento","NombreEmpleado","Cargo","Ciudad","Sucursal","FechaIngreso","FechaRetiro","CausalRetiro","Genero","DiasLaborados","Empresa"];
-  var paHdr   = ["Numdocumento","NombreEmpleado","Cargo","Ciudad","Sucursal","AreaOperativa","Estado","Empresa"];
-  var atHdr   = ["Numdocumento","Nombres","Cargo","Sucursal","Ciudad","Genero","DiasIncapacidad","Peligro","ParteCuerpoAfectada","MecanismoAccidente","TipoLesion"];
-  var egHdr   = ["Numdocumento","Nombres","Cargo","Ciudad","Genero","DiasIncapacidad","GrupoDiagnostico"];
-  var formHdr = ["Tema","FechaFormacion","PersonasProgramadas","PersonasAsistentes","Responsable","Ciudad"];
-  var entHdr  = ["Numdocumento","Nombres","Cargo","Sucursal","MotivoRetiro","P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion","P4_Herramientas","P5_AplicoConocimientos","PercepcionGeneral"];
-  var sinHdr  = ["Numdocumento","Nombres","Estado","TipoSiniestro","Calificacion","Ciudad"];
-  var fuHdr   = ["Numdocumento","Nombres","Cargo","Sucursal","TipoFuero","FechaInicio","FechaFin","EstadoGestion","NivelRiesgo","Observaciones"];
+  // Formato original completo (compatible con exportes del sistema)
+  var selHdr  = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód.Sucursal","Sucursal1",
+                 "Cód.CentroCosto","CentroCosto","Salario","Ciudad","Responsable",
+                 "OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio",
+                 "TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas",
+                 "PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio",
+                 "HOY","Diferencia","Cumplimiento","RETRO CLIENTE",
+                 "EnReclutamiento","EnSeleccion","EnContratacion"];
+  var rotHdr  = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo",
+                 "Sucursal","Ciudad","FechaIngreso","FechaRetiro","DiasLaborados",
+                 "CausalRetiro","TipoRetiro","Genero","ObservacionRetiro"];
+  var paHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo",
+                 "Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa",
+                 "Estado","ObservacionTemporalidad"];
+  var atHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad",
+                 "FechaAccidente","TipoAccidente","MecanismoAccidente","AgenteCausa",
+                 "ParteCuerpoAfectada","TipoLesion","DiasIncapacidad","Peligro","Estado","Descripcion"];
+  var egHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad",
+                 "FechaInicio","FechaFin","DiasIncapacidad","Diagnostico","GrupoDiagnostico",
+                 "TipoIncapacidad","Genero","Edad"];
+  var formHdr = ["Empresa","NIT","Cliente","Sucursal","Ciudad","FechaFormacion","Tema",
+                 "Modalidad","Duración (hrs)","PersonasProgramadas","PersonasAsistentes",
+                 "Responsable","Observaciones"];
+  var entHdr  = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal",
+                 "FechaRetiro","FechaEntrevista","Entrevistador","Responsable",
+                 "P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion",
+                 "P4_Herramientas","P5_AplicoConocimientos","MotivoRetiro","PercepcionGeneral","Comentarios"];
+  var sinHdr  = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal",
+                 "FechaCalificacion","TipoSiniestro","Estado","Calificacion",
+                 "PorcentajePerdida","EntidadCalificadora","DiasCalificacion","Observaciones"];
+  var fuHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal",
+                 "TipoFuero","FechaInicio","FechaFin","NivelRiesgo","EstadoGestion","Observaciones"];
 
   var sheets = [
     { name: 'INSTRUCCIONES', data: instrData },
@@ -3162,11 +3185,11 @@ function getTemplateSheets(withDemo) {
   ];
 
   if (withDemo) {
-    // Demo rows for SELECCION (index 1)
+    // Demo rows for SELECCION (index 1) - formato completo original
     sheets[1].data.push(
-      ["OS-2025-001","2025-01-15",cli1,cli1,"Ana Torres","Bogotá",5,5,0,"Completada",100,0,0,5,"Auxiliar Operativo","Sucursal Norte"],
-      ["OS-2025-002","2025-02-01",cli1,cli1,"Carlos Ruiz","Medellín",8,4,4,"En proceso",50,2,1,1,"Operario","Sucursal Sur"],
-      ["OS-2025-003","2025-03-10",cli1,cli1,"María López","Cali",3,0,3,"En proceso",0,1,2,0,"Técnico","Sucursal Centro"]
+      [cli1,"Sede Norte","CC001","900.123.456-1",cli1,"S001","Bogotá","C001","Centro 1",1600000,"Bogotá","Ana Torres","OS-2025-001","2025-01-15","Sistema","CERRADO","01","CONTRATACION DIRECTA","Auxiliar Operativo","2025-01-25",5,0,5,"2025-01-23","Normal","2025-06-22",2,"A TIEMPO","Conforme",0,0,0],
+      [cli1,"Sede Sur","CC002","900.123.456-1",cli1,"S002","Medellín","C002","Centro 2",1800000,"Medellín","Carlos Ruiz","OS-2025-002","2025-02-01","Sistema","ABIERTO","01","CONTRATACION DIRECTA","Operario","2025-02-15",8,4,4,"","Normal","2025-06-22","","","",2,1,1],
+      [cli1,"Sede Centro","CC003","900.123.456-1",cli1,"S003","Cali","C003","Centro 3",1500000,"Cali","María López","OS-2025-003","2025-03-10","Sistema","CERRADO","01","CONTRATACION DIRECTA","Técnico","2025-03-20",3,0,3,"2025-03-25","Normal","2025-06-22",-5,"INCUMPLIDA","Conforme",0,0,0]
     );
     // Demo rows for ROTACION (index 2)
     sheets[2].data.push(
