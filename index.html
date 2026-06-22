@@ -2294,7 +2294,6 @@ function buildPipelineFromBase(rows) {
   if (data.length === 0) return;
   // Detect if sheet has explicit pipeline columns
   var hasExplicitCols = data[0] && (
-    r['EnReclutamiento'] !== undefined ||
     data[0]['EnReclutamiento'] !== undefined ||
     data[0]['EnSeleccion'] !== undefined
   );
