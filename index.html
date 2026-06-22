@@ -205,7 +205,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:16px;margin-bottom:24px">
       <div style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Hojas que se leen automáticamente</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="sheet-status">
-        <div class="sheet-chip" data-sheet="BASE">📋 BASE</div>
+        <div class="sheet-chip" data-sheet="SELECCION">📋 SELECCION</div>
         <div class="sheet-chip" data-sheet="PIPELINE">🔍 PIPELINE <span style="font-size:9px;opacity:.6">(auto)</span></div>
         <div class="sheet-chip" data-sheet="PERSONAL_ACTIVO">👥 PERSONAL_ACTIVO</div>
         <div class="sheet-chip" data-sheet="ROTACIÓN">🔄 ROTACIÓN</div>
@@ -1439,13 +1439,15 @@ function redraw() {
   // Progress bars
   mkPR('pr-rcit', showCities.map(function(c){return {l:c.name,v:c.req,c:RED};}),
     showCities.reduce(function(m,c){return Math.max(m,c.req);},1));
-  mkPR('pr-perf',[
-    {l:'Auxiliar de Servicios',v:3021,c:RED},{l:'Auxiliar Servicios BPM',v:1594,c:AMB},
-    {l:'Op. Apoyo Logístico',v:272,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:263,c:GREEN},
-    {l:'Op. Apoyo Log. BPM',v:161,c:GRAY},{l:'Op. Apoyo Log. Bodega',v:149,c:RED},
-    {l:'Operario Jardinería',v:88,c:AMB},{l:'Coordinador Operativo',v:83,c:BLUE},
-    {l:'Aux. Servicios Alturas',v:68,c:GREEN},{l:'Especialista Servicio',v:53,c:GRAY}
-  ],3021);
+  (function(){
+    if (window._baseRows && window._baseRows.length) {
+      var cargos={};
+      window._baseRows.forEach(function(r){ var v=(r['PerfilCargo']||'').toString().trim(); if(v) cargos[v]=(cargos[v]||0)+1; });
+      var cols=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE,GREEN,GRAY];
+      var sorted=Object.keys(cargos).sort(function(a,b){return cargos[b]-cargos[a];}).slice(0,10);
+      if (sorted.length) { mkPR('pr-perf',sorted.map(function(k,i){return {l:k,v:cargos[k],c:cols[i]};}),cargos[sorted[0]]); }
+    }
+  })();
   (function(){
     var colors=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE];
     if (window._personalData && Object.keys(window._personalData.cargos).length) {
@@ -1453,18 +1455,22 @@ function redraw() {
       var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,8);
       var items=sorted.map(function(k,i){return {l:k,v:c[k],c:colors[i%colors.length]};});
       mkPR('pr-act-cargo',items,items[0]?items[0].v:1);
-    } else {
-      mkPR('pr-act-cargo',[{l:'Auxiliar de Servicios',v:52,c:RED},{l:'Auxiliar Servicios BPM',v:31,c:AMB},
-        {l:'Op. Apoyo Logístico',v:22,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:14,c:GREEN},
-        {l:'Operario de Jardinería',v:9,c:GRAY},{l:'Coordinador Operativo',v:8,c:RED}],52);
     }
   })();
-  mkPR('pr-rot-cargo',[{l:'Auxiliar de Servicios',v:9.8,c:RED},{l:'Auxiliar Servicios BPM',v:8.2,c:AMB},
-    {l:'Op. Apoyo Logístico',v:11.4,c:RED},{l:'Aux. Mantenimiento Loc.',v:6.3,c:GREEN},
-    {l:'Operario de Jardinería',v:7.1,c:AMB},{l:'Coordinador Operativo',v:3.2,c:GREEN}],11.4);
-  mkPR('pr-rot-ciudad',[{l:'Cali Centro',v:10.2,c:RED},{l:'Yumbo',v:12.8,c:RED},{l:'Palmira',v:8.4,c:AMB},
-    {l:'Buga',v:7.1,c:AMB},{l:'Cali Norte',v:9.3,c:RED},{l:'Pereira',v:6.8,c:GREEN},
-    {l:'Bogotá',v:7.9,c:AMB},{l:'Medellín',v:11.2,c:RED}],12.8);
+  (function(){
+    if (window._rotData && Object.keys(window._rotData).length) {
+      var cargos={}; window._rotData.rows.forEach(function(r){ var v=(r['Cargo']||'').trim(); if(v) cargos[v]=(cargos[v]||0)+1; });
+      var cols=[RED,AMB,BLUE,GREEN,GRAY,RED]; var s=Object.keys(cargos).sort(function(a,b){return cargos[b]-cargos[a];}).slice(0,6);
+      if (s.length) mkPR('pr-rot-cargo',s.map(function(k,i){return {l:k,v:cargos[k],c:cols[i]};}),cargos[s[0]]);
+    }
+  })();
+  (function(){
+    if (window._rotData && Object.keys(window._rotData.ciudades).length) {
+      var ci=window._rotData.ciudades; var cols=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE];
+      var s=Object.keys(ci).sort(function(a,b){return ci[b]-ci[a];}).slice(0,8);
+      if (s.length) mkPR('pr-rot-ciudad',s.map(function(k,i){return {l:k,v:ci[k],c:cols[i]};}),ci[s[0]]);
+    }
+  })();
   (function(){
     var colors=[RED,RED,AMB,AMB,BLUE,GREEN,GRAY,GRAY];
     if (window._atData && Object.keys(window._atData.peligros).length) {
@@ -1472,9 +1478,6 @@ function redraw() {
       var sorted=Object.keys(p).sort(function(a,b){return p[b]-p[a];}).slice(0,8);
       var items=sorted.map(function(k,i){return {l:k,v:Math.round(p[k]/tot*10000)/100,c:colors[i%colors.length]};});
       mkPR('pr-peligro',items,items[0]?items[0].v:1);
-    } else {
-      mkPR('pr-peligro',[{l:'Locativo',v:33.99,c:RED},{l:'Mecánico',v:27.19,c:RED},{l:'Biomecánico',v:21.11,c:AMB},
-        {l:'Químico',v:8.59,c:AMB},{l:'Biológico',v:4.11,c:BLUE},{l:'Físico',v:2.68,c:GREEN}],33.99);
     }
   })();
   (function(){
@@ -1483,9 +1486,6 @@ function redraw() {
       var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,5);
       var items=sorted.map(function(k,i){return {l:k,v:Math.round(c[k]/tot*10000)/100,c:[RED,AMB,BLUE,GREEN,GRAY][i]};});
       mkPR('pr-cuerpo',items,items[0]?items[0].v:1);
-    } else {
-      mkPR('pr-cuerpo',[{l:'Miembros Superiores',v:40.97,c:RED},{l:'Miembros Inferiores',v:20.93,c:AMB},
-        {l:'Tronco',v:15.03,c:BLUE},{l:'Ubicaciones Múltiples',v:10.02,c:GREEN},{l:'Cabeza/Cuello',v:8.12,c:GRAY}],40.97);
     }
   })();
   mkPR('pr-mec',[{l:'Pisadas, choques o golpes',v:26.12,c:RED},{l:'Sobreesfuerzo o falso movimiento',v:21.47,c:AMB},
@@ -1542,9 +1542,6 @@ function redraw() {
       var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,6);
       var items=sorted.map(function(k,i){return {l:k,v:c[k],c:colors[i%colors.length]};});
       mkPR('pr-ent-cargo',items,items[0]?items[0].v:1);
-    } else {
-      mkPR('pr-ent-cargo',[{l:'Auxiliar de Servicios',v:31,c:GREEN},{l:'Auxiliar Servicios BPM',v:18,c:AMB},
-        {l:'Op. Apoyo Logístico',v:12,c:GREEN},{l:'Aux. Mantenimiento',v:8,c:AMB}],31);
     }
   })();
 
@@ -1567,15 +1564,12 @@ function redraw() {
       var m=window._rotData.motivos;
       var sorted=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,6);
       rLabels=sorted; rData=sorted.map(function(k){return m[k];});
-    } else {
-      rLabels=['Paso Directo','Renuncia','Terminación contrato','Bajo Desemp.','Justa Causa'];
-      rData=[542,225,160,86,1];
-    }
+    } else { rLabels=[]; rData=[]; }
     mk('c-r3',{type:'bar',data:{labels:rLabels,datasets:[{data:rData,backgroundColor:[GREEN,AMB,BLUE,RED,GRAY,RL],borderRadius:4}]},
       options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false}}}})});
   })();
   (function(){
-    var atV = window._atData ? window._atData.total : 23;
+    var atV = window._atData ? window._atData.total : 0;
     var egV = window._egData ? window._egData.total : 0;
     mk('c-r4',{type:'bar',data:{labels:['AT (cargados)','EG (cargadas)'],
       datasets:[{data:[atV,egV],backgroundColor:[RED,BLUE],borderRadius:4}]},
@@ -1592,15 +1586,15 @@ function redraw() {
   mk('c-est',{type:'doughnut',data:{labels:['Cerrado','Cancelada','Abierto'],
     datasets:[{data:[d.total.cer,d.total.cancel,d.total.abierto],backgroundColor:[GREEN,AMB,BLUE],borderWidth:0}]},
     options:bo({cutout:'63%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
-  var SUCS=['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín'];
-  var suc_pt=[88.2,91.4,90.6,96.9,84.7,79.9,86.2,73.2];
-  var suc_pc=[91.3,89.7,92.2,88.2,87.5,87.9,93.0,80.1];
-  mk('c-suc-t',{type:'bar',data:{labels:SUCS,datasets:[
-    {data:suc_pt,backgroundColor:suc_pt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
-    options:bo({indexAxis:'y',scales:{x:{min:60,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
-  mk('c-suc-c',{type:'bar',data:{labels:SUCS,datasets:[
-    {data:suc_pc,backgroundColor:suc_pc.map(function(v){return v>=88?GREEN:v>=78?AMB:RED;}),borderRadius:4}]},
-    options:bo({indexAxis:'y',scales:{x:{min:60,max:100,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  (function(){
+    var SUCS=CITY_TABLE.map(function(c){return c.name;}),
+        suc_pt=CITY_TABLE.map(function(c){return c.pct_t;}),
+        suc_pc=CITY_TABLE.map(function(c){return c.pct_c;});
+    mk('c-suc-t',{type:'bar',data:{labels:SUCS,datasets:[{data:suc_pt,backgroundColor:suc_pt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
+      options:bo({indexAxis:'y',scales:{x:{min:0,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+    mk('c-suc-c',{type:'bar',data:{labels:SUCS,datasets:[{data:suc_pc,backgroundColor:suc_pc.map(function(v){return v>=88?GREEN:v>=78?AMB:RED;}),borderRadius:4}]},
+      options:bo({indexAxis:'y',scales:{x:{min:0,max:100,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
+  })();
   var cnames=showCities.map(function(c){return c.name;}),cpt=showCities.map(function(c){return c.pct_t;}),cpc=showCities.map(function(c){return c.pct_c;});
   mk('c-cit',{type:'bar',data:{labels:cnames,datasets:[{data:cpt,backgroundColor:cpt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
     options:bo({indexAxis:'y',scales:{x:{min:60,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
@@ -1614,7 +1608,7 @@ function redraw() {
       var s=window._personalData.sucursales;
       var sorted=Object.keys(s).sort(function(a,b){return s[b]-s[a];}).slice(0,9);
       acLabels=sorted; acData=sorted.map(function(k){return s[k];});
-    } else { acLabels=['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín','Barranquilla']; acData=[28,22,18,15,14,12,19,14,8]; }
+    } else { acLabels=[]; acData=[]; }
     mk('c-act-ciudad',{type:'bar',data:{labels:acLabels,datasets:[{data:acData,backgroundColor:RED,borderRadius:4}]},
       options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#EEE'}}}})});
   })();
@@ -1624,25 +1618,48 @@ function redraw() {
       var a=window._personalData.areas;
       var sorted=Object.keys(a).sort(function(x,y){return a[y]-a[x];}).slice(0,6);
       aaLabels=sorted; aaData=sorted.map(function(k){return a[k];});
-    } else { aaLabels=['Aseo y Limpieza','Logística','Mantenimiento','Jardinería','Operaciones','Coordinación']; aaData=[68,32,18,12,11,9]; }
+    } else { aaLabels=[]; aaData=[]; }
     mk('c-act-area',{type:'doughnut',data:{labels:aaLabels,datasets:[{data:aaData,
       backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,'#7F77DD'],borderWidth:2,borderColor:'#fff'}]},
       options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
   })();
-  mk('c-act-ret',{type:'bar',data:{labels:['Dic 25','Ene 26','Feb 26','Mar 26','Abr 26','May 26'],datasets:[
-    {label:'Paso Directo',data:[62,58,54,61,57,65],backgroundColor:GREEN,borderRadius:3,stack:'a'},
-    {label:'Renuncia',data:[25,28,22,30,26,31],backgroundColor:AMB,borderRadius:3,stack:'a'},
-    {label:'Fin Obra',data:[18,20,15,22,19,24],backgroundColor:BLUE,borderRadius:3,stack:'a'},
-    {label:'Bajo Desemp.',data:[9,8,11,10,9,12],backgroundColor:RED,borderRadius:3,stack:'a'}
-  ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    if (window._rotData && window._rotData.rows.length) {
+      var byMonth={}, motivos=new Set();
+      window._rotData.rows.forEach(function(r){
+        var d=r['FechaRetiro']||''; if(!d) return;
+        var dt=d instanceof Date?d:new Date(d); if(isNaN(dt.getTime())) return;
+        var mk2=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+        if(!byMonth[mk2]) byMonth[mk2]={};
+        var mot=(r['CausalRetiro']||r['Motivo']||'Otro').toString().trim();
+        motivos.add(mot); byMonth[mk2][mot]=(byMonth[mk2][mot]||0)+1;
+      });
+      var months=Object.keys(byMonth).sort().slice(-6);
+      var motArr=Array.from(motivos).slice(0,4);
+      var colors=[GREEN,AMB,BLUE,RED];
+      if (months.length && motArr.length) {
+        mk('c-act-ret',{type:'bar',data:{labels:months,datasets:motArr.map(function(mot,i){
+          return {label:mot,data:months.map(function(m){return (byMonth[m]&&byMonth[m][mot])||0;}),backgroundColor:colors[i%4],borderRadius:3,stack:'a'};
+        })},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
+          plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+      }
+    }
+  })();
 
   // ---- ROTACIÓN CHARTS ----
-  var rotData=[83,73,103,104,117,107,134,104,119,0,0,0];
-  mk('c-rot-m',{type:'bar',data:{labels:MN,datasets:[
-    {data:rotData,backgroundColor:rotData.map(function(v){return v>0?RED:'#E5E5E5';}),borderRadius:4},
-    {data:Array(12).fill(105),type:'line',borderColor:AMB,borderDash:[5,3],pointRadius:0,fill:false}
-  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  (function(){
+    var rotMData=Array(12).fill(0);
+    if (window._rotData && window._rotData.rows.length) {
+      window._rotData.rows.forEach(function(r){
+        var d=r['FechaRetiro']||''; if(!d) return;
+        var dt=d instanceof Date?d:new Date(d); if(isNaN(dt.getTime())) return;
+        rotMData[dt.getMonth()]++;
+      });
+    }
+    mk('c-rot-m',{type:'bar',data:{labels:MN,datasets:[
+      {data:rotMData,backgroundColor:rotMData.map(function(v){return v>0?RED:'#E5E5E5';}),borderRadius:4}
+    ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  })();
   (function(){
     var rcLabels, rcData;
     if (window._rotData && Object.keys(window._rotData.motivos).length) {
@@ -1663,26 +1680,42 @@ function redraw() {
       var c=window._rotData.ciudades;
       var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,6);
       rzLabels=sorted; rzData=sorted.map(function(k){return c[k];});
-    } else { rzLabels=['Buga','Cali','Eje Cafetero','Nariño']; rzData=[560,233,117,34]; }
+    } else { rzLabels=[]; rzData=[]; }
     mk('c-rot-z',{type:'bar',data:{labels:rzLabels,datasets:[{data:rzData,backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,RL],borderRadius:4}]},
       options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
   })();
   (function(){
-    var gM=window._rotData?window._rotData.generos.M:659;
-    var gF=window._rotData?window._rotData.generos.F:285;
+    var gM=window._rotData?window._rotData.generos.M:0;
+    var gF=window._rotData?window._rotData.generos.F:0;
     var tot=gM+gF||1;
     mk('c-rot-g',{type:'doughnut',data:{labels:['Masculino '+Math.round(gM/tot*100)+'%','Femenino '+Math.round(gF/tot*100)+'%'],
       datasets:[{data:[gM,gF],backgroundColor:[BLUE,RED],borderWidth:2,borderColor:'#fff'}]},
       options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})}); 
   })();
-  mk('c-rot-d',{type:'bar',data:{labels:['<30','31–60','61–90','91–120','121–180','>180'],
-    datasets:[{data:[89,142,198,237,156,122],backgroundColor:[RED,RED,AMB,AMB,GREEN,GREEN],borderRadius:4}]},
-    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
-  mk('c-rot-idx',{type:'line',data:{labels:MN5,datasets:[
-    {label:'Índice Rotación %',data:[8.4,9.1,8.7,8.3,9.2],borderColor:RED,backgroundColor:RL,fill:true,tension:.4,pointRadius:5,pointBackgroundColor:RED},
-    {label:'Meta 8%',data:[8,8,8,8,8],borderColor:'#CCC',borderDash:[6,4],pointRadius:0,fill:false}
-  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    var buckets=[0,0,0,0,0,0];
+    if (window._rotData && window._rotData.rows.length) {
+      window._rotData.rows.forEach(function(r){
+        var d=parseInt(r['DiasLaborados'])||0;
+        if(d<30) buckets[0]++; else if(d<=60) buckets[1]++;
+        else if(d<=90) buckets[2]++; else if(d<=120) buckets[3]++;
+        else if(d<=180) buckets[4]++; else buckets[5]++;
+      });
+    }
+    mk('c-rot-d',{type:'bar',data:{labels:['<30','31–60','61–90','91–120','121–180','>180'],
+      datasets:[{data:buckets,backgroundColor:[RED,RED,AMB,AMB,GREEN,GREEN],borderRadius:4}]},
+      options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+  })();
+  (function(){
+    if (window._rotData && window._rotData.total > 0 && window._personalData) {
+      var totalPers=window._personalData.total||1;
+      var pct=Math.round(window._rotData.total/totalPers*1000)/10;
+      mk('c-rot-idx',{type:'bar',data:{labels:['Índice Rotación'],datasets:[
+        {data:[pct],backgroundColor:pct>10?RED:pct>7?AMB:GREEN,borderRadius:6}
+      ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
+        plugins:{legend:{display:false}}})});
+    }
+  })();
 
   // ---- ENTREVISTAS CHARTS ----
   (function(){
@@ -1691,7 +1724,7 @@ function redraw() {
       var m=window._entData.motivos;
       var sorted=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,10);
       emLabels=sorted; emData=sorted.map(function(k){return m[k];});
-    } else { emLabels=['Mejor oferta','Ambiente inadecuado','Motivos viaje','Motivos estudio','Horario trabajo','Incumplim. ofrecido','Transporte','Salud','Personal','Mal trato']; emData=[15,12,9,6,5,2,1,3,2,1]; }
+    } else { emLabels=[]; emData=[]; }
     mk('c-em',{type:'bar',data:{labels:emLabels,datasets:[{data:emData,backgroundColor:RED,borderRadius:4}]},
       options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
   })();
@@ -1702,61 +1735,75 @@ function redraw() {
       datasets:[{data:[ep.Positiva,ep.Neutra,ep.Negativa],backgroundColor:[GREEN,AMB,RED],borderWidth:3,borderColor:'#fff'}]},
       options:bo({cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},boxWidth:12}}}})}); 
   })();
-  mk('c-ent-suc',{type:'bar',data:{labels:['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira'],datasets:[
-    {label:'Positivas',data:[18,12,9,8,10,5],backgroundColor:GREEN,borderRadius:3,stack:'e'},
-    {label:'Neutras',data:[4,2,1,2,1,1],backgroundColor:AMB,borderRadius:3,stack:'e'},
-    {label:'Negativas',data:[1,1,0,1,0,0],backgroundColor:RED,borderRadius:3,stack:'e'}
-  ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    if (window._entData && Object.keys(window._entData.sucursales).length) {
+      var sucs=window._entData.sucursales;
+      var labels=Object.keys(sucs).sort(function(a,b){return sucs[b]-sucs[a];}).slice(0,8);
+      var pos=[],neu=[],neg=[];
+      labels.forEach(function(s){
+        var rows=window._entData.rows.filter(function(r){return (r['Sucursal']||r['Ciudad']||'')===s;});
+        var p=0,n=0,ng=0;
+        rows.forEach(function(r){
+          var pv=(r['PercepcionGeneral']||'').toString().toUpperCase();
+          if(pv.includes('POS')||pv.includes('BUEN')||pv.includes('EXCE')) p++;
+          else if(pv.includes('REG')||pv.includes('NEU')) n++;
+          else if(pv.includes('NEG')||pv.includes('MAL')) ng++;
+        });
+        pos.push(p); neu.push(n); neg.push(ng);
+      });
+      mk('c-ent-suc',{type:'bar',data:{labels:labels,datasets:[
+        {label:'Positivas',data:pos,backgroundColor:GREEN,borderRadius:3,stack:'e'},
+        {label:'Neutras',data:neu,backgroundColor:AMB,borderRadius:3,stack:'e'},
+        {label:'Negativas',data:neg,backgroundColor:RED,borderRadius:3,stack:'e'}
+      ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
+        plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+    }
+  })();
 
   // ---- AT CHARTS ----
-  mk('c-at-if',{type:'bar',data:{labels:MN5,datasets:[
-    {label:'Nº Accidentes',data:[115,100,106,108,130],backgroundColor:[RED,RED,RED,RED,RED],borderRadius:4,yAxisID:'y2'},
-    {label:'Tasa Accidentalidad %',data:[0.62,0.55,0.58,0.60,0.72],type:'line',borderColor:'#8B1A1E',fill:false,tension:.3,pointRadius:6,pointBackgroundColor:'#8B1A1E',yAxisID:'y1',borderWidth:2.5}
-  ]},options:bo({scales:{
-    y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v.toFixed(2)+'%';}},title:{display:true,text:'Tasa %',font:{size:9}}},
-    y2:{position:'right',grid:{display:false},title:{display:true,text:'Nº Accidentes',font:{size:9}}}
-  },plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}},
-    datalabels:{display:function(ctx){return ctx.datasetIndex===0;},
-      formatter:function(v){return v.toFixed(2)+'%';},
-      color:'#fff',font:{size:9,weight:'bold'},anchor:'center',align:'center'}}})});
-  mk('c-at-is',{type:'line',data:{labels:MN5,datasets:[
-    {label:'Tasa Severidad %',data:[3.77,3.78,null,4.54,4.94],borderColor:RED,backgroundColor:RL,fill:true,tension:.3,pointRadius:5,pointBackgroundColor:RED,yAxisID:'y1',spanGaps:false},
-    {label:'Días perdidos',data:[699,690,null,823,894],borderColor:AMB,fill:false,tension:.3,pointRadius:4,type:'bar',yAxisID:'y2',backgroundColor:AMB,spanGaps:false}
-  ]},options:bo({scales:{
-    y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v!=null?v.toFixed(2)+'%':'';}}},
-    y2:{position:'right',grid:{display:false}}
-  },plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-at-causa',{type:'doughnut',data:{labels:['Comportamiento Subestándar 87%','Condición Insegura 13%'],
-    datasets:[{data:[483,74],backgroundColor:[RED,GRAY],borderWidth:3,borderColor:'#fff'}]},
-    options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
-  mk('c-at-clas',{type:'bar',data:{labels:['Sin Severidad','Leve','Moderado','Severo','Grave'],datasets:[
-    {label:'Cant. AT',data:[184,173,154,29,19],backgroundColor:RED,borderRadius:3},
-    {label:'Días perdidos',data:[0,421,1000,null,573],backgroundColor:BLUE,borderRadius:3}
-  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-at-gen',{type:'bar',data:{labels:['Masculino','Femenino'],datasets:[{data:[3.42,2.18],backgroundColor:[BLUE,RED],borderRadius:5}]},
-    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}}})});
-  mk('c-at-tiempo',{type:'bar',data:{labels:['< 1 mes','1 a 2 meses','3 a 6 meses','Mayor a 6 meses',''],
-    datasets:[{data:[38,24,20,18],backgroundColor:[RED,'rgba(192,39,45,.7)','rgba(192,39,45,.5)',GREEN,GREEN],borderRadius:5}]},
-    options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},max:45,ticks:{callback:function(v){return v+'%';}}}}})});
+  (function(){
+    if (!window._atData) return;
+    var rows=window._atData.rows;
+    // Por mes
+    var byMes={};
+    rows.forEach(function(r){ var d=r['FechaAccidente']||''; if(!d) return; var dt=d instanceof Date?d:new Date(d); if(isNaN(dt)) return; var k=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); byMes[k]=(byMes[k]||0)+1; });
+    var mesKeys=Object.keys(byMes).sort().slice(-6);
+    var mesCant=mesKeys.map(function(k){return byMes[k];});
+    if (mesKeys.length) mk('c-at-if',{type:'bar',data:{labels:mesKeys,datasets:[{label:'Nº Accidentes',data:mesCant,backgroundColor:RED,borderRadius:4}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+    // Días perdidos por mes
+    var byMesDias={};
+    rows.forEach(function(r){ var d=r['FechaAccidente']||''; if(!d) return; var dt=d instanceof Date?d:new Date(d); if(isNaN(dt)) return; var k=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); byMesDias[k]=(byMesDias[k]||0)+(parseInt(r['DiasIncapacidad'])||0); });
+    var diasMes=mesKeys.map(function(k){return byMesDias[k]||0;});
+    if (mesKeys.length) mk('c-at-is',{type:'bar',data:{labels:mesKeys,datasets:[{label:'Días perdidos',data:diasMes,backgroundColor:BLUE,borderRadius:4}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+    // TipoLesion
+    var lesiones=window._atData.lesiones;
+    if (Object.keys(lesiones).length) { var ls=Object.keys(lesiones).sort(function(a,b){return lesiones[b]-lesiones[a];}).slice(0,5); mk('c-at-clas',{type:'bar',data:{labels:ls,datasets:[{label:'Cant. AT',data:ls.map(function(k){return lesiones[k];}),backgroundColor:RED,borderRadius:3}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})}); }
+    // Género
+    var gM=window._atData.generos.M, gF=window._atData.generos.F;
+    mk('c-at-gen',{type:'bar',data:{labels:['Masculino','Femenino'],datasets:[{data:[gM,gF],backgroundColor:[BLUE,RED],borderRadius:5}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+    // Días incapacidad buckets
+    var tbuckets=[0,0,0,0];
+    rows.forEach(function(r){ var d=parseInt(r['DiasIncapacidad'])||0; if(d<=30) tbuckets[0]++; else if(d<=60) tbuckets[1]++; else if(d<=180) tbuckets[2]++; else tbuckets[3]++; });
+    mk('c-at-tiempo',{type:'bar',data:{labels:['≤30 días','31–60 días','61–180 días','>180 días'],datasets:[{data:tbuckets,backgroundColor:[GREEN,AMB,RED,RED],borderRadius:5}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
+    // AT causa hardcoded remove — show TipoAccidente if available
+    var tipos={}; rows.forEach(function(r){ var v=(r['TipoAccidente']||'').toString().trim(); if(v) tipos[v]=(tipos[v]||0)+1; });
+    var tk=Object.keys(tipos); if(tk.length) mk('c-at-causa',{type:'doughnut',data:{labels:tk,datasets:[{data:tk.map(function(k){return tipos[k];}),backgroundColor:[RED,GRAY,AMB,BLUE],borderWidth:3,borderColor:'#fff'}]},options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
+  })();
 
   // ---- EG CHARTS ----
-  mk('c-eg-is',{type:'line',data:{labels:MN5,datasets:[
-    {label:'Tasa Severidad %',data:[1.58,1.47,1.58,1.99,1.73],borderColor:RED,backgroundColor:RL,fill:true,tension:.3,pointRadius:5,pointBackgroundColor:RED,yAxisID:'y1'},
-    {label:'Días perdidos',data:[8338,7077,8412,10148,9193],borderColor:BLUE,fill:false,tension:.3,pointRadius:4,type:'bar',yAxisID:'y2',backgroundColor:BLUE}
-  ]},options:bo({scales:{y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v.toFixed(2)+'%';}}},y2:{position:'right',grid:{display:false}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-eg-if',{type:'line',data:{labels:MN5,datasets:[
-    {label:'Tasa Frecuencia %',data:[6.87,7.07,9.05,8.08,6.99],borderColor:AMB,backgroundColor:'rgba(186,117,23,.12)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:AMB,yAxisID:'y1'},
-    {label:'Nº Casos',data:[1274,1290,1642,1464,1266],borderColor:BLUE,fill:false,tension:.3,pointRadius:4,type:'bar',yAxisID:'y2',backgroundColor:BLUE}
-  ]},options:bo({scales:{y1:{position:'left',grid:{color:'#EEE'},ticks:{callback:function(v){return v.toFixed(2)+'%';}}},y2:{position:'right',grid:{display:false}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-eg-gen',{type:'bar',data:{labels:['Masculino','Femenino'],datasets:[
-    {label:'Tasa Frecuencia %',data:[34.2,42.8],backgroundColor:[BLUE,RED],borderRadius:5},
-    {label:'Tasa Severidad %',data:[1.41,1.93],backgroundColor:['rgba(24,95,165,.4)','rgba(192,39,45,.4)'],borderRadius:5}
-  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    if (!window._egData) return;
+    var rows=window._egData.rows;
+    var byMes={}, byMesDias={};
+    rows.forEach(function(r){ var d=r['FechaInicio']||''; if(!d) return; var dt=d instanceof Date?d:new Date(d); if(isNaN(dt)) return; var k=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); byMes[k]=(byMes[k]||0)+1; byMesDias[k]=(byMesDias[k]||0)+(parseInt(r['DiasIncapacidad'])||0); });
+    var mesKeys=Object.keys(byMes).sort().slice(-6);
+    if (mesKeys.length) {
+      mk('c-eg-if',{type:'bar',data:{labels:mesKeys,datasets:[{label:'Nº Casos',data:mesKeys.map(function(k){return byMes[k];}),backgroundColor:BLUE,borderRadius:4}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+      mk('c-eg-is',{type:'bar',data:{labels:mesKeys,datasets:[{label:'Días perdidos',data:mesKeys.map(function(k){return byMesDias[k]||0;}),backgroundColor:RED,borderRadius:4}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+    }
+    var gM=window._egData.generos.M, gF=window._egData.generos.F;
+    mk('c-eg-gen',{type:'bar',data:{labels:['Masculino','Femenino'],datasets:[{label:'Casos',data:[gM,gF],backgroundColor:[BLUE,RED],borderRadius:5}]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},plugins:{legend:{display:false}}})});
+  })();
 
   // ---- SINIESTRO CHARTS ----
   // c-sin-ev removed (chart deleted)
@@ -1767,7 +1814,7 @@ function redraw() {
       var e=window._sinData.estados;
       var sorted=Object.keys(e).sort(function(a,b){return e[b]-e[a];});
       seLabels=sorted; seData=sorted.map(function(k){return e[k];});
-    } else { seLabels=['En seguimiento','Calificación','Reintegro','Alta médica','Junta médica']; seData=[47,18,12,27,15]; }
+    } else { seLabels=[]; seData=[]; }
     mk('c-sin-est',{type:'doughnut',data:{labels:seLabels,datasets:[{data:seData,
       backgroundColor:[RED,AMB,GREEN,BLUE,GRAY],borderWidth:2,borderColor:'#fff'}]},
       options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
@@ -1776,19 +1823,24 @@ function redraw() {
   /* c-sin-prr removed */
 
   // ---- FUEROS CHARTS ----
-  mk('c-fu-mes',{type:'bar',data:{labels:MN5,datasets:[
-    {label:'Críticos',data:[9,10,11,12,12],backgroundColor:RED,borderRadius:3,stack:'f'},
-    {label:'Altos',data:[16,17,19,21,21],backgroundColor:AMB,borderRadius:3,stack:'f'},
-    {label:'Controlados',data:[12,13,14,14,14],backgroundColor:GREEN,borderRadius:3,stack:'f'}
-  ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+  (function(){
+    if (window._fuerosData && window._fuerosData.rows.length) {
+      var r=window._fuerosData.riesgos;
+      mk('c-fu-mes',{type:'bar',data:{labels:['Cargados'],datasets:[
+        {label:'Crítico',data:[r.Critico],backgroundColor:RED,borderRadius:3},
+        {label:'Alto',data:[r.Alto],backgroundColor:AMB,borderRadius:3},
+        {label:'Controlado',data:[r.Controlado],backgroundColor:GREEN,borderRadius:3}
+      ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
+        plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+    }
+  })();
   (function(){
     var ftLabels, ftData;
     if (window._fuerosData && Object.keys(window._fuerosData.tipos).length) {
       var t=window._fuerosData.tipos;
       var sorted=Object.keys(t).sort(function(a,b){return t[b]-t[a];});
       ftLabels=sorted; ftData=sorted.map(function(k){return t[k];});
-    } else { ftLabels=['EG Osteomuscular','EG Psicológica','AT con secuela','ATEL','Otra EG']; ftData=[18,9,11,5,4]; }
+    } else { ftLabels=[]; ftData=[]; }
     mk('c-fu-tipo',{type:'doughnut',data:{labels:ftLabels,datasets:[{data:ftData,
       backgroundColor:[RED,AMB,BLUE,GREEN,GRAY],borderWidth:2,borderColor:'#fff'}]},
       options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
@@ -1886,7 +1938,7 @@ function readAllFiles(idx) {
 
 function markSheetLoaded(sheetName, ok) {
   // BASE es el alias de SELECCIÓN en el nuevo template
-  var aliases = { 'SELECCIÓN': 'BASE', 'BASE': 'SELECCIÓN' };
+  var aliases = { 'SELECCIÓN': 'SELECCION', 'SELECCION': 'SELECCIÓN' };
   var chips = document.querySelectorAll('.sheet-chip');
   for (var i = 0; i < chips.length; i++) {
     var ds = chips[i].getAttribute('data-sheet');
@@ -1894,7 +1946,7 @@ function markSheetLoaded(sheetName, ok) {
       chips[i].classList.add(ok ? 'loaded' : 'partial');
     }
     // PIPELINE se genera automáticamente desde BASE
-    if (ds === 'PIPELINE' && (sheetName === 'BASE' || sheetName === 'SELECCIÓN')) {
+    if (ds === 'PIPELINE' && (sheetName === 'SELECCION' || sheetName === 'SELECCIÓN')) {
       chips[i].classList.add('loaded');
     }
   }
@@ -1918,10 +1970,10 @@ function buildDashboardFromExcel() {
   setProgress(85, 'Calculando indicadores de selección...');
   try {
     // 1. SELECCIÓN / BASE (acepta ambos nombres)
-    var selRows = parsedSheets['SELECCIÓN'] || parsedSheets['BASE'];
+    var selRows = parsedSheets['SELECCION'] || parsedSheets['SELECCIÓN'] || parsedSheets['BASE'];
     if (selRows && selRows.length > 1) {
       buildSeleccionData(selRows);
-      buildPipelineFromBase(selRows); // genera pipeline desde BASE
+      buildPipelineFromBase(selRows); // genera pipeline desde SELECCION
     }
     setProgress(88, 'Procesando pipeline y rotación...');
     // Pipeline sheet explícito (sobreescribe si existe)
@@ -2234,12 +2286,17 @@ function buildPersonalData(rows) {
   if (el) el.textContent = data.length.toLocaleString();
 }
 
-// ── PIPELINE DESDE BASE ──────────────────────────────────────
+// ── PIPELINE DESDE SELECCION ─────────────────────────────────
 function buildPipelineFromBase(rows) {
   var data = rows.filter(function(r){ return r['OrdenServicio'] && r['OrdenServicio'] !== 'OrdenServicio'; });
   if (data.length === 0) return;
+  // Detect if sheet has explicit pipeline columns
+  var hasExplicitCols = data[0] && (
+    r['EnReclutamiento'] !== undefined ||
+    data[0]['EnReclutamiento'] !== undefined ||
+    data[0]['EnSeleccion'] !== undefined
+  );
   PIPE_DATA.length = 0;
-  // Agrupar por PerfilCargo + Sucursal
   var grupos = {};
   data.forEach(function(r){
     var cargo = (r['PerfilCargo']||r['Cargo']||'').toString().trim();
@@ -2247,16 +2304,28 @@ function buildPipelineFromBase(rows) {
     if (!cargo || !suc) return;
     var key = cargo + '||' + suc;
     if (!grupos[key]) grupos[key] = {c:cargo, s:suc, r:0, se:0, co:0, e:0};
-    var estado = (r['Estado']||'').toString().toUpperCase().trim();
-    var pend = parseInt(r['PendientesContratar'])||parseInt(r['Pendiente por contratar'])||0;
-    var cont = parseInt(r['Contratados'])||0;
-    if (estado === 'ABIERTO') {
-      grupos[key].r += Math.max(0, pend);
-      grupos[key].co += cont;
-    } else if (estado === 'CERRADO') {
-      grupos[key].e += cont;
+    // Use explicit pipeline columns if present
+    var reclut = parseInt(r['EnReclutamiento'])||0;
+    var selec  = parseInt(r['EnSeleccion'])||0;
+    var contrat= parseInt(r['EnContratacion'])||0;
+    if (reclut || selec || contrat) {
+      grupos[key].r  += reclut;
+      grupos[key].se += selec;
+      grupos[key].co += contrat;
+      grupos[key].e  += parseInt(r['Contratados'])||0;
     } else {
-      grupos[key].se += pend > 0 ? pend : cont;
+      // Fallback: derive from Estado
+      var estado = (r['Estado']||'').toString().toUpperCase().trim();
+      var pend = parseInt(r['PendientesContratar'])||parseInt(r['Pendiente por contratar'])||0;
+      var cont = parseInt(r['Contratados'])||0;
+      if (estado === 'ABIERTO') {
+        grupos[key].r += Math.max(0, pend);
+        grupos[key].co += cont;
+      } else if (estado === 'CERRADO') {
+        grupos[key].e += cont;
+      } else {
+        grupos[key].se += pend > 0 ? pend : cont;
+      }
     }
   });
   Object.values(grupos).forEach(function(g){
@@ -3045,7 +3114,7 @@ function getTemplateSheets(withDemo) {
   var cli1 = clients[0] ? clients[0].nombre : 'CLIENTE DEMO A';
   var nit1 = clients[0] ? clients[0].nit : '900.123.456-1';
 
-  var baseHdr = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1","Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable","OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio","TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas","PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio","HOY","Diferencia","Cumplimiento","RETRO CLIENTE"];
+  var selHdr = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1","Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable","OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio","TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas","PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio","HOY","Diferencia","Cumplimiento","RETRO CLIENTE"];
   var paHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa","Estado","ObservacionTemporalidad"];
   var rotHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","FechaRetiro","DiasLaborados","CausalRetiro","TipoRetiro","Genero","ObservacionRetiro"];
   var entHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","FechaRetiro","FechaEntrevista","Entrevistador","Responsable","P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion","P4_Herramientas","P5_AplicoConocimientos","MotivoRetiro","PercepcionGeneral","Comentarios"];
@@ -3056,7 +3125,7 @@ function getTemplateSheets(withDemo) {
   var fuHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","TipoFuero","FechaInicio","FechaFin","NivelRiesgo","EstadoGestion","Observaciones"];
 
   var sheets = [
-    { name: 'BASE', data: [baseHdr] },
+    { name: 'SELECCION', data: [selHdr] },
     { name: 'PERSONAL_ACTIVO', data: [paHdr] },
     { name: 'ROTACIÓN', data: [rotHdr] },
     { name: 'ENTREVISTAS_RETIRO', data: [entHdr] },
