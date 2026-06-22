@@ -357,8 +357,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <input type="hidden" id="f-rec" value="">
   <select class="fsel" id="f-empresa" onchange="markActive(this)">
     <option value="">Todas las empresas</option>
-    <option value="SUMMAR PROCESOS">SUMMAR PROCESOS</option>
-    <option value="SUMMAR TEMPORALES">SUMMAR TEMPORALES</option>
   </select>
   <select class="fsel" id="f-cliente" onchange="markActive(this)">
     <option value="">Todos los clientes</option>
@@ -1993,7 +1991,7 @@ function buildSeleccionData(rows) {
     var total = subset.length;
     var sol = subset.reduce(function(s,r){ return s + (parseFloat(r['PersonasSolicitadas'])||0); }, 0);
     var cont = subset.reduce(function(s,r){ return s + (parseFloat(r['Contratados'])||0); }, 0);
-    var pend = subset.reduce(function(s,r){ return s + (parseFloat(r['PendientesContratar'])||0); }, 0);
+    var pend = subset.reduce(function(s,r){ return s + (parseFloat(r['PendientesContratar']||r['Pendiente por contratar'])||0); }, 0);
     var cancel = subset.filter(function(r){ return (r['Estado']||'').toString().toUpperCase()==='CANCELADA'; }).length;
     var abierto = subset.filter(function(r){ return (r['Estado']||'').toString().toUpperCase()==='ABIERTO'; }).length;
     var cerradas = subset.filter(function(r){ return (r['Estado']||'').toString().toUpperCase()==='CERRADO'; });
@@ -2033,6 +2031,8 @@ function buildSeleccionData(rows) {
     });
   });
   
+  // Store raw data for empresa/cliente/responsable filtering
+  window._baseRows = data;
   // Override global FD
   Object.assign(FD, newFD);
   
@@ -2048,6 +2048,38 @@ function buildSeleccionData(rows) {
   newCityTable.sort(function(a,b){ return b.req-a.req; });
   CITY_TABLE.length = 0;
   newCityTable.forEach(function(x){ CITY_TABLE.push(x); });
+
+  // Populate dynamic filter dropdowns from data
+  updateEmpresasFilter(data);
+  updateResponsablesFilter(data);
+}
+
+function updateEmpresasFilter(data) {
+  var sel = document.getElementById('f-empresa');
+  if (!sel) return;
+  var cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  var empresas = {};
+  data.forEach(function(r){ var e=(r['Empresa']||'').toString().trim(); if(e) empresas[e]=1; });
+  Object.keys(empresas).sort().forEach(function(e){
+    var opt = document.createElement('option');
+    opt.value = e; opt.textContent = e; sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+
+function updateResponsablesFilter(data) {
+  var sel = document.getElementById('f-responsable');
+  if (!sel) return;
+  var cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  var resp = {};
+  data.forEach(function(r){ var v=(r['Responsable']||'').toString().trim(); if(v) resp[v]=1; });
+  Object.keys(resp).sort().forEach(function(v){
+    var opt = document.createElement('option');
+    opt.value = v; opt.textContent = v; sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
 }
 
 // ── PIPELINE PROCESSOR ──────────────────────────────────────
@@ -2131,8 +2163,7 @@ function buildATData(rows) {
   if (data.length === 0) return;
   var total = data.length;
   var diasTotal = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0); }, 0);
-  var diasContrat = data.map(function(r){ return parseInt(r['DiasContratadoAlaFechaAT'])||0; }).filter(function(v){return v>0;});
-  var promDias = diasContrat.length > 0 ? Math.round(diasContrat.reduce(function(a,b){return a+b;},0)/diasContrat.length) : 0;
+  var promDias = 0; // DiasContratadoAlaFechaAT is optional
   // Build breakdowns
   var peligros = {}, cuerpos = {}, mecanismos = {}, lesiones = {}, sucursales = {}, cargos = {}, generos = {M:0,F:0};
   data.forEach(function(r){
@@ -3014,7 +3045,7 @@ function getTemplateSheets(withDemo) {
   var cli1 = clients[0] ? clients[0].nombre : 'CLIENTE DEMO A';
   var nit1 = clients[0] ? clients[0].nit : '900.123.456-1';
 
-  var baseHdr = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1","Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable","OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio","TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas","PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio","HOY","Diferencia","Cumplimiento","Pendiente por contratar","RETRO CLIENTE"];
+  var baseHdr = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1","Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable","OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio","TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas","PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio","HOY","Diferencia","Cumplimiento","RETRO CLIENTE"];
   var paHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa","Estado","ObservacionTemporalidad"];
   var rotHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo","Sucursal","Ciudad","FechaIngreso","FechaRetiro","DiasLaborados","CausalRetiro","TipoRetiro","Genero","ObservacionRetiro"];
   var entHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","FechaRetiro","FechaEntrevista","Entrevistador","Responsable","P1_TratoJefe","P2_TrabajoEsperado","P3_Retroalimentacion","P4_Herramientas","P5_AplicoConocimientos","MotivoRetiro","PercepcionGeneral","Comentarios"];
