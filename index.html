@@ -588,15 +588,57 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 
 <!-- TALENTO -->
 <div class="sec" id="sec-talento">
-  <div class="sh"><div class="sh-ic">🏆</div><div><h2>Gestión del Talento</h2><p>Procesos disciplinarios y temporalidad</p></div></div>
-  <div class="cc" style="margin-bottom:14px">
-    <div class="cc-h"><div class="cc-title">Procesos Disciplinarios</div></div>
-    <table class="tbl"><thead><tr><th>Fecha</th><th>Nombre</th><th>Cargo</th><th>Motivo</th><th>Acción</th><th>Estado</th></tr></thead>
-    <tbody id="talento-disc-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja TALENTO_DISCIPLINARIO para ver los procesos</td></tr></tbody></table>
+  <div class="sh"><div class="sh-ic">🏆</div><div><h2>Gestión del Talento</h2><p>Procesos disciplinarios y control de temporalidad</p></div></div>
+
+  <!-- KPIs disciplinarios -->
+  <div class="kg" style="margin-bottom:14px">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Procesos</div><div class="kc-val" id="disc-kpi-total">—</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Llamados de Atención</div><div class="kc-val" id="disc-kpi-llamado">—</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Terminaciones Contrato</div><div class="kc-val" id="disc-kpi-terminacion">—</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Descargos</div><div class="kc-val" id="disc-kpi-descargo">—</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Total Acciones</div><div class="kc-val" id="disc-kpi-acciones">—</div></div>
   </div>
-  <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Control de la Temporalidad</div><span class="cc-tag" id="talento-temp-count"></span></div>
-    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Ciudad</th><th>Fecha Ingreso</th><th>Días</th><th>Contrato</th></tr></thead>
-    <tbody id="talento-temp-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja PERSONAL_ACTIVO para ver temporalidad</td></tr></tbody></table>
+
+  <!-- Tabla Procesos Disciplinarios -->
+  <div class="cc" style="margin-bottom:18px">
+    <div class="cc-h"><div class="cc-title" style="font-weight:700">Procesos Disciplinarios</div><span class="cc-tag" id="disc-count"></span></div>
+    <div class="tscroll"><table class="tbl" style="font-size:12px">
+      <thead>
+        <tr style="background:var(--bg2)">
+          <th rowspan="2">Cédula</th><th rowspan="2">Nombre</th><th rowspan="2">Cargo</th>
+          <th rowspan="2">F. Ingreso</th><th rowspan="2">F. Solicitud Medida</th><th rowspan="2">F. Entrega Medida</th>
+          <th colspan="4" style="text-align:center;border-bottom:1px solid var(--border)">Motivos Disciplinarios</th>
+          <th rowspan="2" style="text-align:center">Total<br>Motivos</th>
+          <th colspan="4" style="text-align:center;border-bottom:1px solid var(--border)">Acciones Disciplinarias</th>
+          <th rowspan="2" style="text-align:center">Total<br>Acciones</th>
+          <th rowspan="2">Observación</th>
+        </tr>
+        <tr style="background:var(--bg2)">
+          <th>Ausencia Injustificada</th><th>Uso Celular Planta</th><th>Maltrato Verbal</th><th>Otro Motivo</th>
+          <th>Descargos</th><th>Dcto Nómina</th><th>Llamado Atención</th><th>Terminación Contrato</th>
+        </tr>
+      </thead>
+      <tbody id="talento-disc-tbody">
+        <tr><td colspan="18" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja TALENTO_DISCIPLINARIO para ver los procesos</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- Tabla Control de Temporalidad -->
+  <div class="cc">
+    <div class="cc-h"><div class="cc-title" style="font-weight:700">Control de la Temporalidad</div><span class="cc-tag" id="talento-temp-count"></span></div>
+    <div class="tscroll"><table class="tbl" style="font-size:12px">
+      <thead>
+        <tr>
+          <th>No.</th><th>Cédula</th><th>Nombre</th><th>Sexo</th><th>Estado</th>
+          <th>F. Ingreso</th><th>Centro de Costo</th><th>Cargo</th><th>Temporalidad</th>
+          <th>Días Pasados / Días Restantes</th><th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody id="talento-temp-tbody">
+        <tr><td colspan="11" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja PERSONAL_ACTIVO para ver temporalidad</td></tr>
+      </tbody>
+    </table></div>
   </div>
 </div>
 
@@ -3218,6 +3260,8 @@ function getTemplateSheets(withDemo) {
     ["ENTREVISTAS_RETIRO","Entrevistas de salida. Alimenta: Módulo Entrevistas","Empresa, Cliente, Numdocumento, Nombres, Cargo, Area, JefeInmediato, FechaEncuesta, FechaIngreso, FechaRetiro, MotivoRetiro, TratoJefe (Bueno/Regular/Deficiente), AplicoConocimientos (SI/NO), TrabajoEsperado (SI/NO), RetroalimentacionJefe (SI/NO), ElementosTrabajo (SI/NO), CondicionesFisicas (SI/NO), ProblemasDesarrollo, ExperienciaPositiva, OportunidadMejora, ComentariosAdicionales"],
     ["SINIESTRO","Siniestros laborales. Alimenta: Módulo Siniestros","Numdocumento, Estado, TipoSiniestro, Calificacion"],
     ["FUEROS_SALUD","Trabajadores con fuero. Alimenta: Módulo Fueros","Numdocumento, TipoFuero, NivelRiesgo, Observaciones, Cargo, Sucursal, FechaInicio, FechaFin, EstadoGestion"],
+    ["TALENTO_DISCIPLINARIO","Procesos disciplinarios. Alimenta: Módulo Talento","Cedula, Nombre, Cargo, FechaIngreso, FechaSolicitudMedida, FechaEntregaMedida, AusenciaInjustificada (X), UsocelularPlanta (X), MaltratoVerbal (X), OtroMotivo (X), Descargos (X), DctoNomina (X), LlamadoAtencion (X), TerminacionContrato (X), Observacion"],
+    ["BIENESTAR_ACTIVIDADES","Actividades de bienestar. Alimenta: Módulo Bienestar","Actividad, Fecha, Medio, Personas, Impacto, Responsable, Ciudad"],
     [],
     ["NOTAS IMPORTANTES:"],
     ["• No renombres ni elimines hojas. La primera fila de cada hoja es el encabezado (no borrar)."],
@@ -3261,18 +3305,27 @@ function getTemplateSheets(withDemo) {
                  "PorcentajePerdida","EntidadCalificadora","DiasCalificacion","Observaciones"];
   var fuHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal",
                  "TipoFuero","FechaInicio","FechaFin","NivelRiesgo","EstadoGestion","Observaciones"];
+  var talHdr  = ["Empresa","NIT","Cliente","Cedula","Nombre","Apellidos","Cargo","FechaIngreso",
+                 "FechaSolicitudMedida","FechaEntregaMedida",
+                 "AusenciaInjustificada","UsocelularPlanta","MaltratoVerbal","OtroMotivo",
+                 "Descargos","DctoNomina","LlamadoAtencion","TerminacionContrato",
+                 "Observacion"];
+  var bieHdr  = ["Empresa","NIT","Cliente","Sucursal","Ciudad","Fecha","Actividad","Medio",
+                 "Personas","Impacto","Responsable","Observaciones"];
 
   var sheets = [
-    { name: 'INSTRUCCIONES', data: instrData },
-    { name: 'SELECCION',       data: [selHdr]  },
-    { name: 'ROTACION',        data: [rotHdr]  },
-    { name: 'PERSONAL_ACTIVO', data: [paHdr]   },
-    { name: 'AT_ACCIDENTES',   data: [atHdr]   },
-    { name: 'EG_ENFERMEDADES', data: [egHdr]   },
-    { name: 'FORMACION_SST',   data: [formHdr] },
-    { name: 'ENTREVISTAS_RETIRO', data: [entHdr] },
-    { name: 'SINIESTRO',       data: [sinHdr]  },
-    { name: 'FUEROS_SALUD',    data: [fuHdr]   }
+    { name: 'INSTRUCCIONES',        data: instrData },
+    { name: 'SELECCION',            data: [selHdr]  },
+    { name: 'ROTACION',             data: [rotHdr]  },
+    { name: 'PERSONAL_ACTIVO',      data: [paHdr]   },
+    { name: 'AT_ACCIDENTES',        data: [atHdr]   },
+    { name: 'EG_ENFERMEDADES',      data: [egHdr]   },
+    { name: 'FORMACION_SST',        data: [formHdr] },
+    { name: 'ENTREVISTAS_RETIRO',   data: [entHdr]  },
+    { name: 'SINIESTRO',            data: [sinHdr]  },
+    { name: 'FUEROS_SALUD',         data: [fuHdr]   },
+    { name: 'TALENTO_DISCIPLINARIO',data: [talHdr]  },
+    { name: 'BIENESTAR_ACTIVIDADES',data: [bieHdr]  }
   ];
 
   if (withDemo) {
@@ -3318,7 +3371,20 @@ function getTemplateSheets(withDemo) {
     );
     // Demo rows for FUEROS_SALUD (index 9)
     sheets[9].data.push(
-      ["1099887766","Laura Soto","Técnico","Sucursal Sur","Maternidad","2025-01-01","2025-10-01","Activo","Controlado","Sin novedad"]
+      [cli1,"900.123.456-1",cli1,"1099887766","Laura Soto","Técnico","Sede Sur","Maternidad","2025-01-01","2025-10-01","Bajo","Activo","Sin novedad"]
+    );
+    // Demo rows for TALENTO_DISCIPLINARIO (index 10)
+    // Columns: Empresa,NIT,Cliente,Cedula,Nombre,Apellidos,Cargo,FechaIngreso,FechaSolicitudMedida,FechaEntregaMedida,
+    //          AusenciaInjustificada,UsocelularPlanta,MaltratoVerbal,OtroMotivo,
+    //          Descargos,DctoNomina,LlamadoAtencion,TerminacionContrato,Observacion
+    sheets[10].data.push(
+      [cli1,"900.123.456-1",cli1,"1113649333","MONTAÑO CUERO","JOSE G","SOLDADOR","2022-12-10","2023-05-29","2023-06-01","X","","","",  "X","X","","0","PENDIENTE DEFINICION DE MEDIDA DISCIPLINARIA POR CLIENTE"],
+      [cli1,"900.123.456-1",cli1,"14701956","SANCHEZ RAMIREZ","VICTOR HUGO","OPERARIO","2023-01-16","2023-05-29","2023-06-01","","X","","",  "X","","","","PENDIENTE DEFINICION DE MEDIDA DISCIPLINARIA POR CLIENTE"]
+    );
+    // Demo rows for BIENESTAR_ACTIVIDADES (index 11)
+    sheets[11].data.push(
+      [cli1,"900.123.456-1",cli1,"Sede Norte","Bogotá","2025-03-08","Día de la Mujer","Presencial",45,"Alto","RH","Excelente participación"],
+      [cli1,"900.123.456-1",cli1,"Sede Sur","Medellín","2025-05-01","Día del Trabajo","Virtual",30,"Medio","RH","Buena asistencia"]
     );
   }
   return sheets;
@@ -3370,64 +3436,108 @@ function updateAdminVisibility() {
 
 // ── TALENTO PARSER ────────────────────────────────────────
 function buildTalentoData(rows) {
-  // Procesos disciplinarios
-  var disc = rows.filter(function(r){
-    return r['Nombre'] || r['Numdocumento'];
-  });
-  var tbody = document.getElementById('talento-disc-tbody');
+  var disc = rows.filter(function(r){ return r['Nombre'] || r['Nombres'] || r['Cedula'] || r['Numdocumento']; });
+  var tbody  = document.getElementById('talento-disc-tbody');
+  var countEl = document.getElementById('disc-count');
+  function x(v){ return (v||'X')==='X'||String(v).toUpperCase()==='X'?'X':''; }
+  function n(v){ var p=parseFloat(String(v||'').replace(',','.')); return isNaN(p)?0:p; }
+  var totLlamado=0, totTermin=0, totDescargo=0, totAcciones=0;
   if (tbody) {
     if (disc.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros en el período</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="18" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros en el período</td></tr>';
     } else {
-      tbody.innerHTML = disc.map(function(r){
-        var fecha = (r['Fecha']||r['Mes']||'').toString().substring(0,10);
-        var nombre = (r['Nombre']||r['Nombres']||'').toString();
-        var cargo = (r['Cargo']||'').toString();
-        var motivo = (r['Motivo']||'').toString();
-        var accion = (r['Acción']||r['Accion']||'').toString();
-        var estado = (r['Estado']||'').toString();
-        var cls = estado.toUpperCase().includes('CERR') ? 'bs' : estado.toUpperCase().includes('ARCH') ? 'bd' : 'bw';
-        return '<tr><td>'+fecha+'</td><td>'+nombre+'</td><td>'+cargo+'</td><td>'+motivo+'</td><td>'+accion+'</td><td><span class="badge '+cls+'">'+estado+'</span></td></tr>';
+      tbody.innerHTML = disc.map(function(r, idx){
+        var cedula  = r['Cedula']||r['Numdocumento']||'';
+        var nombre  = ((r['Nombre']||r['Nombres']||'')+ ' '+(r['Apellidos']||'')).trim();
+        var cargo   = r['Cargo']||'';
+        var fi      = (r['FechaIngreso']||'').toString().substring(0,10);
+        var fSol    = (r['FechaSolicitudMedida']||r['FechaSolicitud']||'').toString().substring(0,10);
+        var fEnt    = (r['FechaEntregaMedida']||r['FechaEntrega']||'').toString().substring(0,10);
+        var ausencia= x(r['AusenciaInjustificada']||r['Ausencia']);
+        var celular = x(r['UsocelularPlanta']||r['UsoCelular']);
+        var maltrato= x(r['MaltratoVerbal']||r['Maltrato']);
+        var otro    = x(r['OtroMotivo']||r['Motivo']);
+        var totalMot= [ausencia,celular,maltrato,otro].filter(function(v){return v==='X';}).length;
+        var desc    = x(r['Descargos']);
+        var dcto    = x(r['DctoNomina']||r['DescuentoNomina']);
+        var llamado = x(r['LlamadoAtencion']||r['Llamado']);
+        var termin  = x(r['TerminacionContrato']||r['Terminacion']);
+        var totalAcc= [desc,dcto,llamado,termin].filter(function(v){return v==='X';}).length;
+        var obs     = r['Observacion']||r['Observaciones']||'';
+        if(llamado==='X') totLlamado++;
+        if(termin==='X') totTermin++;
+        if(desc==='X') totDescargo++;
+        totAcciones += totalAcc;
+        var bg = (idx%2===0)?'':'background:var(--bg2)';
+        return '<tr style="'+bg+'"><td>'+cedula+'</td><td>'+nombre+'</td><td>'+cargo+'</td><td>'+fi+'</td><td>'+fSol+'</td><td>'+fEnt+'</td>'+
+          '<td style="text-align:center">'+ausencia+'</td><td style="text-align:center">'+celular+'</td><td style="text-align:center">'+maltrato+'</td><td style="text-align:center">'+otro+'</td>'+
+          '<td style="text-align:center;font-weight:700">'+totalMot+'</td>'+
+          '<td style="text-align:center">'+desc+'</td><td style="text-align:center">'+dcto+'</td><td style="text-align:center">'+llamado+'</td><td style="text-align:center">'+termin+'</td>'+
+          '<td style="text-align:center;font-weight:700">'+totalAcc+'</td>'+
+          '<td>'+obs+'</td></tr>';
       }).join('');
     }
   }
+  if(countEl) countEl.textContent = disc.length + ' procesos';
+  function s(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  s('disc-kpi-total',     disc.length);
+  s('disc-kpi-llamado',   totLlamado);
+  s('disc-kpi-terminacion', totTermin);
+  s('disc-kpi-descargo',  totDescargo);
+  s('disc-kpi-acciones',  totAcciones);
 }
 
 // Temporalidad desde PERSONAL_ACTIVO (llamada desde buildPersonalData)
 function renderTemporalidadTable(rows) {
   var hoy = new Date();
-  var tbody = document.getElementById('talento-temp-tbody');
+  var tbody   = document.getElementById('talento-temp-tbody');
   var countEl = document.getElementById('talento-temp-count');
   if (!tbody) return;
-  // Filter employees with more than 1 year
-  var conTiempo = rows.filter(function(r){
+  var activos = rows.filter(function(r){
     var fi = r['FechaIngreso']||'';
     if (!fi) return false;
     var d = fi instanceof Date ? fi : new Date(fi);
-    if (isNaN(d.getTime())) return false;
-    var dias = (hoy - d) / (1000*60*60*24);
-    return dias >= 365;
+    return !isNaN(d.getTime());
   }).sort(function(a,b){
-    var da = new Date(a['FechaIngreso']||0), db = new Date(b['FechaIngreso']||0);
-    return da - db;
+    return new Date(a['FechaIngreso']||0) - new Date(b['FechaIngreso']||0);
   });
-  if (countEl) countEl.textContent = conTiempo.length + ' empleados';
-  if (conTiempo.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin empleados con más de 1 año</td></tr>';
+  // Determine temporality label and days remaining (assumes 1-year fixed contracts)
+  function classify(dias){
+    if (dias < 0)   return {label:'FUERA DE TIEMPO', cls:'bd', restantes: Math.abs(dias)+' días vencidos'};
+    if (dias <= 30) return {label:'POR VENCER',      cls:'bw', restantes: dias+' días restantes'};
+    return             {label:'AL DÍA',             cls:'bs', restantes: dias+' días restantes'};
+  }
+  if (countEl) countEl.textContent = activos.length + ' empleados';
+  if (activos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin datos de temporalidad</td></tr>';
     return;
   }
-  tbody.innerHTML = conTiempo.slice(0,20).map(function(r){
-    var fi = r['FechaIngreso']||'';
-    var d = fi instanceof Date ? fi : new Date(fi);
-    var dias = isNaN(d.getTime()) ? 0 : Math.floor((hoy-d)/(1000*60*60*24));
-    var meses = Math.floor(dias/30);
-    var nombre = (r['Nombres']||r['NombreEmpleado']||'').toString()+' '+(r['Apellidos']||'').toString();
-    var ciudad = (r['Ciudad']||r['Sucursal']||'').toString();
-    var contrato = (r['TipoContrato']||'').toString();
-    return '<tr><td>'+nombre.trim()+'</td><td>'+(r['Cargo']||'')+'</td><td>'+ciudad+'</td><td>'+fi.toString().substring(0,10)+'</td><td>'+dias+' días</td><td>'+contrato+'</td></tr>';
+  tbody.innerHTML = activos.map(function(r, idx){
+    var cedula  = r['Numdocumento']||r['Cedula']||'';
+    var nombre  = ((r['Nombres']||r['Nombre']||'')+' '+(r['Apellidos']||'')).trim();
+    var sexo    = r['Genero']||r['Sexo']||'';
+    var estado  = r['Estado']||'';
+    var fi      = r['FechaIngreso']||'';
+    var d       = fi instanceof Date ? fi : new Date(fi);
+    var diasPasados = isNaN(d.getTime()) ? 0 : Math.floor((hoy - d)/(1000*60*60*24));
+    // Días restantes until next contract renewal (annually)
+    var anios = Math.floor(diasPasados/365);
+    var proxRenovacion = new Date(d);
+    proxRenovacion.setFullYear(proxRenovacion.getFullYear() + anios + 1);
+    var diasRestantes = Math.floor((proxRenovacion - hoy)/(1000*60*60*24));
+    var cc    = r['AreaOperativa']||r['CentroCosto']||r['Sucursal']||'';
+    var cargo = r['Cargo']||'';
+    var obs   = r['ObservacionTemporalidad']||r['Observaciones']||'';
+    var info  = classify(diasRestantes);
+    var bg = (idx%2===0)?'':'background:var(--bg2)';
+    return '<tr style="'+bg+'"><td>'+(idx+1)+'</td><td>'+cedula+'</td><td>'+nombre+'</td><td>'+sexo+'</td>'+
+      '<td>'+estado+'</td><td>'+fi.toString().substring(0,10)+'</td><td>'+cc+'</td><td>'+cargo+'</td>'+
+      '<td><span class="badge '+info.cls+'" style="font-size:11px">'+info.label+'</span></td>'+
+      '<td style="text-align:center">'+diasPasados+' / '+info.restantes+'</td>'+
+      '<td>'+obs+'</td></tr>';
   }).join('');
   var el = document.getElementById('act-kpi-temporalidad');
-  if (el) el.textContent = conTiempo.length;
+  if (el) el.textContent = activos.length;
 }
 
 // ── BIENESTAR PARSER ──────────────────────────────────────
