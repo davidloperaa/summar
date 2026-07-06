@@ -391,19 +391,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
       <div class="pipe-filters">
         <select class="pfsel" id="pf-cargo" onchange="renderPipeline()">
           <option value="">Todos los cargos</option>
-          <option>Auxiliar de Servicios</option>
-          <option>Auxiliar Servicios BPM</option>
-          <option>Op. Apoyo Logístico</option>
-          <option>Aux. Mantenimiento Loc.</option>
-          <option>Operario de Jardinería</option>
-          <option>Coordinador Operativo</option>
-          <option>Aux. Servicios Alturas</option>
         </select>
         <select class="pfsel" id="pf-suc" onchange="renderPipeline()">
           <option value="">Todas las sucursales</option>
-          <option>Cali Centro</option><option>Yumbo</option><option>Palmira</option>
-          <option>Buga</option><option>Cali Norte</option><option>Pereira</option>
-          <option>Bogotá</option><option>Medellín</option>
         </select>
         <button style="background:none;border:1px solid var(--graym);border-radius:6px;padding:2px 9px;font-size:10.5px;cursor:pointer;height:26px;color:var(--muted)" onclick="document.getElementById('pf-cargo').value='';document.getElementById('pf-suc').value='';renderPipeline()">↺</button>
       </div>
@@ -417,7 +407,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="pipe-dtl">
       <div class="pipe-dtl-ttl">Detalle por cargo y sucursal</div>
       <div class="tscroll"><table class="tbl">
-        <thead><tr><th>Cargo</th><th>Sucursal</th><th style="color:#C0272D">🔍 Reclutamiento</th><th style="color:#BA7517">📋 Selección</th><th style="color:#185FA5">📝 Contratación</th><th style="color:#1D9E75">✅ Entregados</th><th>Total</th><th>Avance</th></tr></thead>
+        <thead><tr><th>Cargo</th><th>Sucursal</th><th style="color:#BA7517">📋 En Selección</th><th style="color:#185FA5">📝 En Contratación</th><th style="color:#1D9E75">✅ Entregados</th><th>Total</th><th>Avance</th></tr></thead>
         <tbody id="pipe-tbody"></tbody>
       </table></div>
     </div>
@@ -1248,36 +1238,9 @@ function buildOG(rows) {
 }
 
 // ===================== PIPELINE =====================
-var PIPE_DATA = [
-  {c:'Auxiliar de Servicios',s:'Cali Centro',r:12,se:8,co:5,e:18},
-  {c:'Auxiliar de Servicios',s:'Yumbo',r:8,se:6,co:4,e:12},
-  {c:'Auxiliar de Servicios',s:'Palmira',r:6,se:4,co:3,e:9},
-  {c:'Auxiliar de Servicios',s:'Buga',r:4,se:3,co:2,e:8},
-  {c:'Auxiliar de Servicios',s:'Cali Norte',r:7,se:5,co:3,e:10},
-  {c:'Auxiliar de Servicios',s:'Pereira',r:3,se:2,co:2,e:5},
-  {c:'Auxiliar de Servicios',s:'Bogotá',r:9,se:7,co:5,e:14},
-  {c:'Auxiliar de Servicios',s:'Medellín',r:5,se:4,co:2,e:7},
-  {c:'Auxiliar Servicios BPM',s:'Cali Centro',r:7,se:5,co:3,e:10},
-  {c:'Auxiliar Servicios BPM',s:'Yumbo',r:5,se:4,co:2,e:7},
-  {c:'Auxiliar Servicios BPM',s:'Palmira',r:3,se:2,co:2,e:5},
-  {c:'Auxiliar Servicios BPM',s:'Buga',r:4,se:3,co:1,e:6},
-  {c:'Auxiliar Servicios BPM',s:'Bogotá',r:6,se:4,co:3,e:8},
-  {c:'Op. Apoyo Logístico',s:'Cali Centro',r:5,se:3,co:2,e:7},
-  {c:'Op. Apoyo Logístico',s:'Yumbo',r:4,se:3,co:2,e:6},
-  {c:'Op. Apoyo Logístico',s:'Palmira',r:3,se:2,co:1,e:4},
-  {c:'Op. Apoyo Logístico',s:'Bogotá',r:4,se:3,co:2,e:5},
-  {c:'Aux. Mantenimiento Loc.',s:'Cali Centro',r:3,se:2,co:1,e:4},
-  {c:'Aux. Mantenimiento Loc.',s:'Yumbo',r:2,se:1,co:1,e:3},
-  {c:'Aux. Mantenimiento Loc.',s:'Palmira',r:2,se:2,co:1,e:3},
-  {c:'Operario de Jardinería',s:'Cali Centro',r:2,se:2,co:1,e:3},
-  {c:'Operario de Jardinería',s:'Buga',r:2,se:1,co:1,e:2},
-  {c:'Coordinador Operativo',s:'Cali Centro',r:1,se:1,co:1,e:2},
-  {c:'Coordinador Operativo',s:'Bogotá',r:2,se:1,co:1,e:2},
-  {c:'Aux. Servicios Alturas',s:'Cali Centro',r:2,se:2,co:1,e:3},
-  {c:'Aux. Servicios Alturas',s:'Bogotá',r:2,se:1,co:1,e:2}
-];
-var PIPE_COLS = ['#C0272D','#BA7517','#185FA5','#1D9E75','#7F77DD','#D85A30','#888780','#2D9E9E'];
-var PIPE_SUCS = ['Cali Centro','Yumbo','Palmira','Buga','Cali Norte','Pereira','Bogotá','Medellín'];
+// Populated dynamically from SELECCION sheet — no hardcoded data
+var PIPE_DATA = [];
+var PIPE_COLS = ['#BA7517','#185FA5','#1D9E75','#7F77DD','#D85A30','#C0272D','#888780','#2D9E9E','#8B1A1E','#2D6A4F'];
 
 function renderPipeline() {
   var fC = document.getElementById('pf-cargo') ? document.getElementById('pf-cargo').value : '';
@@ -1285,12 +1248,12 @@ function renderPipeline() {
   var rows = PIPE_DATA;
   if (fC) rows = rows.filter(function(r){return r.c===fC;});
   if (fS) rows = rows.filter(function(r){return r.s===fS;});
-  var totR=0, totSe=0, totCo=0, totE=0;
-  for (var i=0;i<rows.length;i++){totR+=rows[i].r;totSe+=rows[i].se;totCo+=rows[i].co;totE+=rows[i].e;}
+  var totSe=0, totCo=0, totE=0;
+  for (var i=0;i<rows.length;i++){totSe+=rows[i].se;totCo+=rows[i].co;totE+=rows[i].e;}
+  // 3 etapas: En Selección → En Contratación → Entregados
   var stages=[
-    {icon:'🔍',label:'Reclutamiento',val:totR,color:'#C0272D',bg:'#FCEBEB',sub:'Búsqueda activa'},
-    {icon:'📋',label:'Selección',val:totSe,color:'#BA7517',bg:'#FAEEDA',sub:'Entrevistas y pruebas'},
-    {icon:'📝',label:'Contratación',val:totCo,color:'#185FA5',bg:'#E6F1FB',sub:'Docs y firma'},
+    {icon:'📋',label:'En Selección',val:totSe,color:'#BA7517',bg:'#FAEEDA',sub:'Entrevistas y pruebas'},
+    {icon:'📝',label:'En Contratación',val:totCo,color:'#185FA5',bg:'#E6F1FB',sub:'Docs y firma'},
     {icon:'✅',label:'Entregados',val:totE,color:'#1D9E75',bg:'#E1F5EE',sub:'En operación'}
   ];
   var stEl = document.getElementById('pipe-stages');
@@ -1298,24 +1261,33 @@ function renderPipeline() {
     var h='';
     for(var i=0;i<stages.length;i++){
       var st=stages[i];
+      var connector = i < stages.length-1 ? '<div class="pconn" style="background:linear-gradient(90deg,'+st.color+','+stages[i+1].color+')"></div>' : '';
       h+='<div class="pstage">'
         +'<div class="pnode" style="background:'+st.bg+';border-color:'+st.color+'">'+st.icon+'</div>'
         +'<div class="pcount" style="color:'+st.color+'">'+st.val+'</div>'
         +'<div class="plbl" style="color:'+st.color+'">'+st.label+'</div>'
         +'<div class="psub">'+st.sub+'</div>'
-        +'</div>';
+        +'</div>'
+        +connector;
     }
     stEl.innerHTML=h;
   }
-  // Bar
-  var sucTotals=[];
-  var activeSucs = fS ? [fS] : PIPE_SUCS;
-  for(var i=0;i<activeSucs.length;i++){
-    var s=activeSucs[i];
-    var t=0;
-    for(var j=0;j<rows.length;j++) if(rows[j].s===s) t+=rows[j].r+rows[j].se+rows[j].co+rows[j].e;
-    if(t>0) sucTotals.push({s:s,t:t});
+  // Populate cargo/sucursal filters dynamically from loaded data
+  var cargoSel = document.getElementById('pf-cargo');
+  var sucSel   = document.getElementById('pf-suc');
+  if (cargoSel && PIPE_DATA.length > 0 && cargoSel.options.length <= 1) {
+    var cargos = {}, sucs = {};
+    PIPE_DATA.forEach(function(r){ cargos[r.c]=1; sucs[r.s]=1; });
+    Object.keys(cargos).sort().forEach(function(c){ var o=document.createElement('option'); o.value=c; o.text=c; cargoSel.appendChild(o); });
+    Object.keys(sucs).sort().forEach(function(s){ var o=document.createElement('option'); o.value=s; o.text=s; sucSel.appendChild(o); });
   }
+  // Bar — distribute by sucursal
+  var sucMap={};
+  for(var i=0;i<rows.length;i++){
+    var s=rows[i].s, t=rows[i].se+rows[i].co+rows[i].e;
+    sucMap[s]=(sucMap[s]||0)+t;
+  }
+  var sucTotals=Object.keys(sucMap).map(function(s){return{s:s,t:sucMap[s]};}).filter(function(x){return x.t>0;}).sort(function(a,b){return b.t-a.t;});
   var barTotal=0; for(var i=0;i<sucTotals.length;i++) barTotal+=sucTotals[i].t;
   if(!barTotal) barTotal=1;
   var barEl=document.getElementById('pipe-bar'), legEl=document.getElementById('pipe-legend');
@@ -1341,39 +1313,36 @@ function renderPipeline() {
   var grouped={};
   for(var i=0;i<rows.length;i++){
     var r=rows[i],k=r.c+'||'+r.s;
-    if(!grouped[k]) grouped[k]={c:r.c,s:r.s,r:0,se:0,co:0,e:0};
-    grouped[k].r+=r.r;grouped[k].se+=r.se;grouped[k].co+=r.co;grouped[k].e+=r.e;
+    if(!grouped[k]) grouped[k]={c:r.c,s:r.s,se:0,co:0,e:0};
+    grouped[k].se+=r.se;grouped[k].co+=r.co;grouped[k].e+=r.e;
   }
-  var sorted=Object.values(grouped).sort(function(a,b){return(b.r+b.se+b.co+b.e)-(a.r+a.se+a.co+a.e);});
+  var sorted=Object.values(grouped).sort(function(a,b){return(b.se+b.co+b.e)-(a.se+a.co+a.e);});
   var h='';
-  for(var i=0;i<Math.min(sorted.length,15);i++){
-    var row=sorted[i],tot=row.r+row.se+row.co+row.e,pct=tot>0?Math.round(row.e/tot*100):0;
+  for(var i=0;i<Math.min(sorted.length,30);i++){
+    var row=sorted[i],tot=row.se+row.co+row.e,pct=tot>0?Math.round(row.e/tot*100):0;
     var cls=pct>=70?'bs':pct>=40?'bw':'bd';
     var bar='<div style="display:flex;height:8px;border-radius:3px;overflow:hidden;width:80px;gap:1px">'
-      +'<div style="width:'+(row.r/tot*100).toFixed(0)+'%;background:#C0272D"></div>'
-      +'<div style="width:'+(row.se/tot*100).toFixed(0)+'%;background:#BA7517"></div>'
-      +'<div style="width:'+(row.co/tot*100).toFixed(0)+'%;background:#185FA5"></div>'
-      +'<div style="width:'+(row.e/tot*100).toFixed(0)+'%;background:#1D9E75"></div>'
+      +'<div style="width:'+(tot>0?(row.se/tot*100).toFixed(0):0)+'%;background:#BA7517"></div>'
+      +'<div style="width:'+(tot>0?(row.co/tot*100).toFixed(0):0)+'%;background:#185FA5"></div>'
+      +'<div style="width:'+(tot>0?(row.e/tot*100).toFixed(0):0)+'%;background:#1D9E75"></div>'
       +'</div>';
     h+='<tr><td><strong>'+row.c+'</strong></td><td>'+row.s+'</td>'
-      +'<td style="text-align:center;color:#C0272D;font-weight:700">'+row.r+'</td>'
       +'<td style="text-align:center;color:#BA7517;font-weight:700">'+row.se+'</td>'
       +'<td style="text-align:center;color:#185FA5;font-weight:700">'+row.co+'</td>'
       +'<td style="text-align:center;color:#1D9E75;font-weight:700">'+row.e+'</td>'
       +'<td style="text-align:center;font-weight:700">'+tot+'</td>'
       +'<td>'+bar+'<span class="badge '+cls+'" style="margin-top:3px;display:inline-block">'+pct+'%</span></td></tr>';
   }
-  var tRow={r:0,se:0,co:0,e:0};
-  for(var i=0;i<sorted.length;i++){tRow.r+=sorted[i].r;tRow.se+=sorted[i].se;tRow.co+=sorted[i].co;tRow.e+=sorted[i].e;}
-  var tTot=tRow.r+tRow.se+tRow.co+tRow.e;
-  h+='<tr style="background:#F4F4F4;font-weight:700"><td colspan="2">TOTAL</td>'
-    +'<td style="text-align:center;color:#C0272D">'+tRow.r+'</td>'
+  var tRow={se:0,co:0,e:0};
+  for(var i=0;i<sorted.length;i++){tRow.se+=sorted[i].se;tRow.co+=sorted[i].co;tRow.e+=sorted[i].e;}
+  var tTot=tRow.se+tRow.co+tRow.e;
+  h+='<tr style="background:var(--bg2);font-weight:700"><td colspan="2">TOTAL</td>'
     +'<td style="text-align:center;color:#BA7517">'+tRow.se+'</td>'
     +'<td style="text-align:center;color:#185FA5">'+tRow.co+'</td>'
     +'<td style="text-align:center;color:#1D9E75">'+tRow.e+'</td>'
     +'<td style="text-align:center">'+tTot+'</td>'
     +'<td><span class="badge bs">'+(tTot>0?Math.round(tRow.e/tTot*100):0)+'%</span></td></tr>';
-  tbody.innerHTML=h;
+  tbody.innerHTML = h || '<tr><td colspan="7" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja SELECCION para ver el pipeline</td></tr>';
 }
 
 // ===================== FORMACIÓN TABLE =====================
@@ -2193,14 +2162,13 @@ function buildPipelineData(rows) {
   PIPE_DATA.length = 0;
   data.forEach(function(r) {
     var entry = {
-      c: (r['Cargo']||'').toString().trim(),
-      s: (r['Sucursal']||'').toString().trim(),
-      r: parseInt(r['Reclutamiento'])||0,
-      se: parseInt(r['Selección'])||0,
-      co: parseInt(r['Contratación'])||0,
-      e: parseInt(r['Entregados'])||0
+      c: (r['Cargo']||r['PerfilCargo']||'').toString().trim(),
+      s: (r['Sucursal']||r['Sucursal1']||r['Ciudad']||'').toString().trim(),
+      se: parseInt(r['EnSeleccion']||r['Selección']||r['Seleccion'])||0,
+      co: parseInt(r['EnContratacion']||r['Contratación']||r['Contratacion'])||0,
+      e:  parseInt(r['Contratados']||r['Entregados'])||0
     };
-    if (entry.c && entry.s && (entry.r+entry.se+entry.co+entry.e) > 0) {
+    if (entry.c && entry.s && (entry.se+entry.co+entry.e) > 0) {
       PIPE_DATA.push(entry);
     }
   });
@@ -2355,46 +2323,50 @@ function buildPersonalData(rows) {
 function buildPipelineFromBase(rows) {
   var data = rows.filter(function(r){ return r['OrdenServicio'] && r['OrdenServicio'] !== 'OrdenServicio'; });
   if (data.length === 0) return;
-  // Detect if sheet has explicit pipeline columns
-  var hasExplicitCols = data[0] && (
-    data[0]['EnReclutamiento'] !== undefined ||
-    data[0]['EnSeleccion'] !== undefined
-  );
   PIPE_DATA.length = 0;
+  // Reset filter dropdowns so they repopulate from new data
+  var cargoSel = document.getElementById('pf-cargo');
+  var sucSel   = document.getElementById('pf-suc');
+  if (cargoSel) { while(cargoSel.options.length > 1) cargoSel.remove(1); }
+  if (sucSel)   { while(sucSel.options.length > 1)   sucSel.remove(1);   }
   var grupos = {};
   data.forEach(function(r){
     var cargo = (r['PerfilCargo']||r['Cargo']||'').toString().trim();
-    var suc = (r['Sucursal1']||r['Sucursal']||r['Ciudad']||'').toString().trim();
+    var suc   = (r['Sucursal1']||r['Sucursal']||r['Ciudad']||'').toString().trim();
     if (!cargo || !suc) return;
     var key = cargo + '||' + suc;
-    if (!grupos[key]) grupos[key] = {c:cargo, s:suc, r:0, se:0, co:0, e:0};
-    // Use explicit pipeline columns if present
-    var reclut = parseInt(r['EnReclutamiento'])||0;
+    if (!grupos[key]) grupos[key] = {c:cargo, s:suc, se:0, co:0, e:0};
+    // Use explicit columns EnSeleccion, EnContratacion, Contratados
     var selec  = parseInt(r['EnSeleccion'])||0;
     var contrat= parseInt(r['EnContratacion'])||0;
-    if (reclut || selec || contrat) {
-      grupos[key].r  += reclut;
+    var entregados = parseInt(r['Contratados'])||0;
+    if (selec || contrat || entregados) {
       grupos[key].se += selec;
       grupos[key].co += contrat;
-      grupos[key].e  += parseInt(r['Contratados'])||0;
+      grupos[key].e  += entregados;
     } else {
-      // Fallback: derive from Estado
+      // Fallback: derive from Estado when explicit columns are absent
       var estado = (r['Estado']||'').toString().toUpperCase().trim();
-      var pend = parseInt(r['PendientesContratar'])||parseInt(r['Pendiente por contratar'])||0;
+      var pend = parseInt(r['PendientesContratar'])||0;
       var cont = parseInt(r['Contratados'])||0;
       if (estado === 'ABIERTO') {
-        grupos[key].r += Math.max(0, pend);
+        grupos[key].se += Math.max(0, pend);
         grupos[key].co += cont;
-      } else if (estado === 'CERRADO') {
-        grupos[key].e += cont;
       } else {
-        grupos[key].se += pend > 0 ? pend : cont;
+        grupos[key].e += cont;
       }
     }
   });
   Object.values(grupos).forEach(function(g){
-    if ((g.r+g.se+g.co+g.e) > 0) PIPE_DATA.push(g);
+    if ((g.se+g.co+g.e) > 0) PIPE_DATA.push(g);
   });
+  // Repopulate filter selects from actual data
+  if (cargoSel && sucSel) {
+    var cargos = {}, sucs = {};
+    PIPE_DATA.forEach(function(r){ cargos[r.c]=1; sucs[r.s]=1; });
+    Object.keys(cargos).sort().forEach(function(c){ var o=document.createElement('option'); o.value=c; o.text=c; cargoSel.appendChild(o); });
+    Object.keys(sucs).sort().forEach(function(s){ var o=document.createElement('option'); o.value=s; o.text=s; sucSel.appendChild(o); });
+  }
 }
 
 // ── ENTREVISTAS PARSER ────────────────────────────────────────
