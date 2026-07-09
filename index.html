@@ -110,9 +110,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 .pipe-filters{display:flex;gap:8px;flex-wrap:wrap}
 .pfsel{border:1px solid var(--graym);border-radius:6px;padding:3px 8px;font-size:11px;background:var(--grayl);color:var(--text);cursor:pointer;height:26px;outline:none}
 .pfsel.on{border-color:var(--red);background:var(--redl);color:var(--red2);font-weight:700}
-.pipe-stages{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-bottom:16px}
-.pipe-stages::before{content:'';position:absolute;top:24px;left:12.5%;right:12.5%;height:3px;background:linear-gradient(90deg,var(--red),var(--warn),var(--info),var(--ok));z-index:0;border-radius:2px}
-.pstage{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;padding:4px 8px 8px}
+.pipe-stages{display:flex;flex-direction:row;align-items:flex-start;margin-bottom:16px;gap:0}
+.pstage{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;padding:4px 8px 8px;flex:1;min-width:0}
+.pconn{flex:1;height:3px;margin-top:26px;border-radius:2px;min-width:20px}
 .pnode{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:6px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .pcount{font-size:24px;font-weight:900;line-height:1;margin-bottom:1px}
 .plbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;text-align:center;margin-bottom:2px}
@@ -379,10 +379,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Contratados</div><div class="kc-val" id="r-cont">9,324</div><div class="kc-sub" id="r-cont-sub">de 10,551 solicitados</div></div>
     <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">% Oportunidad</div><div class="kc-val" id="r-pt">84.4%</div><div class="kc-sub" id="r-pt-sub">5,031 a tiempo / 5,963 cerradas</div><div class="kc-d d-up">▲ Meta 80%</div></div>
     <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% ANS Cantidad</div><div class="kc-val" id="r-pc">88.4%</div><div class="kc-sub" id="r-pc-sub">9,324 / 10,551 solicitados</div><div class="kc-d d-up">▲ Meta 85%</div></div>
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Rotación</div><div class="kc-val">944</div><div class="kc-sub">Retiros período</div><div class="kc-d d-nt">→ 8.7%</div></div>
-    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">AT YTD 2026</div><div class="kc-val">23</div><div class="kc-sub">Accidentes trabajo</div><div class="kc-d d-up">▼ −30% vs 2025</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Ausentismo</div><div class="kc-val">3.8%</div><div class="kc-sub">Promedio 2026</div><div class="kc-d d-up">▲ vs 4.3% 2025</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Entrevistas Retiro</div><div class="kc-val">76</div><div class="kc-sub">72% cobertura</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Rotación</div><div class="kc-val" id="res-kpi-rotacion">—</div><div class="kc-sub" id="res-kpi-rotacion-sub">Retiros período</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">AT YTD</div><div class="kc-val" id="res-kpi-at">—</div><div class="kc-sub">Accidentes trabajo</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val" id="res-kpi-eg">—</div><div class="kc-sub">Total días incapacidad EG</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Entrevistas Retiro</div><div class="kc-val" id="res-kpi-entrevistas">—</div><div class="kc-sub" id="res-kpi-entrevistas-sub">Total encuestas</div></div>
   </div>
   <!-- PIPELINE TRACKER -->
   <div class="pipe-wrap">
@@ -478,7 +478,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Activos</div><div class="kc-val" id="act-kpi-total">—</div></div>
     <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Sucursales Activas</div><div class="kc-val" id="act-kpi-suc">—</div></div>
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Cargos Diferentes</div><div class="kc-val" id="act-kpi-cargo">—</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Contratos &gt;1 Año</div><div class="kc-val">12</div><div class="kc-sub">En revisión temporalidad</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Contratos &gt;1 Año</div><div class="kc-val" id="act-kpi-temporalidad">—</div><div class="kc-sub">En revisión temporalidad</div></div>
     <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Áreas Operativas</div><div class="kc-val" id="act-kpi-areas">—</div></div>
   </div>
   <div class="cg">
@@ -491,21 +491,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
       <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>Paso Directo</span><span class="ld"><span class="ls" style="background:#BA7517"></span>Renuncia</span><span class="ld"><span class="ls" style="background:#185FA5"></span>Fin Obra</span><span class="ld"><span class="ls" style="background:#C0272D"></span>Bajo Desemp.</span></div>
       <div class="cw" style="height:210px"><canvas id="c-act-ret"></canvas></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div>
-      <table class="tbl"><thead><tr><th>Motivo</th><th>%</th></tr></thead><tbody>
-        <tr><td>Finalización Obra / Temporalidad</td><td><span class="badge bi">57.3%</span></td></tr>
-        <tr><td>Renuncia</td><td><span class="badge bw">25.4%</span></td></tr>
-        <tr><td>Vinculación Directa</td><td><span class="badge bs">9.1%</span></td></tr>
-        <tr><td>Período de Prueba</td><td><span class="badge bd">8.2%</span></td></tr>
-      </tbody></table>
+      <table class="tbl"><thead><tr><th>Motivo</th><th>N°</th><th>%</th></tr></thead>
+      <tbody id="act-motivos-tbody"><tr><td colspan="3" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Carga ROTACION para ver motivos</td></tr></tbody></table>
     </div>
   </div>
   <div class="cc" style="margin-bottom:16px">
     <div class="cc-h"><div class="cc-title">Colaboradores con Contratos &gt;1 Año — Temporalidad</div></div>
-    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Sucursal</th><th>Fecha Ingreso</th><th>Meses</th><th>Acción</th></tr></thead><tbody>
-      <tr><td>Carlos Andrés Pérez</td><td>Auxiliar de Servicios</td><td>Bogotá</td><td>Mar 2024</td><td>27</td><td><span class="badge bw">Revisar</span></td></tr>
-      <tr><td>María del Carmen López</td><td>Operario Logístico</td><td>Cali Centro</td><td>Ene 2024</td><td>29</td><td><span class="badge bd">Urgente</span></td></tr>
-      <tr><td>Jhon Fredy Martínez</td><td>Auxiliar Servicios BPM</td><td>Medellín</td><td>Feb 2024</td><td>28</td><td><span class="badge bd">Urgente</span></td></tr>
-    </tbody></table>
+    <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Sucursal</th><th>Fecha Ingreso</th><th>Días</th><th>Estado</th></tr></thead>
+    <tbody id="act-temp-preview-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Carga PERSONAL_ACTIVO para ver temporalidad</td></tr></tbody></table>
   </div>
 </div>
 
@@ -513,12 +506,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="sec" id="sec-rotacion">
   <div class="sh"><div class="sh-ic">🔄</div><div><h2>Índice de Rotación</h2><p>Análisis de retiros, causas y tendencias</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Retiros</div><div class="kc-val">944</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Paso Directo</div><div class="kc-val" id="rot-kpi-directo">—</div><div class="kc-sub">57.3%</div><div class="kc-d d-up">▲ Positivo</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Renuncias</div><div class="kc-val" id="rot-kpi-renuncias">—</div><div class="kc-sub">25.4%</div><div class="kc-d d-dn">▼ Intervención</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Terminación de contrato</div><div class="kc-val">160</div><div class="kc-sub">16.9%</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Masculino</div><div class="kc-val">69.8%</div><div class="kc-sub">659 personas</div></div>
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Femenino</div><div class="kc-val">30.2%</div><div class="kc-sub">285 personas</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Retiros</div><div class="kc-val" id="rot-kpi-total">—</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Paso Directo</div><div class="kc-val" id="rot-kpi-directo">—</div><div class="kc-sub" id="rot-kpi-directo-pct"></div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Renuncias</div><div class="kc-val" id="rot-kpi-renuncias">—</div><div class="kc-sub" id="rot-kpi-renuncias-pct"></div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Terminación de contrato</div><div class="kc-val" id="rot-kpi-termina">—</div><div class="kc-sub" id="rot-kpi-termina-pct"></div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Masculino</div><div class="kc-val" id="rot-kpi-masc">—</div><div class="kc-sub" id="rot-kpi-masc-sub"></div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Femenino</div><div class="kc-val" id="rot-kpi-fem">—</div><div class="kc-sub" id="rot-kpi-fem-sub"></div></div>
   </div>
   <div class="cg t23">
     <div class="cc"><div class="cc-h"><div class="cc-title">Retiros por Mes — Tendencia</div></div><div class="cw" style="height:200px"><canvas id="c-rot-m"></canvas></div></div>
@@ -650,12 +643,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="sec" id="sec-at">
   <div class="sh"><div class="sh-ic">⚠️</div><div><h2>Accidentes de Trabajo</h2><p>#SeguridadesPRIMERO · Frecuencia, severidad y clasificación · 2024–2026</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Tasa de Accidentalidad YTD</div><div class="kc-val">3.07%</div><div class="kc-sub">Por cada 100 trabajadores</div><div class="kc-d d-up">▼ vs 3.8% 2025</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Cantidad Accidentes</div><div class="kc-val">559</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Días Ausentismo AT</div><div class="kc-val">4,096</div></div>
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Tasa de Severidad AT</div><div class="kc-val">22.46%</div><div class="kc-sub">Días incapacidad ÷ total trabajadores</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días hasta 1er AT</div><div class="kc-val">47 días</div><div class="kc-sub">Prom. contratación → AT</div></div>
-    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Mortales</div><div class="kc-val">0</div><div class="kc-d d-up">▲ Sin fatalidades</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Cantidad Accidentes</div><div class="kc-val" id="at-kpi-total">—</div><div class="kc-sub">Total AT registrados</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Días Ausentismo AT</div><div class="kc-val" id="at-kpi-dias">—</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Promedio Días/AT</div><div class="kc-val" id="at-kpi-prom">—</div><div class="kc-sub">Días incapacidad promedio</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">AT sin días pérdida</div><div class="kc-val" id="at-kpi-cero">—</div><div class="kc-sub">Solo asistencia médica</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">AT Leves (1–3 días)</div><div class="kc-val" id="at-kpi-leve">—</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">AT Severos (&gt;15 días)</div><div class="kc-val" id="at-kpi-severo">—</div><div class="kc-d d-dn">▼ Requieren atención</div></div>
   </div>
   <div class="cg">
     <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title" style="font-weight:700">Frecuencia Accidentalidad — Nº Accidentes y Tasa % por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-at-if"></canvas></div></div>
@@ -681,13 +674,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">AT por Cargo</div></div><div id="pr-at-cargo"></div></div>
   </div>
   <div class="cc" style="margin-bottom:14px">
-    <div class="cc-h"><div class="cc-title" style="font-weight:700">⏱ Tiempo desde Contratación hasta el Primer Accidente de Trabajo</div></div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px">
-      <div style="text-align:center;background:var(--redl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)">47 días</div><div style="font-size:9.5px;color:var(--muted)">Promedio global</div></div>
-      <div style="text-align:center;background:var(--redl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)">38%</div><div style="font-size:9.5px;color:var(--muted)">Menos de 1 mes</div></div>
-      <div style="text-align:center;background:var(--warnl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--warn)">24%</div><div style="font-size:9.5px;color:var(--muted)">De 1 a 2 meses</div></div>
-      <div style="text-align:center;background:var(--okl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--ok)">22%</div><div style="font-size:9.5px;color:var(--muted)">De 3 a 6 meses</div></div>
-      <div style="text-align:center;background:var(--okl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--ok)">16%</div><div style="font-size:9.5px;color:var(--muted)">Mayor a 6 meses</div></div>
+    <div class="cc-h"><div class="cc-title" style="font-weight:700">⏱ Clasificación de AT por Días de Incapacidad</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="at-clasif-stats">
+      <div style="text-align:center;background:var(--bg2);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--muted)" id="at-stat-cero">—</div><div style="font-size:9.5px;color:var(--muted)">Sin días pérdida</div></div>
+      <div style="text-align:center;background:var(--redl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)" id="at-stat-leve">—</div><div style="font-size:9.5px;color:var(--muted)">Leve (1–3 días)</div></div>
+      <div style="text-align:center;background:var(--warnl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--warn)" id="at-stat-mod">—</div><div style="font-size:9.5px;color:var(--muted)">Moderado (4–14 días)</div></div>
+      <div style="text-align:center;background:var(--redl);border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)" id="at-stat-sev">—</div><div style="font-size:9.5px;color:var(--muted)">Severo (&gt;15 días)</div></div>
     </div>
     <div class="cw" style="height:160px"><canvas id="c-at-tiempo"></canvas></div>
   </div>
@@ -697,10 +689,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="sec" id="sec-eg">
   <div class="sh"><div class="sh-ic">🏥</div><div><h2>Enfermedades Generales</h2><p>Severidad, frecuencia y diagnósticos · 2024–2026</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Tasa Severidad EG</div><div class="kc-val">1.67%</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Tasa Frecuencia EG</div><div class="kc-val">38.03%</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Casos Registrados</div><div class="kc-val">6,876</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val">43,268</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Casos Registrados</div><div class="kc-val" id="eg-kpi-total">—</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val" id="eg-kpi-dias">—</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Promedio Días/Caso</div><div class="kc-val" id="eg-kpi-prom">—</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Diagnósticos Distintos</div><div class="kc-val" id="eg-kpi-diag">—</div></div>
   </div>
   <div class="cg t23">
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Severidad EG — Días Perdidos y Tasa %</div></div><div class="cw" style="height:180px"><canvas id="c-eg-is"></canvas></div></div>
@@ -728,22 +720,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <!-- ═══ BLOQUE 1: RESUMEN DE CASOS MÉDICOS ═══ -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">
     <div class="kc" style="--kcc:#C0272D">
-      <div class="kc-lbl">Casos Médicos Origen Laboral</div>
-      <div class="kc-val">34</div>
-      <div class="kc-sub">AT activos en seguimiento</div>
-      <div class="kc-d d-dn">▼ Requieren atención</div>
+      <div class="kc-lbl">Total Siniestros</div>
+      <div class="kc-val" id="sin-kpi-total">—</div>
+      <div class="kc-sub">Casos registrados</div>
     </div>
     <div class="kc" style="--kcc:#BA7517">
-      <div class="kc-lbl">Casos Médicos Origen Común</div>
-      <div class="kc-val">82</div>
-      <div class="kc-sub">EG activos en gestión</div>
-      <div class="kc-d d-nt">→ Seguimiento activo</div>
+      <div class="kc-lbl">Casos Abiertos / Activos</div>
+      <div class="kc-val" id="sin-kpi-abiertos">—</div>
+      <div class="kc-sub">En seguimiento</div>
     </div>
     <div class="kc" style="--kcc:#1D9E75">
-      <div class="kc-lbl">Casos Cerrados YTD</div>
-      <div class="kc-val">143</div>
-      <div class="kc-sub">Resueltos en 2026</div>
-      <div class="kc-d d-up">▲ Alta médica / Reintegro</div>
+      <div class="kc-lbl">Casos Cerrados</div>
+      <div class="kc-val" id="sin-kpi-cerrados">—</div>
+      <div class="kc-sub">Alta médica / Reintegro</div>
     </div>
   </div>
 
@@ -772,52 +761,32 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <!-- KPIs de fueros -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
     <div class="kc" style="--kcc:#C0272D">
-      <div class="kc-lbl">🔴 Riesgo Crítico</div>
-      <div class="kc-val">12</div>
-      <div class="kc-sub">Incapacidad &gt;90 días · En calificación</div>
-      <div class="kc-d d-dn">▼ Acción inmediata</div>
+      <div class="kc-lbl">Total Fueros</div>
+      <div class="kc-val" id="fu-kpi-total">—</div>
+      <div class="kc-sub">Trabajadores con fuero</div>
     </div>
     <div class="kc" style="--kcc:#BA7517">
-      <div class="kc-lbl">🟡 Riesgo Alto</div>
-      <div class="kc-val">21</div>
-      <div class="kc-sub">Incapacidad 30–90 días</div>
-      <div class="kc-d d-nt">→ Monitoreo activo</div>
+      <div class="kc-lbl">Riesgo Alto / Crítico</div>
+      <div class="kc-val" id="fu-kpi-alto">—</div>
+      <div class="kc-sub">NivelRiesgo Alto o Crítico</div>
+      <div class="kc-d d-dn">▼ Monitoreo activo</div>
     </div>
     <div class="kc" style="--kcc:#1D9E75">
-      <div class="kc-lbl">🟢 Controlados</div>
-      <div class="kc-val">14</div>
-      <div class="kc-sub">Incapacidad &lt;30 días · Alta reciente</div>
+      <div class="kc-lbl">Controlados</div>
+      <div class="kc-val" id="fu-kpi-control">—</div>
+      <div class="kc-sub">NivelRiesgo Bajo o Medio</div>
     </div>
     <div class="kc" style="--kcc:#8B1A1E">
-      <div class="kc-lbl">⚠️ Riesgo Acción Legal</div>
-      <div class="kc-val">5</div>
-      <div class="kc-sub">Requieren concepto jurídico</div>
-      <div class="kc-d d-dn">▼ Urgente</div>
+      <div class="kc-lbl">Tipos de Fuero</div>
+      <div class="kc-val" id="fu-kpi-tipos">—</div>
+      <div class="kc-sub">Distintos tipos activos</div>
     </div>
   </div>
 
-  <!-- Semáforo visual compacto -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
-    <div style="background:white;border-radius:10px;border-left:5px solid var(--red);padding:14px 16px;display:flex;align-items:center;gap:12px">
-      <div style="font-size:28px">🔴</div>
-      <div>
-        <div style="font-size:20px;font-weight:900;color:var(--red)">12 críticos</div>
-        <div style="font-size:10px;color:var(--muted);line-height:1.5">Incapacidad &gt;90 días · En calificación<br>Riesgo de acción legal ante el MinTrabajo</div>
-      </div>
-    </div>
-    <div style="background:white;border-radius:10px;border-left:5px solid var(--warn);padding:14px 16px;display:flex;align-items:center;gap:12px">
-      <div style="font-size:28px">🟡</div>
-      <div>
-        <div style="font-size:20px;font-weight:900;color:var(--warn)">21 altos</div>
-        <div style="font-size:10px;color:var(--muted);line-height:1.5">Incapacidad 30–90 días · Prórroga recurrente<br>Diagnóstico osteomuscular / psicológico</div>
-      </div>
-    </div>
-    <div style="background:white;border-radius:10px;border-left:5px solid var(--ok);padding:14px 16px;display:flex;align-items:center;gap:12px">
-      <div style="font-size:28px">🟢</div>
-      <div>
-        <div style="font-size:20px;font-weight:900;color:var(--ok)">14 controlados</div>
-        <div style="font-size:10px;color:var(--muted);line-height:1.5">Incapacidad &lt;30 días · Alta médica reciente<br>Sin recurrencia · Sin riesgo jurídico inmediato</div>
-      </div>
+  <!-- Semáforo visual compacto — dinámico -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px" id="fu-semaforo">
+    <div style="background:white;border-radius:10px;border-left:5px solid var(--bg2);padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:10px;color:var(--muted)">Carga la hoja FUEROS_SALUD para ver el semáforo</div>
     </div>
   </div>
 
@@ -834,48 +803,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <!-- ═══ TABLA MAESTRA: FUEROS VIGENTES A LA FECHA ═══ -->
   <div class="cc" style="margin-bottom:14px">
     <div class="cc-h" style="flex-wrap:wrap;gap:8px">
-      <div class="cc-title" style="font-weight:700;font-size:13px">📋 Fueros de Salud Vigentes a la Fecha — Registro Maestro</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="badge bd">🔴 Crítico: 12</span>
-        <span class="badge bw">🟡 Alto: 21</span>
-        <span class="badge bs">🟢 Control: 14</span>
-        <span class="badge bi">Total: 47</span>
-      </div>
-    </div>
-    <!-- Filtro de riesgo -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="fuero-filter-btn active" onclick="filterFueros('todos',this)">Todos (47)</button>
-      <button class="fuero-filter-btn" onclick="filterFueros('critico',this)" style="border-color:var(--red);color:var(--red)">🔴 Críticos (12)</button>
-      <button class="fuero-filter-btn" onclick="filterFueros('alto',this)" style="border-color:var(--warn);color:var(--warn)">🟡 Altos (21)</button>
-      <button class="fuero-filter-btn" onclick="filterFueros('control',this)" style="border-color:var(--ok);color:var(--ok)">🟢 Controlados (14)</button>
+      <div class="cc-title" style="font-weight:700;font-size:13px">📋 Fueros de Salud — Registro desde Excel</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="fu-badges"></div>
     </div>
     <div class="tscroll">
     <table class="tbl" id="fueros-tabla">
       <thead><tr>
-        <th>ID</th>
-        <th>Origen</th>
-        <th>Cargo</th>
-        <th>Sucursal</th>
-        <th>Diagnóstico CIE-10</th>
-        <th>Fecha Inicio Inc.</th>
-        <th>Días Incapacidad</th>
-        <th>Nº Prórrogas</th>
-        <th>Estado Actual</th>
-        <th>Vencimiento Fuero</th>
-        <th>Riesgo Jurídico</th>
-        <th>Acción Requerida</th>
+        <th>Nombre</th><th>Cargo</th><th>Sucursal</th>
+        <th>Tipo Fuero</th><th>Fecha Inicio</th><th>Fecha Fin</th>
+        <th>Nivel Riesgo</th><th>Estado Gestión</th><th>Observaciones</th>
       </tr></thead>
       <tbody id="fueros-tbody">
-        <tr data-riesgo="critico"><td>F-001</td><td><span class="badge bd">AT</span></td><td>Aux. de Servicios</td><td>Cali Centro</td><td>M54 – Dorsalgia/Lumbalgia</td><td>15/01/2026</td><td>112</td><td>3</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--red);font-weight:700">30/07/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Reintegro laboral urgente</td></tr>
-        <tr data-riesgo="critico"><td>F-002</td><td><span class="badge bi">EG</span></td><td>Op. Logístico</td><td>Bogotá</td><td>M75 – Lesión hombro</td><td>20/01/2026</td><td>98</td><td>2</td><td><span class="badge bw">En calificación</span></td><td style="color:var(--red);font-weight:700">15/08/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Concepto jurídico</td></tr>
-        <tr data-riesgo="critico"><td>F-003</td><td><span class="badge bi">EG</span></td><td>Aux. Servicios BPM</td><td>Medellín</td><td>G54 – Túnel carpiano</td><td>05/02/2026</td><td>95</td><td>2</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--red);font-weight:700">01/09/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Adaptación puesto</td></tr>
-        <tr data-riesgo="critico"><td>F-004</td><td><span class="badge bd">AT</span></td><td>Coordinador Operativo</td><td>Yumbo</td><td>S52 – Fractura</td><td>10/01/2026</td><td>120</td><td>3</td><td><span class="badge bw">Junta médica</span></td><td style="color:var(--red);font-weight:700">10/07/2026</td><td><span class="badge bd">🔴 Crítico</span></td><td>Junta médica urgente</td></tr>
-        <tr data-riesgo="alto"><td>F-005</td><td><span class="badge bi">EG</span></td><td>Aux. de Servicios</td><td>Palmira</td><td>M79 – Dolor musculoesq.</td><td>01/03/2026</td><td>72</td><td>2</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--warn);font-weight:700">01/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Seguimiento médico</td></tr>
-        <tr data-riesgo="alto"><td>F-006</td><td><span class="badge bi">EG</span></td><td>Aux. de Servicios</td><td>Buga</td><td>F41 – Trastorno ansioso</td><td>15/03/2026</td><td>67</td><td>2</td><td><span class="badge bw">Psicología activa</span></td><td style="color:var(--warn);font-weight:700">15/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Seguimiento psicológico</td></tr>
-        <tr data-riesgo="alto"><td>F-007</td><td><span class="badge bi">EG</span></td><td>Op. Apoyo Logístico</td><td>Cali Centro</td><td>M54 – Dorsalgia</td><td>10/03/2026</td><td>62</td><td>1</td><td><span class="badge bw">Incapacidad activa</span></td><td style="color:var(--warn);font-weight:700">10/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Seguimiento médico</td></tr>
-        <tr data-riesgo="alto"><td>F-008</td><td><span class="badge bd">AT</span></td><td>Aux. Servicios Alturas</td><td>Barranquilla</td><td>S83 – Lesión rodilla</td><td>20/03/2026</td><td>55</td><td>1</td><td><span class="badge bw">Fisioterapia</span></td><td style="color:var(--warn);font-weight:700">20/09/2026</td><td><span class="badge bw">🟡 Alto</span></td><td>Control fisioterapia</td></tr>
-        <tr data-riesgo="control"><td>F-009</td><td><span class="badge bi">EG</span></td><td>Aux. de Servicios</td><td>Bogotá</td><td>K29 – Gastritis</td><td>01/05/2026</td><td>28</td><td>1</td><td><span class="badge bs">Alta médica</span></td><td style="color:var(--ok);font-weight:700">01/08/2026</td><td><span class="badge bs">🟢 Control</span></td><td>Alta próxima</td></tr>
-        <tr data-riesgo="control"><td>F-010</td><td><span class="badge bi">EG</span></td><td>Aux. Servicios BPM</td><td>Pereira</td><td>J06 – IRA / Gripa</td><td>10/05/2026</td><td>14</td><td>0</td><td><span class="badge bs">Alta médica</span></td><td style="color:var(--ok);font-weight:700">10/08/2026</td><td><span class="badge bs">🟢 Control</span></td><td>Cerrar caso</td></tr>
+        <tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja FUEROS_SALUD para ver el registro</td></tr>
       </tbody>
     </table>
     </div>
@@ -890,11 +829,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="sec" id="sec-formacion">
   <div class="sh"><div class="sh-ic">📚</div><div><h2>Formación SST — Plan de Capacitación</h2><p>Temas formados, programados, cobertura y avance · 2026</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Programados YTD</div><div class="kc-val">378</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Asistentes YTD</div><div class="kc-val">46</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Cobertura Promedio</div><div class="kc-val">17.8%</div><div class="kc-d d-nt">→ Meta: 80%</div></div>
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Temas Ejecutados</div><div class="kc-val">5 / 14</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">% Ejecutado</div><div class="kc-val">100%</div><div class="kc-d d-up">▲ Al día</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Programados YTD</div><div class="kc-val" id="form-kpi-prog">—</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Asistentes YTD</div><div class="kc-val" id="form-kpi-asist">—</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Cobertura Promedio</div><div class="kc-val" id="form-kpi-cob">—</div><div class="kc-d d-nt">→ Meta: 80%</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Temas Ejecutados</div><div class="kc-val" id="form-kpi-temas">—</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Sesiones Realizadas</div><div class="kc-val" id="form-kpi-sesiones">—</div></div>
   </div>
   <div class="cc" style="margin-bottom:14px">
     <div class="red-hdr">Formaciones Acumulado Año</div>
@@ -1261,7 +1200,7 @@ function renderPipeline() {
     var h='';
     for(var i=0;i<stages.length;i++){
       var st=stages[i];
-      var connector = i < stages.length-1 ? '<div class="pconn" style="background:linear-gradient(90deg,'+st.color+','+stages[i+1].color+')"></div>' : '';
+      var connector = i < stages.length-1 ? '<div class="pconn" style="background:linear-gradient(90deg,'+st.color+' 0%,'+stages[i+1].color+' 100%)"></div>' : '';
       h+='<div class="pstage">'
         +'<div class="pnode" style="background:'+st.bg+';border-color:'+st.color+'">'+st.icon+'</div>'
         +'<div class="pcount" style="color:'+st.color+'">'+st.val+'</div>'
@@ -2203,10 +2142,34 @@ function buildRotacionData(rows) {
   var directo = data.filter(function(r){ return (r['TipoRetiro']||'').toString().toUpperCase().includes('DIRECTO'); }).length;
   var renuncias = data.filter(function(r){ var m=(r['CausalRetiro']||r['Motivo']||'').toString().toUpperCase(); return m.includes('RENUNCI'); }).length;
   var termina = data.filter(function(r){ var m=(r['CausalRetiro']||r['Motivo']||'').toString().toUpperCase(); return m.includes('TERMINACI'); }).length;
+  var totalRet = data.length;
+  var mascN  = generos.M, femN = generos.F, totGen = mascN+femN||1;
+  var mascPct = Math.round(mascN/totGen*100), femPct = Math.round(femN/totGen*100);
   function sr(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  sr('rot-kpi-total',   totalRet.toLocaleString());
   sr('rot-kpi-directo', directo||'—');
+  sr('rot-kpi-directo-pct', totalRet>0 ? Math.round(directo/totalRet*100)+'%' : '');
   sr('rot-kpi-renuncias', renuncias);
+  sr('rot-kpi-renuncias-pct', totalRet>0 ? Math.round(renuncias/totalRet*100)+'%' : '');
   sr('rot-kpi-termina', termina);
+  sr('rot-kpi-termina-pct', totalRet>0 ? Math.round(termina/totalRet*100)+'%' : '');
+  sr('rot-kpi-masc', mascPct+'%');
+  sr('rot-kpi-masc-sub', mascN+' personas');
+  sr('rot-kpi-fem', femPct+'%');
+  sr('rot-kpi-fem-sub', femN+' personas');
+  // Resumen ejecutivo
+  sr('res-kpi-rotacion', totalRet.toLocaleString());
+  sr('res-kpi-rotacion-sub', 'Retiros período');
+  // Tabla motivos en sec-activo
+  var motivosList = Object.entries(motivos).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+  var motTbody = document.getElementById('act-motivos-tbody');
+  if (motTbody) {
+    motTbody.innerHTML = motivosList.length ? motivosList.map(function(m){
+      var pct = Math.round(m[1]/totalRet*100);
+      var cls = pct>=30?'bd':pct>=15?'bw':'bs';
+      return '<tr><td>'+m[0]+'</td><td style="text-align:center">'+m[1]+'</td><td><span class="badge '+cls+'">'+pct+'%</span></td></tr>';
+    }).join('') : '<tr><td colspan="3" style="text-align:center;color:var(--muted)">Sin datos</td></tr>';
+  }
 }
 
 // ── FORMACIÓN PROCESSOR ──────────────────────────────────────
@@ -2233,6 +2196,16 @@ function buildFormacionData(rows) {
       ciudad: (r['Ciudad']||'').toString()
     };
   });
+  // Populate KPI cards
+  var totProg=0, totAsist=0, temas={};
+  window._formData.forEach(function(d){ totProg+=d.prog; totAsist+=d.asist; if(d.tema) temas[d.tema]=1; });
+  var cob = totProg>0 ? Math.round(totAsist/totProg*100)+'%' : '—';
+  function sf(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  sf('form-kpi-prog', totProg.toLocaleString());
+  sf('form-kpi-asist', totAsist.toLocaleString());
+  sf('form-kpi-cob', cob);
+  sf('form-kpi-temas', Object.keys(temas).length);
+  sf('form-kpi-sesiones', window._formData.length);
 }
 
 // ── AT PROCESSOR ────────────────────────────────────────────
@@ -2262,10 +2235,26 @@ function buildATData(rows) {
 
 function updateATKPIs() {
   if (!window._atData) return;
+  var d = window._atData;
+  var rows = d.rows||[];
+  var cero=0, leve=0, mod=0, sev=0;
+  rows.forEach(function(r){
+    var dias = parseInt(r['DiasIncapacidad'])||0;
+    if(dias===0) cero++; else if(dias<=3) leve++; else if(dias<=14) mod++; else sev++;
+  });
+  var prom = d.total>0 ? (d.diasAusentismo/d.total).toFixed(1) : '—';
   function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  s('at-kpi-cant', window._atData.total.toLocaleString());
-  s('at-kpi-dias', window._atData.diasAusentismo.toLocaleString());
-  s('at-kpi-promcontrat', window._atData.promDiasContrat + ' días');
+  s('at-kpi-total',  d.total.toLocaleString());
+  s('at-kpi-dias',   d.diasAusentismo.toLocaleString());
+  s('at-kpi-prom',   prom+' días');
+  s('at-kpi-cero',   cero);
+  s('at-kpi-leve',   leve);
+  s('at-kpi-severo', sev);
+  s('at-stat-cero',  cero);
+  s('at-stat-leve',  leve);
+  s('at-stat-mod',   mod);
+  s('at-stat-sev',   sev);
+  s('res-kpi-at',    d.total.toLocaleString());
 }
 
 // ── EG PROCESSOR ────────────────────────────────────────────
@@ -2284,8 +2273,15 @@ function buildEGData(rows) {
     var sex=(r['Genero']||r['Sexo']||'').toString().toUpperCase().trim();
     if(sex==='M'||sex==='MASCULINO') generos.M++; else if(sex==='F'||sex==='FEMENINO') generos.F++;
   });
+  var prom = total>0 ? (dias/total).toFixed(1) : '—';
   window._egData = { total:total, diasAusentismo:dias,
     diagnosticos:diagnosticos, generos:generos, ciudades:ciudades, cargos:cargos, rows:data };
+  function se(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  se('eg-kpi-total', total.toLocaleString());
+  se('eg-kpi-dias',  dias.toLocaleString());
+  se('eg-kpi-prom',  prom+' días');
+  se('eg-kpi-diag',  Object.keys(diagnosticos).length);
+  se('res-kpi-eg',   dias.toLocaleString());
 }
 
 // ── PERSONAL ACTIVO PROCESSOR ───────────────────────────────
@@ -2317,6 +2313,22 @@ function buildPersonalData(rows) {
   s('act-kpi-cargo', Object.keys(cargos).length);
   s('act-kpi-areas', Object.keys(areas).length);
   renderTemporalidadTable(data);
+  // Preview table in sec-activo (first 5 with >1 year)
+  var hoy = new Date();
+  var preview = data.filter(function(r){
+    var d = r['FechaIngreso'] instanceof Date ? r['FechaIngreso'] : new Date(r['FechaIngreso']||'');
+    return !isNaN(d.getTime()) && (hoy-d)/(1000*60*60*24) >= 365;
+  }).slice(0,5);
+  var prevTbody = document.getElementById('act-temp-preview-tbody');
+  if (prevTbody) {
+    prevTbody.innerHTML = preview.length ? preview.map(function(r){
+      var fi = (r['FechaIngreso']||'').toString().substring(0,10);
+      var d  = r['FechaIngreso'] instanceof Date ? r['FechaIngreso'] : new Date(r['FechaIngreso']||'');
+      var dias = isNaN(d.getTime()) ? '—' : Math.floor((hoy-d)/(1000*60*60*24))+'d';
+      var nombre = ((r['Nombres']||'')+' '+(r['Apellidos']||'')).trim();
+      return '<tr><td>'+nombre+'</td><td>'+(r['Cargo']||'')+'</td><td>'+(r['Ciudad']||r['Sucursal']||'')+'</td><td>'+fi+'</td><td>'+dias+'</td><td><span class="badge bw">Revisar</span></td></tr>';
+    }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Sin empleados con más de 1 año</td></tr>';
+  }
 }
 
 // ── PIPELINE DESDE SELECCION ─────────────────────────────────
@@ -2442,6 +2454,8 @@ function buildEntrevistasData(rows) {
   function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
   var tot = data.length;
   s('ent-kpi-total', tot);
+  s('res-kpi-entrevistas', tot);
+  s('res-kpi-entrevistas-sub', 'Total encuestas');
   var pctB = tot>0?Math.round(trato.Bueno/tot*100):0;
   var pctRD = tot>0?Math.round((trato.Regular+trato.Deficiente)/tot*100):0;
   s('ent-kpi-trato-b', trato.Bueno); s('ent-kpi-trato-b-pct', pctB+'%');
@@ -2488,11 +2502,13 @@ function buildSiniestroData(rows) {
     cnt(estados,'Estado'); cnt(tipos,'TipoSiniestro'); cnt(desenlaces,'Calificacion');
   });
   var total = data.length;
-  var cerrados = data.filter(function(r){ return (r['Estado']||'').toString().toUpperCase().includes('CALIFICAD'); }).length;
-  window._sinData = { total: total, cerrados: cerrados, estados: estados, tipos: tipos, desenlaces: desenlaces, rows: data };
-  // Actualizar KPIs de siniestro
-  var labTotal = document.querySelector('#sec-siniestro .kc-val');
-  if (labTotal) labTotal.textContent = total;
+  var cerrados = data.filter(function(r){ var e=(r['Estado']||'').toString().toUpperCase(); return e.includes('CERR')||e.includes('CALIFICAD'); }).length;
+  var abiertos = total - cerrados;
+  window._sinData = { total: total, cerrados: cerrados, abiertos: abiertos, estados: estados, tipos: tipos, desenlaces: desenlaces, rows: data };
+  function ss(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  ss('sin-kpi-total',    total.toLocaleString());
+  ss('sin-kpi-abiertos', abiertos);
+  ss('sin-kpi-cerrados', cerrados);
 }
 
 // ── FUEROS PARSER ────────────────────────────────────────────
@@ -2515,39 +2531,51 @@ function buildFuerosData(rows) {
   });
   window._fuerosData = { total: data.length, tipos: tipos, diagnosticos: diagnosticos, riesgos: riesgos, rows: data };
   renderFuerosTable(data);
-  // Actualizar KPI badges
-  function setKPI(sel, val){ var e=document.querySelector(sel); if(e) e.textContent=val; }
+  // Populate KPIs
+  var alto = riesgos.Alto + riesgos.Critico;
+  function sf(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  sf('fu-kpi-total',   data.length);
+  sf('fu-kpi-alto',    alto);
+  sf('fu-kpi-control', riesgos.Controlado);
+  sf('fu-kpi-tipos',   Object.keys(tipos).length);
+  // Update semáforo
+  var semEl = document.getElementById('fu-semaforo');
+  if (semEl) {
+    semEl.innerHTML =
+      '<div style="background:white;border-radius:10px;border-left:5px solid var(--red);padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="font-size:28px">🔴</div><div><div style="font-size:20px;font-weight:900;color:var(--red)">'+riesgos.Critico+' críticos</div><div style="font-size:10px;color:var(--muted)">NivelRiesgo = Crítico</div></div></div>'+
+      '<div style="background:white;border-radius:10px;border-left:5px solid var(--warn);padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="font-size:28px">🟡</div><div><div style="font-size:20px;font-weight:900;color:var(--warn)">'+riesgos.Alto+' altos</div><div style="font-size:10px;color:var(--muted)">NivelRiesgo = Alto</div></div></div>'+
+      '<div style="background:white;border-radius:10px;border-left:5px solid var(--ok);padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="font-size:28px">🟢</div><div><div style="font-size:20px;font-weight:900;color:var(--ok)">'+riesgos.Controlado+' controlados</div><div style="font-size:10px;color:var(--muted)">NivelRiesgo = Bajo/Medio</div></div></div>';
+  }
+  // Update badges
+  var badgesEl = document.getElementById('fu-badges');
+  if (badgesEl) {
+    badgesEl.innerHTML = '<span class="badge bd">🔴 Crítico: '+riesgos.Critico+'</span><span class="badge bw">🟡 Alto: '+riesgos.Alto+'</span><span class="badge bs">🟢 Control: '+riesgos.Controlado+'</span><span class="badge bi">Total: '+data.length+'</span>';
+  }
 }
 
 function renderFuerosTable(rows) {
   var tbody = document.getElementById('fueros-tbody');
-  if (!tbody || !rows || !rows.length) return;
+  if (!tbody) return;
+  if (!rows || !rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros</td></tr>';
+    return;
+  }
   tbody.innerHTML = rows.map(function(r, i){
     var nivel = (r['NivelRiesgo']||'').toString().toUpperCase();
-    var riesgo = nivel.includes('CRITI') ? 'critico' : nivel.includes('ALTO') ? 'alto' : 'control';
-    var badgeCls = riesgo==='critico' ? 'bd' : riesgo==='alto' ? 'bw' : 'bs';
-    var riesgoLabel = riesgo==='critico' ? '🔴 Crítico' : riesgo==='alto' ? '🟡 Alto' : '🟢 Control';
-    var tipo = (r['TipoFuero']||'').toString();
-    var tipoBadge = tipo.toUpperCase().includes('AT') ? 'bd' : 'bi';
+    var badgeCls = nivel.includes('CRITI')?'bd':nivel.includes('ALTO')?'bw':'bs';
+    var nombre = ((r['Nombres']||r['Nombre']||r['Numdocumento']||('F-'+(i+1)))+'').trim();
     var cargo = (r['Cargo']||'').toString();
-    var suc = (r['Sucursal']||r['Ciudad']||'').toString();
-    var obs = (r['Observaciones']||'—').toString();
+    var suc = (r['Sucursal']||'').toString();
+    var tipo = (r['TipoFuero']||'').toString();
     var fi = (r['FechaInicio']||'').toString().substring(0,10);
     var ff = (r['FechaFin']||'').toString().substring(0,10);
-    var doc = r['Numdocumento']||r['Nombres']||('F-'+(i+1));
-    return '<tr data-riesgo="'+riesgo+'">'
-      +'<td>'+doc+'</td>'
-      +'<td><span class="badge '+tipoBadge+'">'+tipo+'</span></td>'
-      +'<td>'+cargo+'</td>'
-      +'<td>'+suc+'</td>'
-      +'<td>'+obs+'</td>'
-      +'<td>'+fi+'</td>'
-      +'<td>—</td><td>—</td>'
-      +'<td><span class="badge '+badgeCls+'">Activo</span></td>'
-      +'<td>'+(ff||'—')+'</td>'
-      +'<td><span class="badge '+badgeCls+'">'+riesgoLabel+'</span></td>'
-      +'<td>'+(r['EstadoGestion']||'—')+'</td>'
-      +'</tr>';
+    var nivelRiesgo = (r['NivelRiesgo']||'—').toString();
+    var estado = (r['EstadoGestion']||'—').toString();
+    var obs = (r['Observaciones']||'').toString();
+    return '<tr><td>'+nombre+'</td><td>'+cargo+'</td><td>'+suc+'</td>'
+      +'<td>'+tipo+'</td><td>'+fi+'</td><td>'+ff+'</td>'
+      +'<td><span class="badge '+badgeCls+'">'+nivelRiesgo+'</span></td>'
+      +'<td>'+estado+'</td><td>'+obs+'</td></tr>';
   }).join('');
 }
 
