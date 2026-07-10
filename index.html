@@ -613,13 +613,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="tscroll"><table class="tbl" style="font-size:12px">
       <thead>
         <tr>
-          <th>No.</th><th>Cédula</th><th>Nombre</th><th>Sexo</th><th>Estado</th>
-          <th>F. Ingreso</th><th>Centro de Costo</th><th>Cargo</th><th>Temporalidad</th>
-          <th>Días Pasados / Días Restantes</th><th>Observaciones</th>
+          <th>No.</th><th>Cédula</th><th>Nombre Completo</th>
+          <th>F. Ingreso</th><th>F. Corte</th><th style="text-align:center">Meses</th>
+          <th>Centro de Costo</th><th>Cargo</th><th>Temporalidad</th><th>Observaciones</th>
         </tr>
       </thead>
       <tbody id="talento-temp-tbody">
-        <tr><td colspan="11" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja PERSONAL_ACTIVO para ver temporalidad</td></tr>
+        <tr><td colspan="10" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja PERSONAL_ACTIVO para ver temporalidad</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -1989,7 +1989,33 @@ function buildSeleccionData(rows) {
   var data = rows.filter(function(r) { return r['OrdenServicio'] && r['OrdenServicio'] !== 'OrdenServicio'; });
   if (data.length === 0) return;
 
-  var MKEYS_LOCAL = ['2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+  // Calcular MKEYS dinámicamente desde los datos reales (últimos 6 meses con datos)
+  var allMonths = {};
+  data.forEach(function(r){ var m = getMonth(r['FechaCreacion']); if(m) allMonths[m]=1; });
+  var sortedMonths = Object.keys(allMonths).sort();
+  var MKEYS_LOCAL;
+  if (sortedMonths.length >= 6) {
+    MKEYS_LOCAL = sortedMonths.slice(-6);
+  } else if (sortedMonths.length > 0) {
+    // Rellenar hasta 6 meses desde el primer mes disponible
+    var first = sortedMonths[0].split('-');
+    var y = parseInt(first[0]), mo = parseInt(first[1]) - 1;
+    MKEYS_LOCAL = [];
+    for (var mi = 0; mi < 6; mi++) {
+      var dd = new Date(y, mo + mi, 1);
+      MKEYS_LOCAL.push(dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0'));
+    }
+  } else {
+    MKEYS_LOCAL = ['2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+  }
+  // Actualizar MKEYS y MLBLS globales para que redraw() use los mismos meses
+  var MN_ABBR = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  MKEYS = MKEYS_LOCAL.slice();
+  MLBLS = {};
+  MKEYS_LOCAL.forEach(function(mk){
+    var p = mk.split('-');
+    MLBLS[mk] = MN_ABBR[parseInt(p[1])-1]+' '+p[0].slice(2);
+  });
   
   function getMonth(val) {
     if (!val) return '';
@@ -2325,7 +2351,7 @@ function buildPersonalData(rows) {
       var fi = (r['FechaIngreso']||'').toString().substring(0,10);
       var d  = r['FechaIngreso'] instanceof Date ? r['FechaIngreso'] : new Date(r['FechaIngreso']||'');
       var dias = isNaN(d.getTime()) ? '—' : Math.floor((hoy-d)/(1000*60*60*24))+'d';
-      var nombre = ((r['Nombres']||'')+' '+(r['Apellidos']||'')).trim();
+      var nombre = (r['Nombres']||'').toString().trim();
       return '<tr><td>'+nombre+'</td><td>'+(r['Cargo']||'')+'</td><td>'+(r['Ciudad']||r['Sucursal']||'')+'</td><td>'+fi+'</td><td>'+dias+'</td><td><span class="badge bw">Revisar</span></td></tr>';
     }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Sin empleados con más de 1 año</td></tr>';
   }
@@ -3273,19 +3299,19 @@ function getTemplateSheets(withDemo) {
 
   // Column headers that exactly match what each parser reads
   // Formato original completo (compatible con exportes del sistema)
-  var selHdr  = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód.Sucursal","Sucursal1",
-                 "Cód.CentroCosto","CentroCosto","Salario","Ciudad","Responsable",
+  var selHdr  = ["Empresa","Sucursal","C.Cial","NIT","Cliente","Cód. Sucursal","Sucursal1",
+                 "Cód. Centro costo","Centro costo","Salario","Ciudad","Responsable",
                  "OrdenServicio","FechaCreacion","CreadoPor","Estado","CodTipoOrdenServicio",
                  "TipoOrdenServicio","PerfilCargo","FechaPrometida","PersonasSolicitadas",
                  "PendientesContratar","Contratados","FechaCierre","SeguimientoOrdenServicio",
-                 "HOY","Diferencia","Cumplimiento","RETRO CLIENTE",
-                 "EnReclutamiento","EnSeleccion","EnContratacion"];
+                 "HOY","Diferencia","Cumplimiento","Pendiente por contratar","RETRO CLIENTE",
+                 "EnSeleccion","EnContratacion"];
   var rotHdr  = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo",
                  "Sucursal","Ciudad","FechaIngreso","FechaRetiro","DiasLaborados",
                  "CausalRetiro","TipoRetiro","Genero","ObservacionRetiro"];
-  var paHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Apellidos","Cargo",
+  var paHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo",
                  "Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa",
-                 "Estado","ObservacionTemporalidad"];
+                 "Estado","FechaCorte","MesesLaborados","EstadoTemporalidad","Observacion"];
   var atHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad",
                  "FechaAccidente","TipoAccidente","MecanismoAccidente","AgenteCausa",
                  "ParteCuerpoAfectada","TipoLesion","DiasIncapacidad","Peligro","Estado","Descripcion"];
@@ -3501,39 +3527,47 @@ function renderTemporalidadTable(rows) {
   }).sort(function(a,b){
     return new Date(a['FechaIngreso']||0) - new Date(b['FechaIngreso']||0);
   });
-  // Determine temporality label and days remaining (assumes 1-year fixed contracts)
-  function classify(dias){
-    if (dias < 0)   return {label:'FUERA DE TIEMPO', cls:'bd', restantes: Math.abs(dias)+' días vencidos'};
-    if (dias <= 30) return {label:'POR VENCER',      cls:'bw', restantes: dias+' días restantes'};
-    return             {label:'AL DÍA',             cls:'bs', restantes: dias+' días restantes'};
+  // Clasifica por meses laborados (temporalidad anual)
+  function classifyMeses(m){
+    if (m > 12) return {label:'FUERA DE TIEMPO', cls:'bd'};
+    if (m >= 10) return {label:'POR VENCER',      cls:'bw'};
+    return              {label:'AL DÍA',          cls:'bs'};
+  }
+  function calcMeses(fi, corte){
+    var d0 = fi instanceof Date ? fi : new Date(fi);
+    var d1 = corte && !isNaN(new Date(corte).getTime()) ? new Date(corte) : hoy;
+    if (isNaN(d0.getTime())) return 0;
+    return (d1.getFullYear() - d0.getFullYear()) * 12 + (d1.getMonth() - d0.getMonth());
   }
   if (countEl) countEl.textContent = activos.length + ' empleados';
   if (activos.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin datos de temporalidad</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin datos de temporalidad</td></tr>';
     return;
   }
   tbody.innerHTML = activos.map(function(r, idx){
     var cedula  = r['Numdocumento']||r['Cedula']||'';
-    var nombre  = ((r['Nombres']||r['Nombre']||'')+' '+(r['Apellidos']||'')).trim();
-    var sexo    = r['Genero']||r['Sexo']||'';
-    var estado  = r['Estado']||'';
+    var nombre  = (r['Nombres']||r['Nombre']||'').toString().trim();
     var fi      = r['FechaIngreso']||'';
-    var d       = fi instanceof Date ? fi : new Date(fi);
-    var diasPasados = isNaN(d.getTime()) ? 0 : Math.floor((hoy - d)/(1000*60*60*24));
-    // Días restantes until next contract renewal (annually)
-    var anios = Math.floor(diasPasados/365);
-    var proxRenovacion = new Date(d);
-    proxRenovacion.setFullYear(proxRenovacion.getFullYear() + anios + 1);
-    var diasRestantes = Math.floor((proxRenovacion - hoy)/(1000*60*60*24));
-    var cc    = r['AreaOperativa']||r['CentroCosto']||r['Sucursal']||'';
-    var cargo = r['Cargo']||'';
-    var obs   = r['ObservacionTemporalidad']||r['Observaciones']||'';
-    var info  = classify(diasRestantes);
+    var corte   = r['FechaCorte']||'';
+    // Usar MesesLaborados del Excel si está disponible, si no calcular
+    var meses   = parseInt(r['MesesLaborados']) || calcMeses(fi, corte);
+    var estado  = (r['EstadoTemporalidad']||'').toString().trim() || classifyMeses(meses).label;
+    var cc      = r['AreaOperativa']||r['CentroCosto']||r['Sucursal']||'';
+    var cargo   = r['Cargo']||'';
+    var obs     = r['Observacion']||r['ObservacionTemporalidad']||r['Observaciones']||'';
+    var info    = classifyMeses(meses);
+    // Si viene EstadoTemporalidad del Excel, usar su clase
+    var cls = info.cls;
+    if (estado === 'FUERA DE TIEMPO') cls = 'bd';
+    else if (estado === 'POR VENCER')  cls = 'bw';
+    else if (estado === 'AL DÍA')      cls = 'bs';
     var bg = (idx%2===0)?'':'background:var(--bg2)';
-    return '<tr style="'+bg+'"><td>'+(idx+1)+'</td><td>'+cedula+'</td><td>'+nombre+'</td><td>'+sexo+'</td>'+
-      '<td>'+estado+'</td><td>'+fi.toString().substring(0,10)+'</td><td>'+cc+'</td><td>'+cargo+'</td>'+
-      '<td><span class="badge '+info.cls+'" style="font-size:11px">'+info.label+'</span></td>'+
-      '<td style="text-align:center">'+diasPasados+' / '+info.restantes+'</td>'+
+    return '<tr style="'+bg+'"><td>'+(idx+1)+'</td><td>'+cedula+'</td><td>'+nombre+'</td>'+
+      '<td>'+fi.toString().substring(0,10)+'</td>'+
+      '<td>'+(corte.toString().substring(0,10)||'—')+'</td>'+
+      '<td style="text-align:center;font-weight:bold">'+meses+'</td>'+
+      '<td>'+cc+'</td><td>'+cargo+'</td>'+
+      '<td><span class="badge '+cls+'" style="font-size:11px">'+estado+'</span></td>'+
       '<td>'+obs+'</td></tr>';
   }).join('');
   var el = document.getElementById('act-kpi-temporalidad');
