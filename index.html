@@ -212,8 +212,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
         <div class="sheet-chip" data-sheet="ENTREVISTAS_RETIRO">💬 ENTREVISTAS_RETIRO</div>
         <div class="sheet-chip" data-sheet="AT_ACCIDENTES">⚠️ AT_ACCIDENTES</div>
         <div class="sheet-chip" data-sheet="EG_ENFERMEDADES">🏥 EG_ENFERMEDADES</div>
-        <div class="sheet-chip" data-sheet="SINIESTRO">📋 SINIESTRO</div>
-        <div class="sheet-chip" data-sheet="FUEROS_SALUD">🛡️ FUEROS_SALUD</div>
+        <div class="sheet-chip" data-sheet="CASOS_MEDICOS">🩺 CASOS_MEDICOS</div>
         <div class="sheet-chip" data-sheet="FORMACION_SST">📚 FORMACION_SST</div>
         <div class="sheet-chip" data-sheet="TALENTO_DISCIPLINARIO">🏆 TALENTO_DISCIPLINARIO</div>
         <div class="sheet-chip" data-sheet="BIENESTAR_ACTIVIDADES">🌿 BIENESTAR_ACTIVIDADES</div>
@@ -301,7 +300,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <div class="sb-grp"><div class="sb-grp-lbl">Seguridad &amp; Salud</div>
     <div class="nav" onclick="go('at',this)"><span class="nav-ic">⚠️</span><span>Accidentes de Trabajo</span></div>
     <div class="nav" onclick="go('eg',this)"><span class="nav-ic">🏥</span><span>Enfermedades Generales</span></div>
-    <div class="nav" onclick="go('siniestro',this)"><span class="nav-ic">🩺</span><span>Siniestro &amp; Fueros</span></div>
+    <div class="nav" onclick="go('siniestro',this)"><span class="nav-ic">🩺</span><span>Casos Médicos</span></div>
     <div class="nav" onclick="go('formacion',this)"><span class="nav-ic">📚</span><span>Formación SST</span></div>
   </div>
   <div class="sb-grp" id="sb-admin-grp" style="display:none"><div class="sb-grp-lbl">Administración</div>
@@ -649,6 +648,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">AT sin días pérdida</div><div class="kc-val" id="at-kpi-cero">—</div><div class="kc-sub">Solo asistencia médica</div></div>
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">AT Leves (1–3 días)</div><div class="kc-val" id="at-kpi-leve">—</div></div>
     <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">AT Severos (&gt;15 días)</div><div class="kc-val" id="at-kpi-severo">—</div><div class="kc-d d-dn">▼ Requieren atención</div></div>
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">⚠️ Extemporáneos</div><div class="kc-val" id="at-kpi-extempo">—</div><div class="kc-sub">Reportados &gt;2 días hábiles</div><div class="kc-d d-dn" id="at-extempo-badge" style="display:none">▼ Alerta</div></div>
   </div>
   <div class="cg">
     <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title" style="font-weight:700">Frecuencia Accidentalidad — Nº Accidentes y Tasa % por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-at-if"></canvas></div></div>
@@ -657,7 +657,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title" style="font-weight:700">Severidad AT — Días Perdidos y Tasa Severidad % por Mes</div></div><div class="cw" style="height:200px"><canvas id="c-at-is"></canvas></div></div>
   </div>
   <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Causa AT</div></div><div class="cw" style="height:175px"><canvas id="c-at-causa"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Tipo de Accidente</div></div><div class="cw" style="height:175px"><canvas id="c-at-causa"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Causa AT</div></div><div id="pr-at-causa-cat"></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Clasificación por Total Días de AT</div></div>
       <div style="font-size:9px;color:var(--muted);margin-bottom:6px">Sin severidad: 0 días · Leve: 1–3 · Moderado: 4–14 · Severo: &gt;15</div>
       <div class="cw" style="height:145px"><canvas id="c-at-clas"></canvas></div></div>
@@ -670,7 +671,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   </div>
   <div class="cg">
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Tasa AT por Género</div></div><div class="cw" style="height:160px"><canvas id="c-at-gen"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">AT por Sucursal — Frecuencia</div></div><div id="pr-at-suc-f"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">AT por Contrato Comercial</div></div><div id="pr-at-suc-f"></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">AT por Cargo</div></div><div id="pr-at-cargo"></div></div>
   </div>
   <div class="cc" style="margin-bottom:14px">
@@ -693,6 +694,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val" id="eg-kpi-dias">—</div></div>
     <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Promedio Días/Caso</div><div class="kc-val" id="eg-kpi-prom">—</div></div>
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Diagnósticos Distintos</div><div class="kc-val" id="eg-kpi-diag">—</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Días Acumulados Total</div><div class="kc-val" id="eg-kpi-acum">—</div><div class="kc-sub">Suma días incap. acumulados</div></div>
   </div>
   <div class="cg t23">
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Severidad EG — Días Perdidos y Tasa %</div></div><div class="cw" style="height:180px"><canvas id="c-eg-is"></canvas></div></div>
@@ -701,126 +703,74 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
   <div class="cg">
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Diagnóstico EG — Severidad</div></div><div id="pr-eg-diag-s"></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Diagnóstico EG — Frecuencia</div></div><div id="pr-eg-diag-f"></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">EG por Sucursal — Severidad</div></div><div id="pr-eg-suc-s"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">EG por Contrato Comercial</div></div><div id="pr-eg-suc-s"></div></div>
   </div>
   <div class="cg">
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Tasa EG por Género</div></div><div class="cw" style="height:155px"><canvas id="c-eg-gen"></canvas></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">EG por Ciudad</div></div><div id="pr-eg-ciudad"></div></div>
     <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Top EG por Cargo</div></div><div id="pr-eg-cargo"></div></div>
   </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Grupo de Causas EG</div></div><div id="pr-eg-grupocausas"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title" style="font-weight:700">Códigos Diagnóstico Frecuentes</div></div><div id="pr-eg-codigos"></div></div>
+  </div>
 </div>
 
-<!-- SINIESTRO -->
+<!-- CASOS MÉDICOS (antes Siniestro + Fueros) -->
 <div class="sec" id="sec-siniestro">
   <div class="sh"><div class="sh-ic">🩺</div><div>
-    <h2>Gestión del Siniestro &amp; Fueros de Salud</h2>
-    <p>Seguimiento de casos médicos activos · Identificación de fueros de estabilidad reforzada vigentes</p>
+    <h2>Casos Médicos</h2>
+    <p>Siniestros laborales y fueros de salud · Seguimiento de casos activos y estabilidad reforzada</p>
   </div></div>
 
-  <!-- ═══ BLOQUE 1: RESUMEN DE CASOS MÉDICOS ═══ -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">
-    <div class="kc" style="--kcc:#C0272D">
-      <div class="kc-lbl">Total Siniestros</div>
-      <div class="kc-val" id="sin-kpi-total">—</div>
-      <div class="kc-sub">Casos registrados</div>
-    </div>
-    <div class="kc" style="--kcc:#BA7517">
-      <div class="kc-lbl">Casos Abiertos / Activos</div>
-      <div class="kc-val" id="sin-kpi-abiertos">—</div>
-      <div class="kc-sub">En seguimiento</div>
-    </div>
-    <div class="kc" style="--kcc:#1D9E75">
-      <div class="kc-lbl">Casos Cerrados</div>
-      <div class="kc-val" id="sin-kpi-cerrados">—</div>
-      <div class="kc-sub">Alta médica / Reintegro</div>
+  <div class="kg">
+    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Casos</div><div class="kc-val" id="sin-kpi-total">—</div><div class="kc-sub">Casos registrados</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Casos Abiertos / Activos</div><div class="kc-val" id="sin-kpi-abiertos">—</div><div class="kc-sub">En seguimiento</div></div>
+    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Casos Cerrados</div><div class="kc-val" id="sin-kpi-cerrados">—</div><div class="kc-sub">Alta médica / Reintegro</div></div>
+    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Riesgo Alto / Crítico</div><div class="kc-val" id="fu-kpi-alto">—</div><div class="kc-d d-dn">▼ Monitoreo activo</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Tipos de Caso</div><div class="kc-val" id="fu-kpi-tipos">—</div></div>
+  </div>
+
+  <!-- Semáforo de riesgo -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px" id="fu-semaforo">
+    <div style="background:white;border-radius:10px;border-left:5px solid var(--graym);padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:10px;color:var(--muted)">Carga la hoja CASOS_MEDICOS para ver el semáforo</div>
     </div>
   </div>
 
   <div class="cg" style="margin-bottom:18px">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Estado de Casos Activos</div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Estado de Casos</div></div>
       <div class="cw" style="height:200px"><canvas id="c-sin-est"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Desenlace de Casos</div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Tipo de Contingencia</div></div>
+      <div class="cw" style="height:200px"><canvas id="c-fu-tipo"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Desenlace / Diagnósticos</div></div>
       <div id="pr-sin-des"></div></div>
   </div>
 
-  <!-- ═══ DIVISOR ═══ -->
-  <div style="display:flex;align-items:center;gap:14px;margin:22px 0 20px">
-    <div style="flex:1;height:1px;background:var(--graym)"></div>
-    <div style="background:#8B1A1E;color:white;font-size:11px;font-weight:700;padding:5px 16px;border-radius:20px;letter-spacing:.5px;white-space:nowrap">
-      🛡️ FUEROS DE SALUD — ESTABILIDAD REFORZADA
-    </div>
-    <div style="flex:1;height:1px;background:var(--graym)"></div>
-  </div>
-
   <p style="font-size:11.5px;color:var(--muted);margin-bottom:16px;line-height:1.6;background:var(--infol);padding:10px 14px;border-radius:8px;border-left:3px solid var(--info)">
-    <strong style="color:var(--info)">⚖️ Definición legal:</strong> Un trabajador con <strong>fuero de salud</strong> no puede ser desvinculado sin autorización previa del Ministerio de Trabajo. 
-    Se activa cuando existe una <strong>limitación física o de salud</strong> conocida por el empleador al momento del despido. 
-    Criterio principal para identificar casos potenciales: <strong>incapacidad médica activa o reciente</strong>.
+    <strong style="color:var(--info)">⚖️ Fuero de salud:</strong> Un trabajador con fuero de salud no puede ser desvinculado sin autorización previa del Ministerio de Trabajo. Criterio principal: incapacidad médica activa o reciente.
   </p>
 
-  <!-- KPIs de fueros -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
-    <div class="kc" style="--kcc:#C0272D">
-      <div class="kc-lbl">Total Fueros</div>
-      <div class="kc-val" id="fu-kpi-total">—</div>
-      <div class="kc-sub">Trabajadores con fuero</div>
-    </div>
-    <div class="kc" style="--kcc:#BA7517">
-      <div class="kc-lbl">Riesgo Alto / Crítico</div>
-      <div class="kc-val" id="fu-kpi-alto">—</div>
-      <div class="kc-sub">NivelRiesgo Alto o Crítico</div>
-      <div class="kc-d d-dn">▼ Monitoreo activo</div>
-    </div>
-    <div class="kc" style="--kcc:#1D9E75">
-      <div class="kc-lbl">Controlados</div>
-      <div class="kc-val" id="fu-kpi-control">—</div>
-      <div class="kc-sub">NivelRiesgo Bajo o Medio</div>
-    </div>
-    <div class="kc" style="--kcc:#8B1A1E">
-      <div class="kc-lbl">Tipos de Fuero</div>
-      <div class="kc-val" id="fu-kpi-tipos">—</div>
-      <div class="kc-sub">Distintos tipos activos</div>
-    </div>
-  </div>
-
-  <!-- Semáforo visual compacto — dinámico -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px" id="fu-semaforo">
-    <div style="background:white;border-radius:10px;border-left:5px solid var(--bg2);padding:14px 16px;display:flex;align-items:center;gap:12px">
-      <div style="font-size:10px;color:var(--muted)">Carga la hoja FUEROS_SALUD para ver el semáforo</div>
-    </div>
-  </div>
-
-  <!-- Gráficas de fueros -->
-  <div class="cg" style="margin-bottom:18px">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Evolución de Casos por Nivel de Riesgo</div></div>
-      <div class="cw" style="height:200px"><canvas id="c-fu-mes"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Tipo de Contingencia</div></div>
-      <div class="cw" style="height:200px"><canvas id="c-fu-tipo"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Diagnósticos Más Frecuentes</div></div>
-      <div id="pr-fu-diag"></div></div>
-  </div>
-
-  <!-- ═══ TABLA MAESTRA: FUEROS VIGENTES A LA FECHA ═══ -->
+  <!-- Tabla maestra -->
   <div class="cc" style="margin-bottom:14px">
     <div class="cc-h" style="flex-wrap:wrap;gap:8px">
-      <div class="cc-title" style="font-weight:700;font-size:13px">📋 Fueros de Salud — Registro desde Excel</div>
+      <div class="cc-title" style="font-weight:700;font-size:13px">📋 Registro de Casos Médicos</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="fu-badges"></div>
     </div>
     <div class="tscroll">
     <table class="tbl" id="fueros-tabla">
       <thead><tr>
-        <th>Nombre</th><th>Cargo</th><th>Sucursal</th>
-        <th>Tipo Fuero</th><th>Fecha Inicio</th><th>Fecha Fin</th>
-        <th>Nivel Riesgo</th><th>Estado Gestión</th><th>Observaciones</th>
+        <th>Nombre</th><th>Cargo</th><th>Tipo Caso</th><th>Contrato Comercial</th>
+        <th>Tipo Siniestro / Fuero</th><th>F. Inicio</th><th>F. Fin</th>
+        <th>Nivel Riesgo</th><th>Estado</th><th>Observaciones</th>
       </tr></thead>
       <tbody id="fueros-tbody">
-        <tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja FUEROS_SALUD para ver el registro</td></tr>
+        <tr><td colspan="10" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga la hoja CASOS_MEDICOS para ver el registro</td></tr>
       </tbody>
     </table>
     </div>
     <div style="margin-top:10px;font-size:10.5px;color:var(--muted);font-style:italic">
-      * Vencimiento del Fuero estimado: 6 meses después de la última incapacidad / alta médica. Verificar con concepto jurídico en casos críticos.
-      <br>* Los datos deben actualizarse desde la hoja <strong>FUEROS_SALUD</strong> del archivo Excel de plantillas.
+      * Datos desde la hoja <strong>CASOS_MEDICOS</strong> del archivo Excel.
     </div>
   </div>
 </div>
@@ -980,7 +930,7 @@ var TTLS = {
   resumen:'Resumen Ejecutivo', seleccion:'Indicadores de Selección', activo:'Personal Activo',
   rotacion:'Rotación', entrevistas:'Entrevistas de Retiro', talento:'Gestión del Talento',
   bienestar:'Bienestar', at:'Accidentes de Trabajo', eg:'Enfermedades Generales',
-  siniestro:'Gestión del Siniestro & Fueros de Salud', fueros:'Fueros de Salud', formacion:'Formación SST'
+  siniestro:'Casos Médicos', formacion:'Formación SST'
 };
 
 // ===================== NAVIGATION =====================
@@ -1445,22 +1395,80 @@ function redraw() {
       mkPR('pr-cuerpo',items,items[0]?items[0].v:1);
     }
   })();
-  mkPR('pr-mec',[{l:'Pisadas, choques o golpes',v:26.12,c:RED},{l:'Sobreesfuerzo o falso movimiento',v:21.47,c:AMB},
-    {l:'Otro',v:17.35,c:BLUE},{l:'Caída de personas',v:15.74,c:GREEN},{l:'Contacto cortantes',v:10.21,c:GRAY}],26.12);
-  mkPR('pr-lesion',[{l:'Golpe o contusión',v:44.54,c:RED},{l:'Torcedura/esguince/desgarro',v:20.39,c:AMB},
-    {l:'Herida',v:11.99,c:BLUE},{l:'Trauma superficial',v:10.20,c:GREEN},{l:'Fractura',v:6.40,c:GRAY}],44.54);
-  mkPR('pr-at-suc-f',[{l:'Cali Centro',v:4.82,c:RED},{l:'Yumbo',v:3.91,c:AMB},
-    {l:'Palmira',v:3.44,c:BLUE},{l:'Buga',v:2.87,c:GREEN},{l:'Cali Norte',v:2.51,c:GRAY},{l:'Pereira',v:2.10,c:RED}],4.82);
-  mkPR('pr-at-cargo',[{l:'Auxiliar de Servicios',v:38.4,c:RED},{l:'Auxiliar Servicios BPM',v:22.1,c:AMB},
-    {l:'Op. Apoyo Logístico',v:12.3,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:8.7,c:GREEN},{l:'Coord. Operativo',v:5.2,c:GRAY}],38.4);
-  mkPR('pr-eg-diag-s',[{l:'Traumatismos, envenenamientos y otras',v:35.01,c:RED},
-    {l:'Enf. sistema osteomuscular',v:15.60,c:AMB},{l:'Enf. sistema digestivo',v:6.12,c:BLUE},
-    {l:'Ciertas enf. infecciosas',v:5.72,c:GREEN}],35.01);
-  mkPR('pr-eg-diag-f',[{l:'Ciertas enf. infecciosas y parasitarias',v:15.83,c:RED},
-    {l:'Enf. sistema osteomuscular',v:15.27,c:AMB},{l:'Enf. sistema respiratorio',v:12.44,c:BLUE},
-    {l:'Traumatismos y envenenamientos',v:11.38,c:GREEN},{l:'Enf. sistema digestivo',v:9.21,c:GRAY}],15.83);
-  mkPR('pr-eg-suc-s',[{l:'Cali Centro',v:3.12,c:RED},{l:'Yumbo',v:2.87,c:AMB},
-    {l:'Palmira',v:2.54,c:BLUE},{l:'Buga',v:2.31,c:GREEN},{l:'Cali Norte',v:2.08,c:GRAY},{l:'Pereira',v:1.95,c:RED}],3.12);
+  (function(){
+    var colors=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE,GREEN];
+    if (window._atData && Object.keys(window._atData.mecanismos).length) {
+      var m=window._atData.mecanismos; var tot=window._atData.total||1;
+      var s=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,5);
+      mkPR('pr-mec',s.map(function(k,i){return {l:k,v:Math.round(m[k]/tot*10000)/100,c:colors[i]};}),100);
+    } else {
+      mkPR('pr-mec',[{l:'Pisadas, choques o golpes',v:26.12,c:RED},{l:'Sobreesfuerzo o falso movimiento',v:21.47,c:AMB},
+        {l:'Otro',v:17.35,c:BLUE},{l:'Caída de personas',v:15.74,c:GREEN},{l:'Contacto cortantes',v:10.21,c:GRAY}],26.12);
+    }
+    if (window._atData && Object.keys(window._atData.lesiones).length) {
+      var l=window._atData.lesiones; var tot=window._atData.total||1;
+      var s=Object.keys(l).sort(function(a,b){return l[b]-l[a];}).slice(0,5);
+      mkPR('pr-lesion',s.map(function(k,i){return {l:k,v:Math.round(l[k]/tot*10000)/100,c:colors[i]};}),100);
+    } else {
+      mkPR('pr-lesion',[{l:'Golpe o contusión',v:44.54,c:RED},{l:'Torcedura/esguince/desgarro',v:20.39,c:AMB},
+        {l:'Herida',v:11.99,c:BLUE},{l:'Trauma superficial',v:10.20,c:GREEN},{l:'Fractura',v:6.40,c:GRAY}],44.54);
+    }
+    if (window._atData && Object.keys(window._atData.contratosComerciales).length) {
+      var cc=window._atData.contratosComerciales; var tot=window._atData.total||1;
+      var s=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a];}).slice(0,6);
+      mkPR('pr-at-suc-f',s.map(function(k,i){return {l:k,v:Math.round(cc[k]/tot*10000)/100,c:colors[i]};}),100);
+    } else {
+      mkPR('pr-at-suc-f',[{l:'Cali Centro',v:4.82,c:RED},{l:'Yumbo',v:3.91,c:AMB},
+        {l:'Palmira',v:3.44,c:BLUE},{l:'Buga',v:2.87,c:GREEN},{l:'Cali Norte',v:2.51,c:GRAY},{l:'Pereira',v:2.10,c:RED}],4.82);
+    }
+    if (window._atData && Object.keys(window._atData.cargos).length) {
+      var ca=window._atData.cargos; var tot=window._atData.total||1;
+      var s=Object.keys(ca).sort(function(a,b){return ca[b]-ca[a];}).slice(0,5);
+      mkPR('pr-at-cargo',s.map(function(k,i){return {l:k,v:Math.round(ca[k]/tot*10000)/100,c:colors[i]};}),100);
+    } else {
+      mkPR('pr-at-cargo',[{l:'Auxiliar de Servicios',v:38.4,c:RED},{l:'Auxiliar Servicios BPM',v:22.1,c:AMB},
+        {l:'Op. Apoyo Logístico',v:12.3,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:8.7,c:GREEN},{l:'Coord. Operativo',v:5.2,c:GRAY}],38.4);
+    }
+    // CAUSA breakdown
+    if (window._atData && Object.keys(window._atData.causas).length) {
+      var ca=window._atData.causas; var tot=window._atData.total||1;
+      var s=Object.keys(ca).sort(function(a,b){return ca[b]-ca[a];});
+      mkPR('pr-at-causa-cat',s.map(function(k,i){return {l:k,v:Math.round(ca[k]/tot*10000)/100,c:[RED,AMB,BLUE][i]||GRAY};}),100);
+    } else {
+      mkPR('pr-at-causa-cat',[{l:'Comportamiento subestándar',v:55,c:RED},{l:'Condición insegura',v:35,c:AMB},{l:'No clasificado',v:10,c:GRAY}],55);
+    }
+  })();
+  (function(){
+    var colors=[RED,AMB,BLUE,GREEN,GRAY];
+    if (window._egData && Object.keys(window._egData.diagnosticos).length) {
+      var d=window._egData.diagnosticos; var tot=window._egData.total||1;
+      var diasMap={};
+      (window._egData.rows||[]).forEach(function(r){ var k=(r['GrupoDiagnostico']||'').trim(); if(k) diasMap[k]=(diasMap[k]||0)+(parseInt(r['DiasIncapacidad'])||0); });
+      var ks=Object.keys(d).sort(function(a,b){return (diasMap[b]||0)-(diasMap[a]||0);}).slice(0,5);
+      mkPR('pr-eg-diag-s',ks.map(function(k,i){return {l:k,v:diasMap[k]||0,c:colors[i]};})  ,Math.max.apply(null,ks.map(function(k){return diasMap[k]||0;})));
+      var kf=Object.keys(d).sort(function(a,b){return d[b]-d[a];}).slice(0,5);
+      mkPR('pr-eg-diag-f',kf.map(function(k,i){return {l:k,v:Math.round(d[k]/tot*10000)/100,c:colors[i]};}),100);
+    } else {
+      mkPR('pr-eg-diag-s',[{l:'Traumatismos y envenenamientos',v:35.01,c:RED},{l:'Enf. osteomuscular',v:15.60,c:AMB},{l:'Enf. digestivo',v:6.12,c:BLUE}],35.01);
+      mkPR('pr-eg-diag-f',[{l:'Enf. infecciosas y parasitarias',v:15.83,c:RED},{l:'Enf. osteomuscular',v:15.27,c:AMB},{l:'Enf. respiratorio',v:12.44,c:BLUE}],15.83);
+    }
+    if (window._egData && Object.keys(window._egData.contratosComerciales).length) {
+      var cc=window._egData.contratosComerciales; var tot=window._egData.total||1;
+      var s=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a];}).slice(0,6);
+      mkPR('pr-eg-suc-s',s.map(function(k,i){return {l:k,v:Math.round(cc[k]/tot*10000)/100,c:colors[i%colors.length]};}),100);
+    } else {
+      mkPR('pr-eg-suc-s',[{l:'Cali Centro',v:3.12,c:RED},{l:'Yumbo',v:2.87,c:AMB},{l:'Palmira',v:2.54,c:BLUE},{l:'Buga',v:2.31,c:GREEN},{l:'Cali Norte',v:2.08,c:GRAY}],3.12);
+    }
+    if (window._egData && Object.keys(window._egData.grupoCausas).length) {
+      var gc=window._egData.grupoCausas; var tot=window._egData.total||1;
+      var s=Object.keys(gc).sort(function(a,b){return gc[b]-gc[a];}).slice(0,6);
+      mkPR('pr-eg-grupocausas',s.map(function(k,i){return {l:k,v:Math.round(gc[k]/tot*10000)/100,c:colors[i%colors.length]};}),100);
+    }
+    if (window._egData && Object.keys(window._egData.codigos).length) {
+      var co=window._egData.codigos; var s=Object.keys(co).sort(function(a,b){return co[b]-co[a];}).slice(0,5);
+      mkPR('pr-eg-codigos',s.map(function(k,i){return {l:k,v:co[k],c:colors[i]};})  ,co[s[0]]||1);
+    }
+  })();
   (function(){
     if (window._egData && Object.keys(window._egData.ciudades).length) {
       var c=window._egData.ciudades; var tot=window._egData.total||1;
@@ -1477,21 +1485,18 @@ function redraw() {
       mkPR('pr-eg-cargo',[{l:'Auxiliar de Servicios',v:35.2,c:RED},{l:'Auxiliar Servicios BPM',v:18.4,c:AMB},{l:'Op. Apoyo Logístico',v:11.8,c:BLUE},{l:'Aux. Mantenimiento Loc.',v:7.3,c:GREEN}],35.2);
     }
   })();
-  mkPR('pr-sin-des',[{l:'Alta médica con reintegro',v:34.2,c:GREEN},{l:'Alta sin secuelas',v:28.6,c:GREEN},
-    {l:'Reintegro con restricciones',v:18.9,c:AMB},{l:'En proceso calificación',v:12.6,c:AMB},
-    {l:'Pensión invalidez',v:3.1,c:RED},{l:'Otro desenlace',v:2.6,c:GRAY}],34.2);
-  /* pr-fu-ciudad removed */
   (function(){
-    if (window._fuerosData && Object.keys(window._fuerosData.diagnosticos).length) {
-      var d=window._fuerosData.diagnosticos;
-      var sorted=Object.keys(d).sort(function(a,b){return d[b]-d[a];}).slice(0,5);
-      var items=sorted.map(function(k,i){return {l:k,v:d[k],c:[RED,AMB,BLUE,GREEN,GRAY][i]};});
-      mkPR('pr-fu-diag',items,items[0]?items[0].v:1);
+    if (window._sinData && Object.keys(window._sinData.desenlaces).length) {
+      var d=window._sinData.desenlaces; var s=Object.keys(d).sort(function(a,b){return d[b]-d[a];}).slice(0,6);
+      var colors=[GREEN,AMB,RED,BLUE,GRAY,GREEN];
+      mkPR('pr-sin-des',s.map(function(k,i){return {l:k,v:d[k],c:colors[i]};})  ,d[s[0]]||1);
     } else {
-      mkPR('pr-fu-diag',[{l:'M54 – Dorsalgia / Lumbalgia',v:12,c:RED},{l:'M75 – Lesión hombro',v:8,c:AMB},
-        {l:'F41 – Trastorno ansioso',v:7,c:BLUE},{l:'G54 – Túnel carpiano',v:5,c:GREEN},{l:'S52 – Fractura',v:4,c:GRAY}],12);
+      mkPR('pr-sin-des',[{l:'Alta médica con reintegro',v:34.2,c:GREEN},{l:'Alta sin secuelas',v:28.6,c:GREEN},
+        {l:'Reintegro con restricciones',v:18.9,c:AMB},{l:'En proceso calificación',v:12.6,c:AMB},
+        {l:'Pensión invalidez',v:3.1,c:RED},{l:'Otro desenlace',v:2.6,c:GRAY}],34.2);
     }
   })();
+  /* pr-fu-ciudad and pr-fu-diag removed (section now uses CASOS_MEDICOS) */
   (function(){
     var colors=[GREEN,AMB,BLUE,RED,GRAY,GREEN];
     if (window._entData && Object.keys(window._entData.cargos).length) {
@@ -1779,28 +1784,17 @@ function redraw() {
   /* c-sin-dias removed */
   /* c-sin-prr removed */
 
-  // ---- FUEROS CHARTS ----
-  (function(){
-    if (window._fuerosData && window._fuerosData.rows.length) {
-      var r=window._fuerosData.riesgos;
-      mk('c-fu-mes',{type:'bar',data:{labels:['Cargados'],datasets:[
-        {label:'Crítico',data:[r.Critico],backgroundColor:RED,borderRadius:3},
-        {label:'Alto',data:[r.Alto],backgroundColor:AMB,borderRadius:3},
-        {label:'Controlado',data:[r.Controlado],backgroundColor:GREEN,borderRadius:3}
-      ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
-        plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-    }
-  })();
+  // ---- CASOS MÉDICOS CHARTS ----
   (function(){
     var ftLabels, ftData;
-    if (window._fuerosData && Object.keys(window._fuerosData.tipos).length) {
-      var t=window._fuerosData.tipos;
+    if (window._sinData && Object.keys(window._sinData.tipos).length) {
+      var t=window._sinData.tipos;
       var sorted=Object.keys(t).sort(function(a,b){return t[b]-t[a];});
       ftLabels=sorted; ftData=sorted.map(function(k){return t[k];});
     } else { ftLabels=[]; ftData=[]; }
     mk('c-fu-tipo',{type:'doughnut',data:{labels:ftLabels,datasets:[{data:ftData,
       backgroundColor:[RED,AMB,BLUE,GREEN,GRAY],borderWidth:2,borderColor:'#fff'}]},
-      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
+      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})});
   })();
 }
 
@@ -1903,8 +1897,8 @@ function markSheetLoaded(sheetName, ok) {
     'EG': 'EG_ENFERMEDADES', 'EG_ENFERMEDADES': 'EG',
     'PERSONAL': 'PERSONAL_ACTIVO', 'PERSONAL_ACTIVO': 'PERSONAL',
     'ENTREVISTAS': 'ENTREVISTAS_RETIRO', 'ENTREVISTAS_RETIRO': 'ENTREVISTAS',
-    'SINIESTROS': 'SINIESTRO', 'SINIESTRO': 'SINIESTROS',
-    'FUEROS': 'FUEROS_SALUD', 'FUEROS_SALUD': 'FUEROS',
+    'SINIESTROS': 'SINIESTRO', 'SINIESTRO': 'CASOS_MEDICOS', 'CASOS_MEDICOS': 'SINIESTRO',
+    'FUEROS': 'FUEROS_SALUD', 'FUEROS_SALUD': 'CASOS_MEDICOS',
     'TALENTO': 'TALENTO_DISCIPLINARIO', 'TALENTO_DISCIPLINARIO': 'TALENTO',
     'BIENESTAR': 'BIENESTAR_ACTIVIDADES', 'BIENESTAR_ACTIVIDADES': 'BIENESTAR'
   };
@@ -1968,12 +1962,12 @@ function buildDashboardFromExcel() {
     // 8. ENTREVISTAS
     var entRows = parsedSheets['ENTREVISTAS_RETIRO'] || parsedSheets['ENTREVISTAS'];
     if (entRows && entRows.length > 1) { buildEntrevistasData(entRows); }
-    // 9. SINIESTRO
-    var sinRows = parsedSheets['SINIESTRO'] || parsedSheets['SINIESTROS'];
-    if (sinRows && sinRows.length > 1) { buildSiniestroData(sinRows); }
-    // 10. FUEROS
+    // 9. CASOS MÉDICOS (nueva hoja unificada; backwards compat con SINIESTRO/FUEROS_SALUD)
+    var cmRows = parsedSheets['CASOS_MEDICOS'] || parsedSheets['SINIESTRO'] || parsedSheets['SINIESTROS'];
+    if (cmRows && cmRows.length > 1) { buildCasosMedicosData(cmRows); }
+    // Si existe FUEROS_SALUD separado (plantilla antigua), también lo procesa
     var fueRows = parsedSheets['FUEROS_SALUD'] || parsedSheets['FUEROS'];
-    if (fueRows && fueRows.length > 1) { buildFuerosData(fueRows); }
+    if (fueRows && fueRows.length > 1 && !parsedSheets['CASOS_MEDICOS']) { buildCasosMedicosData(fueRows); }
     // 11. TALENTO
     var talRows = parsedSheets['TALENTO_DISCIPLINARIO'] || parsedSheets['TALENTO'];
     if (talRows && talRows.length > 1) { buildTalentoData(talRows); }
@@ -2243,6 +2237,19 @@ function buildFormacionData(rows) {
 }
 
 // ── AT PROCESSOR ────────────────────────────────────────────
+function diasHabilesEntre(d1, d2) {
+  var start = new Date(Math.min(d1,d2)), end = new Date(Math.max(d1,d2));
+  var dias = 0;
+  var cur = new Date(start);
+  cur.setDate(cur.getDate()+1);
+  while (cur <= end) {
+    var dow = cur.getDay();
+    if (dow !== 0 && dow !== 6) dias++;
+    cur.setDate(cur.getDate()+1);
+  }
+  return dias;
+}
+
 function buildATData(rows) {
   var data = rows.filter(function(r){
     var id = r['Numdocumento']||r['ID_AT']||r['NumDocumento']||r['Nombres'];
@@ -2251,19 +2258,27 @@ function buildATData(rows) {
   if (data.length === 0) return;
   var total = data.length;
   var diasTotal = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0); }, 0);
-  var promDias = 0; // DiasContratadoAlaFechaAT is optional
-  // Build breakdowns
-  var peligros = {}, cuerpos = {}, mecanismos = {}, lesiones = {}, sucursales = {}, cargos = {}, generos = {M:0,F:0};
+  var peligros = {}, cuerpos = {}, mecanismos = {}, lesiones = {}, contratosComerciales = {}, cargos = {}, generos = {M:0,F:0}, causas = {}, extemporaneos = 0;
   data.forEach(function(r){
     function cnt(obj,key){ var v=(r[key]||'').toString().trim(); if(v) obj[v]=(obj[v]||0)+1; }
     cnt(peligros,'Peligro'); cnt(cuerpos,'ParteCuerpoAfectada'); cnt(mecanismos,'MecanismoAccidente');
-    cnt(lesiones,'TipoLesion'); cnt(sucursales,'Sucursal'); cnt(cargos,'Cargo');
+    cnt(lesiones,'TipoLesion'); cnt(contratosComerciales,'ContratoComercial'); cnt(cargos,'Cargo');
+    cnt(causas,'CAUSA');
     var sex=(r['Genero']||r['Sexo']||'').toString().toUpperCase().trim();
     if(sex==='M'||sex==='MASCULINO') generos.M++; else if(sex==='F'||sex==='FEMENINO') generos.F++;
+    // Extemporaneidad: FechaReporte - FechaAccidente > 2 días hábiles
+    var fa = r['FechaAccidente']; var fr = r['FechaReporte'];
+    if (fa && fr) {
+      var dfa = fa instanceof Date ? fa : new Date(fa);
+      var dfr = fr instanceof Date ? fr : new Date(fr);
+      if (!isNaN(dfa) && !isNaN(dfr) && dfr > dfa) {
+        if (diasHabilesEntre(dfa, dfr) > 2) extemporaneos++;
+      }
+    }
   });
-  window._atData = { total:total, diasAusentismo:diasTotal, promDiasContrat:promDias,
+  window._atData = { total:total, diasAusentismo:diasTotal,
     peligros:peligros, cuerpos:cuerpos, mecanismos:mecanismos, lesiones:lesiones,
-    sucursales:sucursales, cargos:cargos, generos:generos, rows:data };
+    contratosComerciales:contratosComerciales, cargos:cargos, generos:generos, causas:causas, extemporaneos:extemporaneos, rows:data };
   updateATKPIs();
 }
 
@@ -2278,17 +2293,20 @@ function updateATKPIs() {
   });
   var prom = d.total>0 ? (d.diasAusentismo/d.total).toFixed(1) : '—';
   function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  s('at-kpi-total',  d.total.toLocaleString());
-  s('at-kpi-dias',   d.diasAusentismo.toLocaleString());
-  s('at-kpi-prom',   prom+' días');
-  s('at-kpi-cero',   cero);
-  s('at-kpi-leve',   leve);
-  s('at-kpi-severo', sev);
-  s('at-stat-cero',  cero);
-  s('at-stat-leve',  leve);
-  s('at-stat-mod',   mod);
-  s('at-stat-sev',   sev);
-  s('res-kpi-at',    d.total.toLocaleString());
+  s('at-kpi-total',   d.total.toLocaleString());
+  s('at-kpi-dias',    d.diasAusentismo.toLocaleString());
+  s('at-kpi-prom',    prom+' días');
+  s('at-kpi-cero',    cero);
+  s('at-kpi-leve',    leve);
+  s('at-kpi-severo',  sev);
+  s('at-kpi-extempo', d.extemporaneos||0);
+  s('at-stat-cero',   cero);
+  s('at-stat-leve',   leve);
+  s('at-stat-mod',    mod);
+  s('at-stat-sev',    sev);
+  s('res-kpi-at',     d.total.toLocaleString());
+  var badge = document.getElementById('at-extempo-badge');
+  if (badge) badge.style.display = (d.extemporaneos>0)?'inline-flex':'none';
 }
 
 // ── EG PROCESSOR ────────────────────────────────────────────
@@ -2300,21 +2318,25 @@ function buildEGData(rows) {
   if (data.length === 0) return;
   var total = data.length;
   var dias = data.reduce(function(s,r){ return s+(parseInt(r['DiasIncapacidad'])||0); }, 0);
-  var diagnosticos = {}, generos = {M:0,F:0}, ciudades = {}, cargos = {};
+  var diasAcumulados = data.reduce(function(s,r){ return s+(parseInt(r['DiasAcumulados'])||0); }, 0);
+  var diagnosticos = {}, generos = {M:0,F:0}, ciudades = {}, cargos = {}, contratosComerciales = {}, grupoCausas = {}, codigos = {};
   data.forEach(function(r){
     function cnt(obj,key){ var v=(r[key]||'').toString().trim(); if(v) obj[v]=(obj[v]||0)+1; }
     cnt(diagnosticos,'GrupoDiagnostico'); cnt(ciudades,'Ciudad'); cnt(cargos,'Cargo');
+    cnt(contratosComerciales,'ContratoComercial'); cnt(grupoCausas,'GrupoCausas'); cnt(codigos,'CodigoDiagnostico');
     var sex=(r['Genero']||r['Sexo']||'').toString().toUpperCase().trim();
     if(sex==='M'||sex==='MASCULINO') generos.M++; else if(sex==='F'||sex==='FEMENINO') generos.F++;
   });
   var prom = total>0 ? (dias/total).toFixed(1) : '—';
-  window._egData = { total:total, diasAusentismo:dias,
-    diagnosticos:diagnosticos, generos:generos, ciudades:ciudades, cargos:cargos, rows:data };
+  window._egData = { total:total, diasAusentismo:dias, diasAcumulados:diasAcumulados,
+    diagnosticos:diagnosticos, generos:generos, ciudades:ciudades, cargos:cargos,
+    contratosComerciales:contratosComerciales, grupoCausas:grupoCausas, codigos:codigos, rows:data };
   function se(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
   se('eg-kpi-total', total.toLocaleString());
   se('eg-kpi-dias',  dias.toLocaleString());
   se('eg-kpi-prom',  prom+' días');
   se('eg-kpi-diag',  Object.keys(diagnosticos).length);
+  se('eg-kpi-acum',  diasAcumulados.toLocaleString());
   se('res-kpi-eg',   dias.toLocaleString());
 }
 
@@ -2524,55 +2546,38 @@ function buildEntrevistasData(rows) {
 }
 
 // ── SINIESTRO PARSER ──────────────────────────────────────────
-function buildSiniestroData(rows) {
+function buildCasosMedicosData(rows) {
   var data = rows.filter(function(r){
     var id = r['Numdocumento']||r['Nombres']||r['ID'];
     return id && id !== 'Numdocumento';
   });
   if (data.length === 0) return;
-  var estados = {}, tipos = {}, desenlaces = {};
+  var estados = {}, tipos = {}, desenlaces = {}, riesgos = {Critico:0, Alto:0, Controlado:0};
   data.forEach(function(r){
     function cnt(obj,key){ var v=(r[key]||'').toString().trim(); if(v) obj[v]=(obj[v]||0)+1; }
-    cnt(estados,'Estado'); cnt(tipos,'TipoSiniestro'); cnt(desenlaces,'Calificacion');
+    cnt(estados,'Estado');
+    // Tipo de caso: puede venir de TipoSiniestro, TipoCaso o TipoFuero
+    var tc = (r['TipoCaso']||r['TipoSiniestro']||r['TipoFuero']||'').toString().trim();
+    if (tc) tipos[tc] = (tipos[tc]||0)+1;
+    cnt(desenlaces,'Calificacion');
+    var nivel = (r['NivelRiesgo']||'').toString().toUpperCase().trim();
+    if (nivel.includes('CRITI')) riesgos.Critico++;
+    else if (nivel.includes('ALTO')) riesgos.Alto++;
+    else if (nivel) riesgos.Controlado++;
   });
   var total = data.length;
   var cerrados = data.filter(function(r){ var e=(r['Estado']||'').toString().toUpperCase(); return e.includes('CERR')||e.includes('CALIFICAD'); }).length;
   var abiertos = total - cerrados;
-  window._sinData = { total: total, cerrados: cerrados, abiertos: abiertos, estados: estados, tipos: tipos, desenlaces: desenlaces, rows: data };
+  var alto = riesgos.Alto + riesgos.Critico;
+  window._sinData = { total:total, cerrados:cerrados, abiertos:abiertos, estados:estados, tipos:tipos, desenlaces:desenlaces, rows:data };
+  window._fuerosData = { total:total, tipos:tipos, diagnosticos:desenlaces, riesgos:riesgos, rows:data };
+  renderCasosMedicosTable(data);
   function ss(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
   ss('sin-kpi-total',    total.toLocaleString());
   ss('sin-kpi-abiertos', abiertos);
   ss('sin-kpi-cerrados', cerrados);
-}
-
-// ── FUEROS PARSER ────────────────────────────────────────────
-function buildFuerosData(rows) {
-  var data = rows.filter(function(r){
-    var id = r['Numdocumento']||r['Nombres']||r['ID'];
-    return id && id !== 'Numdocumento';
-  });
-  if (data.length === 0) return;
-  var tipos = {}, diagnosticos = {}, riesgos = {Critico:0, Alto:0, Controlado:0};
-  data.forEach(function(r){
-    var t = (r['TipoFuero']||'').toString().trim();
-    if (t) tipos[t] = (tipos[t]||0)+1;
-    var d = (r['Observaciones']||'').toString().substring(0,30).trim();
-    if (d) diagnosticos[d] = (diagnosticos[d]||0)+1;
-    var nivel = (r['NivelRiesgo']||'').toString().toUpperCase().trim();
-    if (nivel.includes('CRITI')) riesgos.Critico++;
-    else if (nivel.includes('ALTO')) riesgos.Alto++;
-    else riesgos.Controlado++;
-  });
-  window._fuerosData = { total: data.length, tipos: tipos, diagnosticos: diagnosticos, riesgos: riesgos, rows: data };
-  renderFuerosTable(data);
-  // Populate KPIs
-  var alto = riesgos.Alto + riesgos.Critico;
-  function sf(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  sf('fu-kpi-total',   data.length);
-  sf('fu-kpi-alto',    alto);
-  sf('fu-kpi-control', riesgos.Controlado);
-  sf('fu-kpi-tipos',   Object.keys(tipos).length);
-  // Update semáforo
+  ss('fu-kpi-alto',      alto);
+  ss('fu-kpi-tipos',     Object.keys(tipos).length);
   var semEl = document.getElementById('fu-semaforo');
   if (semEl) {
     semEl.innerHTML =
@@ -2580,34 +2585,34 @@ function buildFuerosData(rows) {
       '<div style="background:white;border-radius:10px;border-left:5px solid var(--warn);padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="font-size:28px">🟡</div><div><div style="font-size:20px;font-weight:900;color:var(--warn)">'+riesgos.Alto+' altos</div><div style="font-size:10px;color:var(--muted)">NivelRiesgo = Alto</div></div></div>'+
       '<div style="background:white;border-radius:10px;border-left:5px solid var(--ok);padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="font-size:28px">🟢</div><div><div style="font-size:20px;font-weight:900;color:var(--ok)">'+riesgos.Controlado+' controlados</div><div style="font-size:10px;color:var(--muted)">NivelRiesgo = Bajo/Medio</div></div></div>';
   }
-  // Update badges
   var badgesEl = document.getElementById('fu-badges');
   if (badgesEl) {
     badgesEl.innerHTML = '<span class="badge bd">🔴 Crítico: '+riesgos.Critico+'</span><span class="badge bw">🟡 Alto: '+riesgos.Alto+'</span><span class="badge bs">🟢 Control: '+riesgos.Controlado+'</span><span class="badge bi">Total: '+data.length+'</span>';
   }
 }
 
-function renderFuerosTable(rows) {
+function renderCasosMedicosTable(rows) {
   var tbody = document.getElementById('fueros-tbody');
   if (!tbody) return;
   if (!rows || !rows.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin registros</td></tr>';
     return;
   }
   tbody.innerHTML = rows.map(function(r, i){
     var nivel = (r['NivelRiesgo']||'').toString().toUpperCase();
     var badgeCls = nivel.includes('CRITI')?'bd':nivel.includes('ALTO')?'bw':'bs';
-    var nombre = ((r['Nombres']||r['Nombre']||r['Numdocumento']||('F-'+(i+1)))+'').trim();
+    var nombre = ((r['Nombres']||r['Nombre']||r['Numdocumento']||('CM-'+(i+1)))+'').trim();
     var cargo = (r['Cargo']||'').toString();
-    var suc = (r['Sucursal']||'').toString();
-    var tipo = (r['TipoFuero']||'').toString();
-    var fi = (r['FechaInicio']||'').toString().substring(0,10);
+    var tipoCaso = (r['TipoCaso']||'—').toString();
+    var cc = (r['ContratoComercial']||r['Sucursal']||'').toString();
+    var tipoDetalle = (r['TipoSiniestro']||r['TipoFuero']||'').toString();
+    var fi = (r['FechaInicio']||r['FechaCalificacion']||'').toString().substring(0,10);
     var ff = (r['FechaFin']||'').toString().substring(0,10);
     var nivelRiesgo = (r['NivelRiesgo']||'—').toString();
-    var estado = (r['EstadoGestion']||'—').toString();
+    var estado = (r['Estado']||r['EstadoGestion']||'—').toString();
     var obs = (r['Observaciones']||'').toString();
-    return '<tr><td>'+nombre+'</td><td>'+cargo+'</td><td>'+suc+'</td>'
-      +'<td>'+tipo+'</td><td>'+fi+'</td><td>'+ff+'</td>'
+    return '<tr><td>'+nombre+'</td><td>'+cargo+'</td><td>'+tipoCaso+'</td><td>'+cc+'</td>'
+      +'<td>'+tipoDetalle+'</td><td>'+fi+'</td><td>'+ff+'</td>'
       +'<td><span class="badge '+badgeCls+'">'+nivelRiesgo+'</span></td>'
       +'<td>'+estado+'</td><td>'+obs+'</td></tr>';
   }).join('');
@@ -3288,12 +3293,11 @@ function getTemplateSheets(withDemo) {
     ["SELECCION","Órdenes de servicio. Alimenta: Resumen Ejecutivo, Pipeline, Módulo Selección","OrdenServicio, Empresa, Ciudad, Responsable, PersonasSolicitadas, Contratados, PendientesContratar, Estado, EnReclutamiento, EnSeleccion, EnContratacion"],
     ["ROTACION","Retiros de personal. Alimenta: Módulo Rotación y Personal Activo","Numdocumento, CausalRetiro, Genero, Ciudad, FechaRetiro, DiasLaborados"],
     ["PERSONAL_ACTIVO","Plantilla activa. Alimenta: Módulo Personal Activo","Numdocumento, Estado (debe ser ACTIVO), Cargo, Ciudad, AreaOperativa"],
-    ["AT_ACCIDENTES","Accidentes de trabajo. Alimenta: Módulo AT","Numdocumento, DiasIncapacidad, Peligro, ParteCuerpoAfectada, MecanismoAccidente, TipoLesion, Sucursal, Cargo, Genero"],
-    ["EG_ENFERMEDADES","Incapacidades por enfermedad general. Alimenta: Módulo EG","Numdocumento, DiasIncapacidad, GrupoDiagnostico, Ciudad, Cargo, Genero"],
+    ["AT_ACCIDENTES","Accidentes de trabajo. Alimenta: Módulo AT","Numdocumento, Genero, FechaNacimiento, FechaIngreso, Cargo, ContratoComercial, FechaAccidente, HoraAccidente, FechaReporte, Extemporaneo, TipoAccidente, CAUSA, MecanismoAccidente, ParteCuerpoAfectada, TipoLesion, DiasIncapacidad, Peligro, Estado"],
+    ["EG_ENFERMEDADES","Incapacidades por enfermedad general. Alimenta: Módulo EG","Numdocumento, Genero, FechaNacimiento, FechaIngreso, Cargo, ContratoComercial, FechaInicio, FechaFin, DiasIncapacidad, DiasAcumulados, CodigoDiagnostico, Letra, GrupoDiagnostico, GrupoCausas"],
     ["FORMACION_SST","Capacitaciones. Alimenta: Módulo Formación","Tema, FechaFormacion, PersonasProgramadas, PersonasAsistentes, Responsable, Ciudad"],
     ["ENTREVISTAS_RETIRO","Entrevistas de salida. Alimenta: Módulo Entrevistas","Empresa, Cliente, Numdocumento, Nombres, Cargo, Area, JefeInmediato, FechaEncuesta, FechaIngreso, FechaRetiro, MotivoRetiro, TratoJefe (Bueno/Regular/Deficiente), AplicoConocimientos (SI/NO), TrabajoEsperado (SI/NO), RetroalimentacionJefe (SI/NO), ElementosTrabajo (SI/NO), CondicionesFisicas (SI/NO), ProblemasDesarrollo, ExperienciaPositiva, OportunidadMejora, ComentariosAdicionales"],
-    ["SINIESTRO","Siniestros laborales. Alimenta: Módulo Siniestros","Numdocumento, Estado, TipoSiniestro, Calificacion"],
-    ["FUEROS_SALUD","Trabajadores con fuero. Alimenta: Módulo Fueros","Numdocumento, TipoFuero, NivelRiesgo, Observaciones, Cargo, Sucursal, FechaInicio, FechaFin, EstadoGestion"],
+    ["CASOS_MEDICOS","Siniestros y fueros de salud unificados. Alimenta: Módulo Casos Médicos","Numdocumento, TipoCaso (Siniestro o Fuero), ContratoComercial, TipoSiniestro, TipoFuero, Estado, NivelRiesgo, FechaInicio, FechaFin, Calificacion, EstadoGestion, Observaciones"],
     ["TALENTO_DISCIPLINARIO","Procesos disciplinarios. Alimenta: Módulo Talento","Cedula, Nombre, Cargo, FechaIngreso, FechaSolicitudMedida, FechaEntregaMedida, AusenciaInjustificada (X), UsocelularPlanta (X), MaltratoVerbal (X), OtroMotivo (X), Descargos (X), DctoNomina (X), LlamadoAtencion (X), TerminacionContrato (X), Observacion"],
     ["BIENESTAR_ACTIVIDADES","Actividades de bienestar. Alimenta: Módulo Bienestar","Actividad, Fecha, Medio, Personas, Impacto, Responsable, Ciudad"],
     [],
@@ -3320,12 +3324,16 @@ function getTemplateSheets(withDemo) {
   var paHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo",
                  "Sucursal","Ciudad","FechaIngreso","TipoContrato","Salario","AreaOperativa",
                  "Estado","FechaCorte","MesesLaborados","EstadoTemporalidad","Observacion"];
-  var atHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad",
-                 "FechaAccidente","TipoAccidente","MecanismoAccidente","AgenteCausa",
+  var atHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Genero","FechaNacimiento","FechaIngreso",
+                 "Cargo","ContratoComercial","Ciudad",
+                 "FechaAccidente","HoraAccidente","FechaReporte","Extemporaneo",
+                 "TipoAccidente","CAUSA","MecanismoAccidente","AgenteCausa",
                  "ParteCuerpoAfectada","TipoLesion","DiasIncapacidad","Peligro","Estado","Descripcion"];
-  var egHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal","Ciudad",
-                 "FechaInicio","FechaFin","DiasIncapacidad","Diagnostico","GrupoDiagnostico",
-                 "TipoIncapacidad","Genero","Edad"];
+  var egHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Genero","FechaNacimiento","FechaIngreso",
+                 "Cargo","ContratoComercial","Ciudad",
+                 "FechaInicio","FechaFin","DiasIncapacidad","DiasAcumulados",
+                 "CodigoDiagnostico","Letra","Diagnostico","GrupoDiagnostico","GrupoCausas",
+                 "TipoIncapacidad","Edad"];
   var formHdr = ["Empresa","NIT","Cliente","Sucursal","Ciudad","FechaFormacion","Tema",
                  "Modalidad","Duración (hrs)","PersonasProgramadas","PersonasAsistentes",
                  "Responsable","Observaciones"];
@@ -3334,11 +3342,10 @@ function getTemplateSheets(withDemo) {
                  "MotivoRetiro","TratoJefe","AplicoConocimientos","TrabajoEsperado",
                  "RetroalimentacionJefe","ElementosTrabajo","CondicionesFisicas",
                  "ProblemasDesarrollo","ExperienciaPositiva","OportunidadMejora","ComentariosAdicionales"];
-  var sinHdr  = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal",
-                 "FechaCalificacion","TipoSiniestro","Estado","Calificacion",
-                 "PorcentajePerdida","EntidadCalificadora","DiasCalificacion","Observaciones"];
-  var fuHdr   = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","Sucursal",
-                 "TipoFuero","FechaInicio","FechaFin","NivelRiesgo","EstadoGestion","Observaciones"];
+  var casosMedHdr = ["Empresa","NIT","Cliente","Numdocumento","Nombres","Cargo","ContratoComercial",
+                 "TipoCaso","FechaInicio","FechaFin",
+                 "TipoSiniestro","TipoFuero","Estado","Calificacion",
+                 "PorcentajePerdida","EntidadCalificadora","NivelRiesgo","EstadoGestion","Observaciones"];
   var talHdr  = ["Empresa","NIT","Cliente","Cedula","Nombre","Apellidos","Cargo","FechaIngreso",
                  "FechaSolicitudMedida","FechaEntregaMedida",
                  "AusenciaInjustificada","UsocelularPlanta","MaltratoVerbal","OtroMotivo",
@@ -3356,8 +3363,7 @@ function getTemplateSheets(withDemo) {
     { name: 'EG_ENFERMEDADES',      data: [egHdr]   },
     { name: 'FORMACION_SST',        data: [formHdr] },
     { name: 'ENTREVISTAS_RETIRO',   data: [entHdr]  },
-    { name: 'SINIESTRO',            data: [sinHdr]  },
-    { name: 'FUEROS_SALUD',         data: [fuHdr]   },
+    { name: 'CASOS_MEDICOS',         data: [casosMedHdr] },
     { name: 'TALENTO_DISCIPLINARIO',data: [talHdr]  },
     { name: 'BIENESTAR_ACTIVIDADES',data: [bieHdr]  }
   ];
@@ -3380,12 +3386,18 @@ function getTemplateSheets(withDemo) {
       ["1099887766","Laura Soto","Técnico","Medellín","Sucursal Sur","Producción","ACTIVO",cli1]
     );
     // Demo rows for AT_ACCIDENTES (index 4)
+    // Cols: Empresa,NIT,Cliente,Numdocumento,Nombres,Genero,FechaNacimiento,FechaIngreso,Cargo,ContratoComercial,Ciudad,FechaAccidente,HoraAccidente,FechaReporte,Extemporaneo,TipoAccidente,CAUSA,MecanismoAccidente,AgenteCausa,ParteCuerpoAfectada,TipoLesion,DiasIncapacidad,Peligro,Estado,Descripcion
     sheets[4].data.push(
-      ["1012345678","Juan García","Operario","Sucursal Norte","Bogotá","M",5,"Biomecánico","Mano","Golpe","Contusión"]
+      [cli1,"900.123.456-1",cli1,"1012345678","Juan García","M","1990-05-12","2022-03-01","Operario","Contrato A",       "Bogotá","2025-02-10","09:30","2025-02-11","1","AT con lesión","Comportamiento subestándar","Caída de personas","Piso húmedo","Tobillo","Esguince",5,"Biomecánico","Cerrado","Caída en plataforma"],
+      [cli1,"900.123.456-1",cli1,"1087654321","María Pérez","F","1988-11-20","2021-06-15","Auxiliar","Contrato B",       "Medellín","2025-03-22","14:00","2025-03-22","0","AT sin lesión grave","Condición insegura","Golpe","Máquina sin guarda","Mano","Contusión",0,"Mecánico","Cerrado","Golpe con maquinaria"],
+      [cli1,"900.123.456-1",cli1,"1055443322","Pedro Ríos","M","1985-07-30","2023-01-10","Técnico","Contrato A",         "Cali","2025-04-05","08:15","2025-04-10","4","AT con lesión","Comportamiento subestándar","Sobreesfuerzo","Carga pesada","Espalda","Lumbalgia",12,"Biomecánico","Abierto","Sobreesfuerzo en carga"]
     );
     // Demo rows for EG_ENFERMEDADES (index 5)
+    // Cols: Empresa,NIT,Cliente,Numdocumento,Nombres,Genero,FechaNacimiento,FechaIngreso,Cargo,ContratoComercial,Ciudad,FechaInicio,FechaFin,DiasIncapacidad,DiasAcumulados,CodigoDiagnostico,Letra,Diagnostico,GrupoDiagnostico,GrupoCausas,TipoIncapacidad,Edad
     sheets[5].data.push(
-      ["1087654321","María Pérez","Auxiliar","Medellín","F",3,"Sistema Musculoesquelético"]
+      [cli1,"900.123.456-1",cli1,"1087654321","María Pérez","F","1988-11-20","2021-06-15","Auxiliar","Contrato B","Medellín","2025-01-10","2025-01-16",6,18,"M54","M","Dorsalgia","Enf. sistema osteomuscular","Enfermedad","Enfermedad General",36],
+      [cli1,"900.123.456-1",cli1,"1099887766","Laura Soto","F","1992-03-08","2022-09-01","Técnico","Contrato C","Bogotá","2025-02-20","2025-02-25",5,5,"J06","J","Rinofaringitis","Enf. sistema respiratorio","Común","Enfermedad General",32],
+      [cli1,"900.123.456-1",cli1,"1012345678","Juan García","M","1990-05-12","2022-03-01","Operario","Contrato A","Bogotá","2025-03-05","2025-03-09",4,4,"K29","K","Gastritis","Enf. sistema digestivo","Común","Enfermedad General",34]
     );
     // Demo rows for FORMACION_SST (index 6)
     sheets[6].data.push(
@@ -3399,24 +3411,22 @@ function getTemplateSheets(withDemo) {
       [cli1,"900.123.456-1",cli1,"1087654321","María Pérez","Auxiliar","Producción","Carlos Vega","2025-04-25","2022-06-01","2025-04-20","Salario","Regular","SI","NO","NO","SI","SI","Falta Inducción y entrenamiento","Aprendizaje","Más capacitación","Aprendí mucho"],
       [cli1,"900.123.456-1",cli1,"1055443322","Pedro Ríos","Técnico","Mantenimiento","Ana Torres","2025-05-10","2021-03-15","2025-05-08","Ambiente de trabajo inadecuado","Deficiente","NO","NO","NO","NO","NO","Otro","Estabilidad laboral","Mejorar liderazgo","Conflictos frecuentes"]
     );
-    // Demo rows for SINIESTRO (index 8)
+    // Demo rows for CASOS_MEDICOS (index 8)
+    // Cols: Empresa,NIT,Cliente,Numdocumento,Nombres,Cargo,ContratoComercial,TipoCaso,FechaInicio,FechaFin,TipoSiniestro,TipoFuero,Estado,Calificacion,PorcentajePerdida,EntidadCalificadora,NivelRiesgo,EstadoGestion,Observaciones
     sheets[8].data.push(
-      ["1012345678","Juan García","Activo","AT","Total Temporal","Bogotá"]
+      [cli1,"900.123.456-1",cli1,"1012345678","Juan García","Operario","Contrato A","Siniestro","2025-01-15","","AT","","Abierto","Total Temporal","","","Alto","En seguimiento","Accidente con lesión en tobillo"],
+      [cli1,"900.123.456-1",cli1,"1099887766","Laura Soto","Técnico","Contrato C","Fuero","2025-01-01","2025-10-01","","Maternidad","Abierto","","","","Bajo","Activo","Fuero de maternidad vigente"]
     );
-    // Demo rows for FUEROS_SALUD (index 9)
-    sheets[9].data.push(
-      [cli1,"900.123.456-1",cli1,"1099887766","Laura Soto","Técnico","Sede Sur","Maternidad","2025-01-01","2025-10-01","Bajo","Activo","Sin novedad"]
-    );
-    // Demo rows for TALENTO_DISCIPLINARIO (index 10)
+    // Demo rows for TALENTO_DISCIPLINARIO (index 9)
     // Columns: Empresa,NIT,Cliente,Cedula,Nombre,Apellidos,Cargo,FechaIngreso,FechaSolicitudMedida,FechaEntregaMedida,
     //          AusenciaInjustificada,UsocelularPlanta,MaltratoVerbal,OtroMotivo,
     //          Descargos,DctoNomina,LlamadoAtencion,TerminacionContrato,Observacion
-    sheets[10].data.push(
+    sheets[9].data.push(
       [cli1,"900.123.456-1",cli1,"1113649333","MONTAÑO CUERO","JOSE G","SOLDADOR","2022-12-10","2023-05-29","2023-06-01","X","","","",  "X","X","","0","PENDIENTE DEFINICION DE MEDIDA DISCIPLINARIA POR CLIENTE"],
       [cli1,"900.123.456-1",cli1,"14701956","SANCHEZ RAMIREZ","VICTOR HUGO","OPERARIO","2023-01-16","2023-05-29","2023-06-01","","X","","",  "X","","","","PENDIENTE DEFINICION DE MEDIDA DISCIPLINARIA POR CLIENTE"]
     );
-    // Demo rows for BIENESTAR_ACTIVIDADES (index 11)
-    sheets[11].data.push(
+    // Demo rows for BIENESTAR_ACTIVIDADES (index 10)
+    sheets[10].data.push(
       [cli1,"900.123.456-1",cli1,"Sede Norte","Bogotá","2025-03-08","Día de la Mujer","Presencial",45,"Alto","RH","Excelente participación"],
       [cli1,"900.123.456-1",cli1,"Sede Sur","Medellín","2025-05-01","Día del Trabajo","Virtual",30,"Medio","RH","Buena asistencia"]
     );
