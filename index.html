@@ -372,68 +372,50 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <div class="cnt">
 <!-- RESUMEN -->
 <div class="sec on" id="sec-resumen">
-  <div class="sh"><div class="sh-ic">📊</div><div><h2>Resumen Ejecutivo Operacional</h2><p id="res-sub">Dic 2025 – May 2026 · Datos reales de 6,656 requisiciones</p></div></div>
+  <div class="sh"><div class="sh-ic">📊</div><div><h2>Resumen Ejecutivo Operacional</h2><p id="res-sub">Indicadores consolidados del período</p></div></div>
   <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Requisiciones</div><div class="kc-val" id="r-req">6,656</div><div class="kc-sub">Período completo</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Contratados</div><div class="kc-val" id="r-cont">9,324</div><div class="kc-sub" id="r-cont-sub">de 10,551 solicitados</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">% Oportunidad</div><div class="kc-val" id="r-pt">84.4%</div><div class="kc-sub" id="r-pt-sub">5,031 a tiempo / 5,963 cerradas</div><div class="kc-d d-up">▲ Meta 80%</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% ANS Cantidad</div><div class="kc-val" id="r-pc">88.4%</div><div class="kc-sub" id="r-pc-sub">9,324 / 10,551 solicitados</div><div class="kc-d d-up">▲ Meta 85%</div></div>
+    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">% ANS Tiempo</div><div class="kc-val" id="r-pt">—</div><div class="kc-sub" id="r-pt-sub">A tiempo / cerradas</div><div class="kc-d d-up">▲ Meta 80%</div></div>
+    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">% ANS Cantidad</div><div class="kc-val" id="r-pc">—</div><div class="kc-sub" id="r-pc-sub">Contratados / solicitados</div><div class="kc-d d-up">▲ Meta 85%</div></div>
     <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Rotación</div><div class="kc-val" id="res-kpi-rotacion">—</div><div class="kc-sub" id="res-kpi-rotacion-sub">Retiros período</div></div>
     <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">AT YTD</div><div class="kc-val" id="res-kpi-at">—</div><div class="kc-sub">Accidentes trabajo</div></div>
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val" id="res-kpi-eg">—</div><div class="kc-sub">Total días incapacidad EG</div></div>
     <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Entrevistas Retiro</div><div class="kc-val" id="res-kpi-entrevistas">—</div><div class="kc-sub" id="res-kpi-entrevistas-sub">Total encuestas</div></div>
   </div>
-  <!-- PIPELINE TRACKER -->
-  <div class="pipe-wrap">
-    <div class="pipe-hdr">
-      <div class="pipe-hdr-left"><h3>📍 Pipeline de Selección — Estado en Tiempo Real</h3><p>Personas activas en cada etapa del proceso · Jun 2026</p></div>
-      <div class="pipe-filters">
-        <select class="pfsel" id="pf-cargo" onchange="renderPipeline()">
-          <option value="">Todos los cargos</option>
-        </select>
-        <select class="pfsel" id="pf-suc" onchange="renderPipeline()">
-          <option value="">Todas las sucursales</option>
-        </select>
-        <button style="background:none;border:1px solid var(--graym);border-radius:6px;padding:2px 9px;font-size:10.5px;cursor:pointer;height:26px;color:var(--muted)" onclick="document.getElementById('pf-cargo').value='';document.getElementById('pf-suc').value='';renderPipeline()">↺</button>
-      </div>
-    </div>
-    <div class="pipe-stages" id="pipe-stages"></div>
-    <div class="pipe-bar-row">
-      <div class="pipe-bar-lbl">Distribución por sucursal en pipeline</div>
-      <div class="pipe-stacked" id="pipe-bar"></div>
-      <div class="pipe-legend" id="pipe-legend"></div>
-    </div>
-    <div class="pipe-dtl">
-      <div class="pipe-dtl-ttl">Detalle por cargo y sucursal</div>
-      <div class="tscroll"><table class="tbl">
-        <thead><tr><th>Cargo</th><th>Sucursal</th><th style="color:#BA7517">📋 En Selección</th><th style="color:#185FA5">📝 En Contratación</th><th style="color:#1D9E75">✅ Entregados</th><th>Total</th><th>Avance</th></tr></thead>
-        <tbody id="pipe-tbody"></tbody>
-      </table></div>
-    </div>
-  </div>
-  <!-- CHARTS -->
   <div class="cg t23">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Requisiciones vs Contratados por Mes</div></div>
-      <div class="leg"><span class="ld"><span class="ls" style="background:#C0272D"></span>Requisiciones</span><span class="ld"><span class="ls" style="background:#1D9E75"></span>Contratados</span><span class="ld"><span class="ls" style="background:#185FA5"></span>Solicitados</span></div>
-      <div class="cw" style="height:200px"><canvas id="c-r1"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">ANS Tiempo vs Cantidad</div></div>
-      <div class="cw" style="height:200px"><canvas id="c-r2"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Tendencia ANS — Tiempo vs Cantidad</div></div>
+      <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>% ANS Tiempo</span><span class="ld"><span class="ls" style="background:#185FA5"></span>% ANS Cantidad</span></div>
+      <div class="cw" style="height:220px"><canvas id="c-r2"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Indicadores SSTA</div></div><div class="cw" style="height:220px"><canvas id="c-r4"></canvas></div></div>
   </div>
   <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Top ciudades · Requisiciones</div></div><div id="pr-rcit"></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div><div class="cw" style="height:180px"><canvas id="c-r3"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Indicadores SSTA</div></div><div class="cw" style="height:180px"><canvas id="c-r4"></canvas></div></div>
+    <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div><div class="cw" style="height:200px"><canvas id="c-r3"></canvas></div></div>
   </div>
 </div>
 
 <!-- SELECCIÓN -->
 <div class="sec" id="sec-seleccion">
-  <div class="sh"><div class="sh-ic">🔍</div><div><h2>Indicadores de Selección</h2><p>Cumplimiento en tiempo y en cantidad · Datos reales Dic 2025 – May 2026</p></div></div>
-  <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Requisiciones</div><div class="kc-val" id="s-req">6,656</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Solicitados</div><div class="kc-val" id="s-sol">10,551</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Contratados</div><div class="kc-val" id="s-cont">9,324</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Pendientes</div><div class="kc-val" id="s-pend">84</div></div>
+  <div class="sh"><div class="sh-ic">🔍</div><div><h2>Indicadores de Selección</h2><p>Cumplimiento en tiempo y en cantidad</p></div>
+    <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--muted)">Solicitados: <strong style="color:var(--text)" id="s-sol">—</strong></span>
+      <span style="font-size:12px;color:var(--muted)">Contratados: <strong style="color:#1D9E75" id="s-cont">—</strong></span>
+      <span style="font-size:12px;color:var(--muted)">Pendientes: <strong style="color:#BA7517" id="s-pend">—</strong></span>
+    </div>
+  </div>
+  <!-- Filtro de período ANS -->
+  <div class="cc" style="margin-bottom:14px;padding:10px 14px">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-right:4px">Período ANS:</span>
+      <button class="ans-flt-btn active" onclick="filtrarANS('mes')" id="ans-flt-mes">Este mes</button>
+      <button class="ans-flt-btn" onclick="filtrarANS('semana')" id="ans-flt-semana">Esta semana</button>
+      <button class="ans-flt-btn" onclick="filtrarANS('dia')" id="ans-flt-dia">Hoy</button>
+      <button class="ans-flt-btn" onclick="filtrarANS('rango')" id="ans-flt-rango">Rango personalizado</button>
+      <span id="ans-flt-rango-inputs" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="ans-flt-desde" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-size:12px">
+        <span style="color:var(--muted);font-size:12px">hasta</span>
+        <input type="date" id="ans-flt-hasta" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-size:12px">
+        <button class="ans-flt-btn active" onclick="filtrarANS('rango-aplicar')">Aplicar</button>
+      </span>
+    </div>
   </div>
   <div class="ans-row">
     <div class="ans-card">
@@ -449,55 +431,36 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
         <div class="ans-pills"><span class="pill pg" id="ans-c-en">✓ 9,324 entregadas</span><span class="pill pr" id="ans-c-fa">✗ 1,227 faltantes</span><span class="pill pb">Meta: 85%</span></div></div>
     </div>
   </div>
-  <div class="cc" style="margin-bottom:16px">
-    <div class="cc-h"><div class="cc-title">Oportunidad Mensual en Selección</div></div>
-    <div class="og" id="og"></div>
-    <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>% ANS Tiempo</span><span class="ld"><span class="ls" style="background:#185FA5"></span>% ANS Cantidad</span></div>
-    <div class="cw" style="height:190px"><canvas id="c-oport"></canvas></div>
-  </div>
   <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Estado de Requisición</div></div><div class="cw" style="height:240px"><canvas id="c-est"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Tiempo por Sucursal</div></div><div class="cw" style="height:240px"><canvas id="c-suc-t"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Cantidad por Sucursal</div></div><div class="cw" style="height:240px"><canvas id="c-suc-c"></canvas></div></div>
-  </div>
-  <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Tiempo por Ciudad</div></div><div class="cw" style="height:210px"><canvas id="c-cit"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Cantidad por Ciudad</div></div><div class="cw" style="height:210px"><canvas id="c-cic"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Top 10 Perfiles Solicitados</div></div><div id="pr-perf"></div></div>
-  </div>
-  <div class="cg">
-    <div class="cc" style="grid-column:1/-1"><div class="cc-h"><div class="cc-title">% ANS por Responsable (Analista de Selección)</div><span class="cc-tag">Top 10</span></div><div class="cw" style="height:220px"><canvas id="c-responsable"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Tiempo por Ciudad</div></div><div class="cw" style="height:240px"><canvas id="c-cit"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">% ANS Cantidad por Ciudad</div></div><div class="cw" style="height:240px"><canvas id="c-cic"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Top 10 Perfiles Solicitados</div></div><div id="pr-perf" style="padding-top:4px"></div></div>
   </div>
 </div>
 
 <!-- PERSONAL ACTIVO -->
 <div class="sec" id="sec-activo">
-  <div class="sh"><div class="sh-ic">👥</div><div><h2>Personal Activo</h2><p>Estado de fuerza laboral · Jun 2026</p></div></div>
-  <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Activos</div><div class="kc-val" id="act-kpi-total">—</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Sucursales Activas</div><div class="kc-val" id="act-kpi-suc">—</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Cargos Diferentes</div><div class="kc-val" id="act-kpi-cargo">—</div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Contratos &gt;1 Año</div><div class="kc-val" id="act-kpi-temporalidad">—</div><div class="kc-sub">En revisión temporalidad</div></div>
-    <div class="kc" style="--kcc:#8B1A1E"><div class="kc-lbl">Áreas Operativas</div><div class="kc-val" id="act-kpi-areas">—</div></div>
+  <div class="sh"><div class="sh-ic">👥</div><div><h2>Personal Activo</h2><p>Estado de fuerza laboral</p></div></div>
+  <div class="kg" style="grid-template-columns:1fr 1fr;max-width:600px">
+    <div class="kc" style="--kcc:#C0272D;padding:18px 20px">
+      <div class="kc-lbl">Total Activos</div>
+      <div class="kc-val" id="act-kpi-total" style="font-size:36px">—</div>
+      <div class="kc-sub">Colaboradores en nómina</div>
+    </div>
+    <div class="kc" style="--kcc:#BA7517;padding:18px 20px">
+      <div class="kc-lbl">Contratos &gt;1 Año</div>
+      <div class="kc-val" id="act-kpi-temporalidad" style="font-size:36px">—</div>
+      <div class="kc-sub">En revisión de temporalidad</div>
+    </div>
   </div>
   <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Sucursal / Ciudad</div></div><div class="cw" style="height:220px"><canvas id="c-act-ciudad"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Cargo (Top 8)</div></div><div id="pr-act-cargo"></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Área Operativa</div></div><div class="cw" style="height:220px"><canvas id="c-act-area"></canvas></div></div>
-  </div>
-  <div class="cg t23">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Retiros Mensuales por Motivo</div></div>
-      <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>Paso Directo</span><span class="ld"><span class="ls" style="background:#BA7517"></span>Renuncia</span><span class="ld"><span class="ls" style="background:#185FA5"></span>Fin Obra</span><span class="ld"><span class="ls" style="background:#C0272D"></span>Bajo Desemp.</span></div>
-      <div class="cw" style="height:210px"><canvas id="c-act-ret"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div>
-      <table class="tbl"><thead><tr><th>Motivo</th><th>N°</th><th>%</th></tr></thead>
-      <tbody id="act-motivos-tbody"><tr><td colspan="3" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Carga ROTACION para ver motivos</td></tr></tbody></table>
-    </div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Ciudad</div></div><div class="cw" style="height:250px"><canvas id="c-act-ciudad"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Activos por Cargo (Top 8)</div></div><div id="pr-act-cargo" style="padding-top:4px"></div></div>
   </div>
   <div class="cc" style="margin-bottom:16px">
     <div class="cc-h"><div class="cc-title">Colaboradores con Contratos &gt;1 Año — Temporalidad</div></div>
     <table class="tbl"><thead><tr><th>Nombre</th><th>Cargo</th><th>Sucursal</th><th>Fecha Ingreso</th><th>Días</th><th>Estado</th></tr></thead>
-    <tbody id="act-temp-preview-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Carga PERSONAL_ACTIVO para ver temporalidad</td></tr></tbody></table>
+    <tbody id="act-temp-preview-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Carga PERSONAL_ACTIVO para ver temporalidad</td></tr></tbody></table>
   </div>
 </div>
 
