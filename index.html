@@ -438,6 +438,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
       </span>
     </div>
   </div>
+  <!-- Pipeline global completo -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h">
+      <div class="cc-title" style="font-weight:700;font-size:14px">Pipeline de Selección Global</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="pf-cargo" onchange="renderPipeline()" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-size:11px"><option value="">Todos los cargos</option></select>
+        <select id="pf-suc" onchange="renderPipeline()" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-size:11px"><option value="">Todas las ciudades</option></select>
+      </div>
+    </div>
+    <!-- Funnel stages -->
+    <div id="pipe-stages" class="pipe-stages" style="margin:14px 0 10px"></div>
+    <!-- Bar por ciudad -->
+    <div class="pipe-bar-row">
+      <div class="pipe-bar-lbl">DISTRIBUCIÓN POR CIUDAD</div>
+      <div style="display:flex;height:22px;border-radius:5px;overflow:hidden;gap:2px" id="pipe-bar"></div>
+      <div class="pipe-legend" id="pipe-legend" style="margin-top:6px"></div>
+    </div>
+    <!-- Tabla detalle -->
+    <div class="pipe-dtl">
+      <div class="pipe-dtl-ttl">DETALLE POR CARGO Y CIUDAD</div>
+      <div class="tscroll"><table class="tbl" style="font-size:12px">
+        <thead><tr><th>Cargo</th><th>Ciudad</th><th style="text-align:center;color:#BA7517">🔍 Sel.</th><th style="text-align:center;color:#185FA5">📝 Cont.</th><th style="text-align:center;color:#1D9E75">✅ Entregados</th><th style="text-align:center">Total</th><th>Avance</th></tr></thead>
+        <tbody id="pipe-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
   <!-- Pipeline detalle por cargo y ciudad -->
   <div class="cg" style="margin-bottom:14px">
     <div class="cc">
@@ -2749,27 +2776,87 @@ function loadDemoData() {
   sv('eg-kpi-diag',      Object.keys(egDiags).length);
   sv('eg-kpi-acum',      egAcum);
 
-  // Demo pipeline totals
+  // ── PIPELINE GLOBAL ───────────────────────────────────
+  var pipeBase=[
+    // [cargo, ciudad, enSel, enCont, entregados]
+    ['Operario','Bogotá',32,18,980],['Operario','Medellín',28,16,820],['Operario','Cali',22,12,680],
+    ['Operario','Barranquilla',18,10,560],['Operario','Bucaramanga',10,6,300],['Operario','Pereira',6,3,160],
+    ['Auxiliar de Servicios','Bogotá',20,12,720],['Auxiliar de Servicios','Medellín',16,9,530],['Auxiliar de Servicios','Cali',12,7,390],
+    ['Auxiliar de Servicios','Barranquilla',9,5,280],['Auxiliar de Servicios','Bucaramanga',5,3,150],['Auxiliar de Servicios','Pereira',3,2,80],
+    ['Técnico','Bogotá',12,7,310],['Técnico','Medellín',9,5,230],['Técnico','Cali',6,4,180],
+    ['Técnico','Barranquilla',5,3,120],['Técnico','Bucaramanga',3,2,90],['Técnico','Pereira',2,1,60],
+    ['Auxiliar Admin','Bogotá',8,4,180],['Auxiliar Admin','Medellín',5,3,130],['Auxiliar Admin','Cali',4,2,110],
+    ['Auxiliar Admin','Barranquilla',3,2,80],['Auxiliar Admin','Bucaramanga',2,1,50],
+    ['Coordinador','Bogotá',4,2,98],['Coordinador','Medellín',3,1,72],['Coordinador','Cali',2,1,55],
+    ['Coordinador','Barranquilla',1,0,38],['Coordinador','Bucaramanga',1,0,22],
+    ['Auxiliar BPM','Bogotá',2,1,68],['Auxiliar BPM','Medellín',1,1,52],['Auxiliar BPM','Cali',1,0,44],
+    ['Auxiliar BPM','Barranquilla',1,0,30],['Auxiliar BPM','Pereira',0,0,10]
+  ];
+  PIPE_DATA.length=0;
+  pipeBase.forEach(function(r){ PIPE_DATA.push({c:r[0],s:r[1],se:r[2],co:r[3],e:r[4]}); });
+
+  // Demo pipeline totals for compact summary
   sp2('res-pipe-sel', 312);
   sp2('res-pipe-cont', 187);
   sp2('res-pipe-ent', 9324);
+
   // Demo pipeline by cargo table
   var demoCargoHTML = [
-    ['Operario',148,89,4200],['Auxiliar de Servicios',82,51,2800],['Técnico',45,28,1100],
-    ['Auxiliar Admin',22,13,680],['Coordinador',10,4,340],['Auxiliar BPM',5,2,204]
+    ['Operario',116,65,3500],['Auxiliar de Servicios',65,38,2150],['Técnico',37,22,990],
+    ['Auxiliar Admin',22,12,550],['Coordinador',11,4,285],['Auxiliar BPM',4,2,204]
   ].map(function(r){
     return '<tr><td>'+r[0]+'</td><td style="text-align:center;color:#BA7517;font-weight:700">'+r[1]+'</td><td style="text-align:center;color:#185FA5;font-weight:700">'+r[2]+'</td><td style="text-align:center;color:#1D9E75;font-weight:700">'+r[3]+'</td><td style="text-align:center;font-weight:700">'+(r[1]+r[2]+r[3])+'</td></tr>';
   }).join('');
   var pct=document.getElementById('pipe-cargo-tbody'); if(pct) pct.innerHTML=demoCargoHTML;
   var demoCiudadHTML=[
-    ['Bogotá',110,65,3280],['Medellín',78,48,2100],['Cali',55,32,1640],
-    ['Barranquilla',38,24,1200],['Bucaramanga',20,12,680],['Pereira',11,6,424]
+    ['Bogotá',78,44,2356],['Medellín',62,35,1834],['Cali',47,26,1459],
+    ['Barranquilla',37,20,1108],['Bucaramanga',21,12,612],['Pereira',12,6,354]
   ].map(function(r){
     return '<tr><td>'+r[0]+'</td><td style="text-align:center;color:#BA7517;font-weight:700">'+r[1]+'</td><td style="text-align:center;color:#185FA5;font-weight:700">'+r[2]+'</td><td style="text-align:center;color:#1D9E75;font-weight:700">'+r[3]+'</td><td style="text-align:center;font-weight:700">'+(r[1]+r[2]+r[3])+'</td></tr>';
   }).join('');
   var pciud=document.getElementById('pipe-ciudad-tbody'); if(pciud) pciud.innerHTML=demoCiudadHTML;
 
+  // ── ANS y Selección ────────────────────────────────────
+  var pctT=84.4, pctC=88.4, solD=10551, contD=9324, pendD=1227, atD=5031, inD=932;
+  sv('r-pt', pctT.toFixed(1)+'%');
+  sv('r-pc', pctC.toFixed(1)+'%');
+  sv('r-pt-sub', atD.toLocaleString()+' a tiempo / '+(atD+inD).toLocaleString()+' cerradas');
+  sv('r-pc-sub', contD.toLocaleString()+' / '+solD.toLocaleString()+' solicitados');
+  sv('s-sol', solD.toLocaleString());
+  sv('s-cont', contD.toLocaleString());
+  sv('s-pend', pendD.toLocaleString());
+  var gtv=document.getElementById('g-t-val'); if(gtv) gtv.textContent=pctT.toFixed(1)+'%';
+  var gcv=document.getElementById('g-c-val'); if(gcv) gcv.textContent=pctC.toFixed(1)+'%';
+  var atEl=document.getElementById('ans-t-at'); if(atEl) atEl.textContent='✓ '+atD.toLocaleString()+' a tiempo';
+  var inEl=document.getElementById('ans-t-in'); if(inEl) inEl.textContent='✗ '+inD.toLocaleString()+' incumplidas';
+  var enEl=document.getElementById('ans-c-en'); if(enEl) enEl.textContent='✓ '+contD.toLocaleString()+' entregadas';
+  var faEl=document.getElementById('ans-c-fa'); if(faEl) faEl.textContent='✗ '+pendD.toLocaleString()+' faltantes';
+
+  // ── Top perfiles solicitados (demo) ───────────────────
+  (function(){
+    var perfItems=[
+      {l:'Operario',v:148,c:'#C0272D'},{l:'Auxiliar de Servicios',v:112,c:'#BA7517'},
+      {l:'Técnico',v:67,c:'#185FA5'},{l:'Auxiliar Admin',v:45,c:'#1D9E75'},
+      {l:'Coordinador',v:28,c:'#7F77DD'},{l:'Auxiliar BPM',v:18,c:'#888780'}
+    ];
+    if(typeof mkPR==='function') mkPR('pr-perf',perfItems,148);
+  })();
+
+  // ── Casos médicos (sin/fueros) ────────────────────────
+  sv('sin-kpi-total', 14);
+  sv('sin-kpi-abiertos', 9);
+  sv('sin-kpi-cerrados', 5);
+
   redraw();
+
+  // Gauges + pipeline requieren que la sección sea visible; se dibujan en redraw y aquí como fallback
+  setTimeout(function(){
+    if(typeof drawGauge==='function'){
+      drawGauge('g-t', pctT, pctT>=80?'#1D9E75':pctT>=70?'#BA7517':'#C0272D');
+      drawGauge('g-c', pctC, pctC>=85?'#1D9E75':pctC>=75?'#BA7517':'#C0272D');
+    }
+    if(typeof renderPipeline==='function') renderPipeline();
+  }, 150);
 }
 
 function openUploadScreen() {
