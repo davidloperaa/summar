@@ -946,13 +946,24 @@ function go(name, el) {
   if (ttl) ttl.textContent = TTLS[name] || name;
   // Resize + redraw Chart.js charts that rendered while section was hidden
   if (sec && typeof Chart !== 'undefined') {
-    setTimeout(function() {
+    function resizeCharts() {
       var canvases = sec.querySelectorAll('canvas');
+      var needsRedraw = false;
       for (var ci=0; ci<canvases.length; ci++) {
-        var ch = Chart.getChart(canvases[ci]);
-        if (ch) { ch.resize(); ch.update('none'); }
+        var cv = canvases[ci];
+        var ch = Chart.getChart(cv);
+        if (ch) {
+          ch.resize();
+          ch.update('none');
+        } else if (cv.id) {
+          // Chart was never created (section was hidden) — trigger full redraw
+          needsRedraw = true;
+        }
       }
-    }, 50);
+      if (needsRedraw && typeof redraw === 'function') redraw();
+    }
+    setTimeout(resizeCharts, 60);
+    setTimeout(resizeCharts, 300);
   }
 }
 
