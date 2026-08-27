@@ -1309,16 +1309,48 @@ function redraw() {
   })();
   (function(){
     if (window._rotData && Object.keys(window._rotData).length) {
-      var cargos={}; window._rotData.rows.forEach(function(r){ var v=(r['Cargo']||'').trim(); if(v) cargos[v]=(cargos[v]||0)+1; });
-      var cols=[RED,AMB,BLUE,GREEN,GRAY,RED]; var s=Object.keys(cargos).sort(function(a,b){return cargos[b]-cargos[a];}).slice(0,6);
-      if (s.length) mkPR('pr-rot-cargo',s.map(function(k,i){return {l:k,v:cargos[k],c:cols[i]};}),cargos[s[0]]);
+      var retirosCargo={}; window._rotData.rows.forEach(function(r){ var v=(r['Cargo']||'').trim(); if(v) retirosCargo[v]=(retirosCargo[v]||0)+1; });
+      var activosCargo={}; if (window._personalData && window._personalData.rows) {
+        window._personalData.rows.forEach(function(r){ var v=(r['Cargo']||'').trim(); if(v) activosCargo[v]=(activosCargo[v]||0)+1; });
+      }
+      var cols=[RED,AMB,BLUE,GREEN,GRAY,RED];
+      var s=Object.keys(retirosCargo).sort(function(a,b){
+        var pa=(activosCargo[a]||0)>0?retirosCargo[a]/(activosCargo[a]||1)*100:retirosCargo[a];
+        var pb=(activosCargo[b]||0)>0?retirosCargo[b]/(activosCargo[b]||1)*100:retirosCargo[b];
+        return pb-pa;
+      }).slice(0,6);
+      if (s.length) {
+        var items=s.map(function(k,i){
+          var activos=activosCargo[k]||0;
+          var pct=activos>0?Math.round(retirosCargo[k]/activos*1000)/10:null;
+          var lbl=pct!==null?k+' ('+pct+'%)':k;
+          return {l:lbl,v:pct!==null?pct:retirosCargo[k],c:cols[i]};
+        });
+        mkPR('pr-rot-cargo',items,100);
+      }
     }
   })();
   (function(){
     if (window._rotData && Object.keys(window._rotData.ciudades).length) {
-      var ci=window._rotData.ciudades; var cols=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE];
-      var s=Object.keys(ci).sort(function(a,b){return ci[b]-ci[a];}).slice(0,8);
-      if (s.length) mkPR('pr-rot-ciudad',s.map(function(k,i){return {l:k,v:ci[k],c:cols[i]};}),ci[s[0]]);
+      var ci=window._rotData.ciudades;
+      var activosCiudad={}; if (window._personalData && window._personalData.rows) {
+        window._personalData.rows.forEach(function(r){ var v=(r['Ciudad']||r['Sucursal']||'').trim(); if(v) activosCiudad[v]=(activosCiudad[v]||0)+1; });
+      }
+      var cols=[RED,AMB,BLUE,GREEN,GRAY,RED,AMB,BLUE];
+      var s=Object.keys(ci).sort(function(a,b){
+        var pa=activosCiudad[a]>0?ci[a]/(activosCiudad[a]||1)*100:ci[a];
+        var pb=activosCiudad[b]>0?ci[b]/(activosCiudad[b]||1)*100:ci[b];
+        return pb-pa;
+      }).slice(0,8);
+      if (s.length) {
+        var items=s.map(function(k,i){
+          var activos=activosCiudad[k]||0;
+          var pct=activos>0?Math.round(ci[k]/activos*1000)/10:null;
+          var lbl=pct!==null?k+' ('+pct+'%)':k;
+          return {l:lbl,v:pct!==null?pct:ci[k],c:cols[i]};
+        });
+        mkPR('pr-rot-ciudad',items,100);
+      }
     }
   })();
   (function(){
@@ -1555,13 +1587,25 @@ function redraw() {
     }
   })();
   (function(){
-    if (window._rotData && window._rotData.total > 0 && window._personalData) {
-      var totalPers=window._personalData.total||1;
-      var pct=Math.round(window._rotData.total/totalPers*1000)/10;
-      mk('c-rot-idx',{type:'bar',data:{labels:['Índice Rotación'],datasets:[
-        {data:[pct],backgroundColor:pct>10?RED:pct>7?AMB:GREEN,borderRadius:6}
-      ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
-        plugins:{legend:{display:false}}})});
+    if (window._rotData && window._rotData.rows.length) {
+      // Retiros por mes
+      var retMes={};
+      window._rotData.rows.forEach(function(r){
+        var d=r['FechaRetiro']||''; if(!d) return;
+        var dt=d instanceof Date?d:new Date(d); if(isNaN(dt.getTime())) return;
+        var k=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+        retMes[k]=(retMes[k]||0)+1;
+      });
+      var totalPers=(window._personalData&&window._personalData.total)||0;
+      var months=Object.keys(retMes).sort().slice(-12);
+      var tasas=months.map(function(m){ return totalPers>0?Math.round(retMes[m]/totalPers*1000)/10:retMes[m]; });
+      var colors=tasas.map(function(v){return v>10?RED:v>7?AMB:GREEN;});
+      if (months.length) {
+        mk('c-rot-idx',{type:'bar',data:{labels:months,datasets:[
+          {data:tasas,backgroundColor:colors,borderRadius:4}
+        ]},options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
+          plugins:{legend:{display:false}}})});
+      }
     }
   })();
 
