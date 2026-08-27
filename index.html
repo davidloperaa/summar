@@ -944,13 +944,15 @@ function go(name, el) {
   if (el) el.classList.add('on');
   var ttl = document.getElementById('top-title');
   if (ttl) ttl.textContent = TTLS[name] || name;
-  // Resize Chart.js charts that rendered while section was hidden
+  // Resize + redraw Chart.js charts that rendered while section was hidden
   if (sec && typeof Chart !== 'undefined') {
-    var canvases = sec.querySelectorAll('canvas');
-    for (var ci=0; ci<canvases.length; ci++) {
-      var ch = Chart.getChart(canvases[ci]);
-      if (ch) ch.resize();
-    }
+    setTimeout(function() {
+      var canvases = sec.querySelectorAll('canvas');
+      for (var ci=0; ci<canvases.length; ci++) {
+        var ch = Chart.getChart(canvases[ci]);
+        if (ch) { ch.resize(); ch.update('none'); }
+      }
+    }, 50);
   }
 }
 
