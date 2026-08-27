@@ -50,6 +50,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 .kc-d{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:9px;margin-top:3px}
 .d-up{background:var(--okl);color:var(--ok)}.d-dn{background:var(--redl);color:var(--red)}.d-nt{background:var(--warnl);color:var(--warn)}
 .ans-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.ans-flt-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--txt);font-size:12px;cursor:pointer;transition:background .15s}
+.ans-flt-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+.ans-flt-btn:hover:not(.active){background:var(--bg)}
 .ans-card{background:#fff;border-radius:9px;border:1px solid var(--graym);padding:14px 18px;display:flex;align-items:center;gap:14px}
 .gauge-wrap{position:relative;width:76px;height:76px;flex-shrink:0}
 .gauge-wrap canvas{position:absolute;top:0;left:0;width:76px!important;height:76px!important}
@@ -467,67 +470,42 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
 <!-- ROTACIÓN -->
 <div class="sec" id="sec-rotacion">
   <div class="sh"><div class="sh-ic">🔄</div><div><h2>Índice de Rotación</h2><p>Análisis de retiros, causas y tendencias</p></div></div>
-  <div class="kg">
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Total Retiros</div><div class="kc-val" id="rot-kpi-total">—</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Paso Directo</div><div class="kc-val" id="rot-kpi-directo">—</div><div class="kc-sub" id="rot-kpi-directo-pct"></div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Renuncias</div><div class="kc-val" id="rot-kpi-renuncias">—</div><div class="kc-sub" id="rot-kpi-renuncias-pct"></div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Terminación de contrato</div><div class="kc-val" id="rot-kpi-termina">—</div><div class="kc-sub" id="rot-kpi-termina-pct"></div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Masculino</div><div class="kc-val" id="rot-kpi-masc">—</div><div class="kc-sub" id="rot-kpi-masc-sub"></div></div>
-    <div class="kc" style="--kcc:#C0272D"><div class="kc-lbl">Femenino</div><div class="kc-val" id="rot-kpi-fem">—</div><div class="kc-sub" id="rot-kpi-fem-sub"></div></div>
-  </div>
-  <div class="cg t23">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Retiros por Mes — Tendencia</div></div><div class="cw" style="height:200px"><canvas id="c-rot-m"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Causal de Retiro</div></div><div class="cw" style="height:200px"><canvas id="c-rot-c"></canvas></div></div>
-  </div>
-  <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Índice de Rotación por Cargo</div></div><div id="pr-rot-cargo"></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Índice de Rotación por Ciudad / Sucursal</div></div><div id="pr-rot-ciudad"></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Evolución Índice Rotación Mensual</div></div><div class="cw" style="height:190px"><canvas id="c-rot-idx"></canvas></div></div>
+  <div class="kg" style="grid-template-columns:1fr 1fr;max-width:600px">
+    <div class="kc" style="--kcc:#C0272D;padding:18px 20px">
+      <div class="kc-lbl">Total Retiros</div>
+      <div class="kc-val" id="rot-kpi-total" style="font-size:36px">—</div>
+      <div class="kc-sub">Retiros en el período</div>
+    </div>
+    <div class="kc" style="--kcc:#185FA5;padding:18px 20px">
+      <div class="kc-lbl">Tasa de Rotación</div>
+      <div class="kc-val" id="rot-kpi-tasa" style="font-size:36px">—</div>
+      <div class="kc-sub">Retiros / Activos × 100</div>
+    </div>
   </div>
   <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Por Zona</div></div><div class="cw" style="height:170px"><canvas id="c-rot-z"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Por Género</div></div><div class="cw" style="height:170px"><canvas id="c-rot-g"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Permanencia</div></div><div class="cw" style="height:170px"><canvas id="c-rot-d"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Retiros por Mes — Tendencia</div></div><div class="cw" style="height:220px"><canvas id="c-rot-m"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Causal de Retiro por Mes</div></div><div class="cw" style="height:220px"><canvas id="c-rot-c"></canvas></div></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="cc-h"><div class="cc-title">Tasa de Rotación por Cargo</div></div><div id="pr-rot-cargo" style="padding-top:4px"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Retiros por Ciudad</div></div><div id="pr-rot-ciudad" style="padding-top:4px"></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Evolución Tasa Rotación Mensual</div></div><div class="cw" style="height:200px"><canvas id="c-rot-idx"></canvas></div></div>
   </div>
 </div>
 
 <!-- ENTREVISTAS -->
 <div class="sec" id="sec-entrevistas">
-  <div class="sh"><div class="sh-ic">💬</div><div><h2>Entrevistas de Retiro</h2><p id="ent-sub">Carga la hoja ENTREVISTAS_RETIRO para ver resultados</p></div></div>
-  <div class="kg">
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Total Entrevistas</div><div class="kc-val" id="ent-kpi-total">—</div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Trato Bueno del Jefe</div><div class="kc-val" id="ent-kpi-trato-b">—</div><div class="kc-sub" id="ent-kpi-trato-b-pct"></div></div>
-    <div class="kc" style="--kcc:#BA7517"><div class="kc-lbl">Trato Regular/Deficiente</div><div class="kc-val" id="ent-kpi-trato-rd">—</div><div class="kc-sub" id="ent-kpi-trato-rd-pct"></div></div>
-    <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Aplicó Conocimientos (Sí)</div><div class="kc-val" id="ent-kpi-conoc">—</div></div>
-    <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Trabajo Esperado (Sí)</div><div class="kc-val" id="ent-kpi-esperado">—</div></div>
+  <div class="sh"><div class="sh-ic">💬</div><div><h2>Entrevistas de Retiro</h2><p id="ent-sub">Motivos de salida por ciudad</p></div></div>
+  <div style="margin-bottom:16px">
+    <div class="kc" style="--kcc:#185FA5;padding:18px 20px;max-width:280px">
+      <div class="kc-lbl">Total Entrevistas Realizadas</div>
+      <div class="kc-val" id="ent-kpi-total" style="font-size:36px">—</div>
+      <div class="kc-sub">Entrevistas de retiro procesadas</div>
+    </div>
   </div>
-  <!-- Motivos + Trato Jefe -->
-  <div class="cg t23">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div><div class="cw" style="height:260px"><canvas id="c-em"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Trato del Jefe Inmediato</div></div><div class="cw" style="height:260px"><canvas id="c-ej"></canvas></div></div>
-  </div>
-  <!-- Preguntas Si/No -->
-  <div class="cc" style="margin-bottom:14px">
-    <div class="cc-h"><div class="cc-title">Preguntas Sí / No — Porcentaje de respuestas afirmativas</div></div>
-    <div id="ent-preguntas"></div>
-  </div>
-  <!-- Problemas + Experiencia positiva -->
   <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Problemas que dificultaban el trabajo</div></div><div class="cw" style="height:200px"><canvas id="c-ent-prob"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Experiencia más positiva</div></div><div class="cw" style="height:200px"><canvas id="c-ent-exp"></canvas></div></div>
-  </div>
-  <!-- Sucursal + Cargo -->
-  <div class="cg">
-    <div class="cc"><div class="cc-h"><div class="cc-title">Entrevistas por Área</div></div><div class="cw" style="height:200px"><canvas id="c-ent-suc"></canvas></div></div>
-    <div class="cc"><div class="cc-h"><div class="cc-title">Distribución por Cargo</div></div><div id="pr-ent-cargo"></div></div>
-  </div>
-  <!-- Tabla detalle -->
-  <div class="cc">
-    <div class="cc-h"><div class="cc-title">Detalle de Entrevistas</div><span class="cc-tag" id="ent-tabla-count"></span></div>
-    <div class="tscroll"><table class="tbl" id="ent-tabla">
-      <thead><tr><th>Fecha</th><th>Nombre</th><th>Cargo</th><th>Área</th><th>Motivo Retiro</th><th>Trato Jefe</th><th>Problemas</th><th>Exp. Positiva</th></tr></thead>
-      <tbody id="ent-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);font-style:italic;padding:14px">Sin datos cargados</td></tr></tbody>
-    </table></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro</div></div><div class="cw" style="height:320px"><canvas id="c-em"></canvas></div></div>
+    <div class="cc"><div class="cc-h"><div class="cc-title">Motivos de Retiro por Ciudad</div></div><div class="cw" style="height:320px"><canvas id="c-em-ciudad"></canvas></div></div>
   </div>
 </div>
 
@@ -895,6 +873,26 @@ var TTLS = {
   bienestar:'Bienestar', at:'Accidentes de Trabajo', eg:'Enfermedades Generales',
   siniestro:'Casos Médicos', formacion:'Formación SST'
 };
+
+// ===================== ANS FILTER =====================
+function filtrarANS(tipo) {
+  var btns = document.querySelectorAll('.ans-flt-btn');
+  for (var i=0; i<btns.length; i++) btns[i].classList.remove('active');
+  var rangoInputs = document.getElementById('ans-flt-rango-inputs');
+  if (tipo === 'rango') {
+    document.getElementById('ans-flt-rango').classList.add('active');
+    if (rangoInputs) rangoInputs.style.display='flex';
+    return;
+  }
+  if (tipo === 'rango-aplicar') {
+    document.getElementById('ans-flt-rango').classList.add('active');
+  } else {
+    var btn = document.getElementById('ans-flt-'+tipo);
+    if (btn) btn.classList.add('active');
+    if (rangoInputs) rangoInputs.style.display='none';
+  }
+  window._ansFiltro = tipo;
+}
 
 // ===================== NAVIGATION =====================
 function go(name, el) {
@@ -1484,12 +1482,6 @@ function redraw() {
   })();
 
   // ---- RESUMEN CHARTS ----
-  mk('c-r1',{type:'bar',data:{labels:mLabels,datasets:[
-    {label:'Req',data:rows.map(function(r){return r.req;}),backgroundColor:RED,borderRadius:3},
-    {label:'Contratados',data:rows.map(function(r){return r.cont;}),backgroundColor:GREEN,borderRadius:3},
-    {label:'Solicitados',data:rows.map(function(r){return r.sol;}),backgroundColor:BLUE,borderRadius:3}
-  ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
   mk('c-r2',{type:'line',data:{labels:mLabels,datasets:[
     {label:'% Tiempo',data:rows.map(function(r){return r.cer>0?Math.min(r.pct_t,100):null;}),borderColor:GREEN,backgroundColor:GL,fill:true,tension:.4,pointRadius:4,spanGaps:true},
     {label:'% Cantidad',data:rows.map(function(r){return r.sol>0?r.pct_c:null;}),borderColor:BLUE,fill:false,tension:.4,pointRadius:4,borderDash:[4,2],spanGaps:true},
@@ -1515,24 +1507,6 @@ function redraw() {
   })();
 
   // ---- SELECCIÓN CHARTS ----
-  mk('c-oport',{type:'bar',data:{labels:mLabels,datasets:[
-    {label:'% ANS Tiempo',data:rows.map(function(r){return r.cer>0?Math.min(r.pct_t,100):0;}),backgroundColor:GREEN,borderRadius:3,barPercentage:.5},
-    {label:'% ANS Cantidad',data:rows.map(function(r){return r.sol>0?r.pct_c:0;}),backgroundColor:BLUE,borderRadius:3,barPercentage:.5},
-    {label:'Meta 80%',data:Array(6).fill(80),type:'line',borderColor:'#CCC',borderDash:[5,3],pointRadius:0,fill:false}
-  ]},options:bo({scales:{x:{grid:{display:false}},y:{min:0,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-  mk('c-est',{type:'doughnut',data:{labels:['Cerrado','Cancelada','Abierto'],
-    datasets:[{data:[d.total.cer,d.total.cancel,d.total.abierto],backgroundColor:[GREEN,AMB,BLUE],borderWidth:0}]},
-    options:bo({cutout:'63%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})});
-  (function(){
-    var SUCS=CITY_TABLE.map(function(c){return c.name;}),
-        suc_pt=CITY_TABLE.map(function(c){return c.pct_t;}),
-        suc_pc=CITY_TABLE.map(function(c){return c.pct_c;});
-    mk('c-suc-t',{type:'bar',data:{labels:SUCS,datasets:[{data:suc_pt,backgroundColor:suc_pt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
-      options:bo({indexAxis:'y',scales:{x:{min:0,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
-    mk('c-suc-c',{type:'bar',data:{labels:SUCS,datasets:[{data:suc_pc,backgroundColor:suc_pc.map(function(v){return v>=88?GREEN:v>=78?AMB:RED;}),borderRadius:4}]},
-      options:bo({indexAxis:'y',scales:{x:{min:0,max:100,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
-  })();
   var cnames=showCities.map(function(c){return c.name;}),cpt=showCities.map(function(c){return c.pct_t;}),cpc=showCities.map(function(c){return c.pct_c;});
   mk('c-cit',{type:'bar',data:{labels:cnames,datasets:[{data:cpt,backgroundColor:cpt.map(function(v){return v>=85?GREEN:v>=75?AMB:RED;}),borderRadius:4}]},
     options:bo({indexAxis:'y',scales:{x:{min:60,max:105,grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
@@ -1550,39 +1524,6 @@ function redraw() {
     mk('c-act-ciudad',{type:'bar',data:{labels:acLabels,datasets:[{data:acData,backgroundColor:RED,borderRadius:4}]},
       options:bo({scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#EEE'}}}})});
   })();
-  (function(){
-    var aaLabels, aaData;
-    if (window._personalData && Object.keys(window._personalData.areas).length) {
-      var a=window._personalData.areas;
-      var sorted=Object.keys(a).sort(function(x,y){return a[y]-a[x];}).slice(0,6);
-      aaLabels=sorted; aaData=sorted.map(function(k){return a[k];});
-    } else { aaLabels=[]; aaData=[]; }
-    mk('c-act-area',{type:'doughnut',data:{labels:aaLabels,datasets:[{data:aaData,
-      backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,'#7F77DD'],borderWidth:2,borderColor:'#fff'}]},
-      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
-  })();
-  (function(){
-    if (window._rotData && window._rotData.rows.length) {
-      var byMonth={}, motivos=new Set();
-      window._rotData.rows.forEach(function(r){
-        var d=r['FechaRetiro']||''; if(!d) return;
-        var dt=d instanceof Date?d:new Date(d); if(isNaN(dt.getTime())) return;
-        var mk2=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
-        if(!byMonth[mk2]) byMonth[mk2]={};
-        var mot=(r['CausalRetiro']||r['Motivo']||'Otro').toString().trim();
-        motivos.add(mot); byMonth[mk2][mot]=(byMonth[mk2][mot]||0)+1;
-      });
-      var months=Object.keys(byMonth).sort().slice(-6);
-      var motArr=Array.from(motivos).slice(0,4);
-      var colors=[GREEN,AMB,BLUE,RED];
-      if (months.length && motArr.length) {
-        mk('c-act-ret',{type:'bar',data:{labels:months,datasets:motArr.map(function(mot,i){
-          return {label:mot,data:months.map(function(m){return (byMonth[m]&&byMonth[m][mot])||0;}),backgroundColor:colors[i%4],borderRadius:3,stack:'a'};
-        })},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
-          plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
-      }
-    }
-  })();
 
   // ---- ROTACIÓN CHARTS ----
   (function(){
@@ -1599,59 +1540,45 @@ function redraw() {
     ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
   })();
   (function(){
-    var rcLabels, rcData;
-    if (window._rotData && Object.keys(window._rotData.motivos).length) {
-      var m=window._rotData.motivos;
-      var sorted=Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,6);
-      rcLabels=sorted; rcData=sorted.map(function(k){return m[k];});
-    } else {
-      rcLabels=['Paso Directo','Renuncia Personal','Bajo Desempeño','Terminación contrato','Mejor Oferta','Justa Causa'];
-      rcData=[542,225,86,73,11,7];
-    }
-    mk('c-rot-c',{type:'doughnut',data:{labels:rcLabels,datasets:[{data:rcData,
-      backgroundColor:[GREEN,AMB,RED,BLUE,GRAY,'#D85A30'],borderWidth:2,borderColor:'#fff'}]},
-      options:bo({cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9}}}})}); 
-  })();
-  (function(){
-    var rzLabels, rzData;
-    if (window._rotData && Object.keys(window._rotData.ciudades).length) {
-      var c=window._rotData.ciudades;
-      var sorted=Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,6);
-      rzLabels=sorted; rzData=sorted.map(function(k){return c[k];});
-    } else { rzLabels=[]; rzData=[]; }
-    mk('c-rot-z',{type:'bar',data:{labels:rzLabels,datasets:[{data:rzData,backgroundColor:[RED,AMB,BLUE,GREEN,GRAY,RL],borderRadius:4}]},
-      options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
-  })();
-  (function(){
-    var gM=window._rotData?window._rotData.generos.M:0;
-    var gF=window._rotData?window._rotData.generos.F:0;
-    var tot=gM+gF||1;
-    mk('c-rot-g',{type:'doughnut',data:{labels:['Masculino '+Math.round(gM/tot*100)+'%','Femenino '+Math.round(gF/tot*100)+'%'],
-      datasets:[{data:[gM,gF],backgroundColor:[BLUE,RED],borderWidth:2,borderColor:'#fff'}]},
-      options:bo({cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}})}); 
-  })();
-  (function(){
-    var buckets=[0,0,0,0,0,0];
     if (window._rotData && window._rotData.rows.length) {
+      var byMonth={}, motivos=new Set();
       window._rotData.rows.forEach(function(r){
-        var d=parseInt(r['DiasLaborados'])||0;
-        if(d<30) buckets[0]++; else if(d<=60) buckets[1]++;
-        else if(d<=90) buckets[2]++; else if(d<=120) buckets[3]++;
-        else if(d<=180) buckets[4]++; else buckets[5]++;
+        var d=r['FechaRetiro']||''; if(!d) return;
+        var dt=d instanceof Date?d:new Date(d); if(isNaN(dt.getTime())) return;
+        var mk2=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+        if(!byMonth[mk2]) byMonth[mk2]={};
+        var mot=(r['CausalRetiro']||r['Motivo']||'Otro').toString().trim();
+        motivos.add(mot); byMonth[mk2][mot]=(byMonth[mk2][mot]||0)+1;
       });
+      var months=Object.keys(byMonth).sort().slice(-8);
+      var motArr=Array.from(motivos).slice(0,5);
+      var colors=[GREEN,AMB,BLUE,RED,GRAY];
+      if (months.length && motArr.length) {
+        mk('c-rot-c',{type:'bar',data:{labels:months,datasets:motArr.map(function(mot,i){
+          return {label:mot,data:months.map(function(m){return (byMonth[m]&&byMonth[m][mot])||0;}),backgroundColor:colors[i%5],borderRadius:3,stack:'c'};
+        })},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
+          plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+      }
     }
-    mk('c-rot-d',{type:'bar',data:{labels:['<30','31–60','61–90','91–120','121–180','>180'],
-      datasets:[{data:buckets,backgroundColor:[RED,RED,AMB,AMB,GREEN,GREEN],borderRadius:4}]},
-      options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'}}}})});
   })();
   (function(){
-    if (window._rotData && window._rotData.total > 0 && window._personalData) {
+    if (window._rotData && window._rotData.rows.length && window._personalData) {
       var totalPers=window._personalData.total||1;
-      var pct=Math.round(window._rotData.total/totalPers*1000)/10;
-      mk('c-rot-idx',{type:'bar',data:{labels:['Índice Rotación'],datasets:[
-        {data:[pct],backgroundColor:pct>10?RED:pct>7?AMB:GREEN,borderRadius:6}
-      ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
-        plugins:{legend:{display:false}}})});
+      var byMonth={};
+      window._rotData.rows.forEach(function(r){
+        var d=r['FechaRetiro']||''; if(!d) return;
+        var dt=d instanceof Date?d:new Date(d); if(isNaN(dt.getTime())) return;
+        var k=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+        byMonth[k]=(byMonth[k]||0)+1;
+      });
+      var months=Object.keys(byMonth).sort().slice(-8);
+      if (months.length) {
+        var tasas=months.map(function(m){return Math.round(byMonth[m]/totalPers*1000)/10;});
+        mk('c-rot-idx',{type:'line',data:{labels:months,datasets:[
+          {label:'Tasa %',data:tasas,borderColor:RED,backgroundColor:RL,fill:true,tension:.4,pointRadius:4}
+        ]},options:bo({scales:{x:{grid:{display:false}},y:{grid:{color:'#EEE'},ticks:{callback:function(v){return v+'%';}}}},
+          plugins:{legend:{display:false}}})});
+      }
     }
   })();
 
@@ -1667,34 +1594,28 @@ function redraw() {
       options:bo({indexAxis:'y',scales:{x:{grid:{color:'#EEE'}},y:{grid:{display:false},ticks:{font:{size:10}}}}})});
   })();
   (function(){
-    var ep=window._entData?window._entData.percepcion:{Positiva:62,Neutra:11,Negativa:3};
-    var tot=(ep.Positiva+ep.Neutra+ep.Negativa)||1;
-    mk('c-ej',{type:'doughnut',data:{labels:['Positiva '+Math.round(ep.Positiva/tot*100)+'%','Neutra '+Math.round(ep.Neutra/tot*100)+'%','Negativa '+Math.round(ep.Negativa/tot*100)+'%'],
-      datasets:[{data:[ep.Positiva,ep.Neutra,ep.Negativa],backgroundColor:[GREEN,AMB,RED],borderWidth:3,borderColor:'#fff'}]},
-      options:bo({cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},boxWidth:12}}}})}); 
-  })();
-  (function(){
-    if (window._entData && Object.keys(window._entData.sucursales).length) {
-      var sucs=window._entData.sucursales;
-      var labels=Object.keys(sucs).sort(function(a,b){return sucs[b]-sucs[a];}).slice(0,8);
-      var pos=[],neu=[],neg=[];
-      labels.forEach(function(s){
-        var rows=window._entData.rows.filter(function(r){return (r['Sucursal']||r['Ciudad']||'')===s;});
-        var p=0,n=0,ng=0;
-        rows.forEach(function(r){
-          var pv=(r['PercepcionGeneral']||'').toString().toUpperCase();
-          if(pv.includes('POS')||pv.includes('BUEN')||pv.includes('EXCE')) p++;
-          else if(pv.includes('REG')||pv.includes('NEU')) n++;
-          else if(pv.includes('NEG')||pv.includes('MAL')) ng++;
-        });
-        pos.push(p); neu.push(n); neg.push(ng);
+    if (window._entData && window._entData.rows.length) {
+      var byCiudad={}, motivos=new Set();
+      window._entData.rows.forEach(function(r){
+        var ciudad=(r['Ciudad']||r['Sucursal']||'Sin ciudad').toString().trim();
+        var mot=(r['MotivoRetiro']||r['Motivo']||'Otro').toString().trim();
+        if(!byCiudad[ciudad]) byCiudad[ciudad]={};
+        byCiudad[ciudad][mot]=(byCiudad[ciudad][mot]||0)+1;
+        motivos.add(mot);
       });
-      mk('c-ent-suc',{type:'bar',data:{labels:labels,datasets:[
-        {label:'Positivas',data:pos,backgroundColor:GREEN,borderRadius:3,stack:'e'},
-        {label:'Neutras',data:neu,backgroundColor:AMB,borderRadius:3,stack:'e'},
-        {label:'Negativas',data:neg,backgroundColor:RED,borderRadius:3,stack:'e'}
-      ]},options:bo({scales:{x:{grid:{display:false},stacked:true},y:{stacked:true,grid:{color:'#EEE'}}},
-        plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+      var ciudades=Object.keys(byCiudad).sort(function(a,b){
+        var ta=Object.values(byCiudad[a]).reduce(function(s,v){return s+v;},0);
+        var tb=Object.values(byCiudad[b]).reduce(function(s,v){return s+v;},0);
+        return tb-ta;
+      }).slice(0,8);
+      var motArr=Array.from(motivos).slice(0,5);
+      var colors=[RED,AMB,BLUE,GREEN,GRAY];
+      if (ciudades.length && motArr.length) {
+        mk('c-em-ciudad',{type:'bar',data:{labels:ciudades,datasets:motArr.map(function(mot,i){
+          return {label:mot,data:ciudades.map(function(c){return (byCiudad[c]&&byCiudad[c][mot])||0;}),backgroundColor:colors[i%5],borderRadius:3,stack:'ec'};
+        })},options:bo({scales:{x:{grid:{display:false},stacked:true,ticks:{font:{size:9},maxRotation:35}},y:{stacked:true,grid:{color:'#EEE'}}},
+          plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:9}}}})});
+      }
     }
   })();
 
@@ -2140,40 +2061,17 @@ function buildRotacionData(rows) {
   var el = document.getElementById('rot-kpi-total');
   if (el) el.textContent = data.length.toLocaleString();
   window._rotData = { total: data.length, motivos: motivos, generos: generos, ciudades: ciudades, rows: data };
-  var el = document.getElementById('rot-kpi-total');
-  if (el) el.textContent = data.length.toLocaleString();
-  // Extra KPIs
-  var directo = data.filter(function(r){ return (r['TipoRetiro']||'').toString().toUpperCase().includes('DIRECTO'); }).length;
-  var renuncias = data.filter(function(r){ var m=(r['CausalRetiro']||r['Motivo']||'').toString().toUpperCase(); return m.includes('RENUNCI'); }).length;
-  var termina = data.filter(function(r){ var m=(r['CausalRetiro']||r['Motivo']||'').toString().toUpperCase(); return m.includes('TERMINACI'); }).length;
   var totalRet = data.length;
-  var mascN  = generos.M, femN = generos.F, totGen = mascN+femN||1;
-  var mascPct = Math.round(mascN/totGen*100), femPct = Math.round(femN/totGen*100);
   function sr(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  sr('rot-kpi-total',   totalRet.toLocaleString());
-  sr('rot-kpi-directo', directo||'—');
-  sr('rot-kpi-directo-pct', totalRet>0 ? Math.round(directo/totalRet*100)+'%' : '');
-  sr('rot-kpi-renuncias', renuncias);
-  sr('rot-kpi-renuncias-pct', totalRet>0 ? Math.round(renuncias/totalRet*100)+'%' : '');
-  sr('rot-kpi-termina', termina);
-  sr('rot-kpi-termina-pct', totalRet>0 ? Math.round(termina/totalRet*100)+'%' : '');
-  sr('rot-kpi-masc', mascPct+'%');
-  sr('rot-kpi-masc-sub', mascN+' personas');
-  sr('rot-kpi-fem', femPct+'%');
-  sr('rot-kpi-fem-sub', femN+' personas');
+  sr('rot-kpi-total', totalRet.toLocaleString());
+  // Tasa de rotación
+  var totalActivos = window._personalData ? (window._personalData.total||0) : 0;
+  if (totalActivos > 0) {
+    sr('rot-kpi-tasa', (totalRet/totalActivos*100).toFixed(1)+'%');
+  }
   // Resumen ejecutivo
   sr('res-kpi-rotacion', totalRet.toLocaleString());
   sr('res-kpi-rotacion-sub', 'Retiros período');
-  // Tabla motivos en sec-activo
-  var motivosList = Object.entries(motivos).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
-  var motTbody = document.getElementById('act-motivos-tbody');
-  if (motTbody) {
-    motTbody.innerHTML = motivosList.length ? motivosList.map(function(m){
-      var pct = Math.round(m[1]/totalRet*100);
-      var cls = pct>=30?'bd':pct>=15?'bw':'bs';
-      return '<tr><td>'+m[0]+'</td><td style="text-align:center">'+m[1]+'</td><td><span class="badge '+cls+'">'+pct+'%</span></td></tr>';
-    }).join('') : '<tr><td colspan="3" style="text-align:center;color:var(--muted)">Sin datos</td></tr>';
-  }
 }
 
 // ── FORMACIÓN PROCESSOR ──────────────────────────────────────
