@@ -946,24 +946,24 @@ function go(name, el) {
   if (ttl) ttl.textContent = TTLS[name] || name;
   // Resize + redraw Chart.js charts that rendered while section was hidden
   if (sec && typeof Chart !== 'undefined') {
-    function resizeCharts() {
-      var canvases = sec.querySelectorAll('canvas');
-      var needsRedraw = false;
-      for (var ci=0; ci<canvases.length; ci++) {
-        var cv = canvases[ci];
-        var ch = Chart.getChart(cv);
-        if (ch) {
-          ch.resize();
-          ch.update('none');
-        } else if (cv.id) {
-          // Chart was never created (section was hidden) — trigger full redraw
-          needsRedraw = true;
+    // Sections that always need a full redraw when navigated to
+    var alwaysRedraw = ['sec-at','sec-eg','sec-sin','sec-rotacion','sec-activo','sec-entrevistas'];
+    var needsFull = alwaysRedraw.indexOf(sec.id) !== -1;
+    setTimeout(function() {
+      if (needsFull && typeof redraw === 'function') {
+        redraw();
+      } else {
+        var canvases = sec.querySelectorAll('canvas');
+        var needsRedraw = false;
+        for (var ci=0; ci<canvases.length; ci++) {
+          var cv = canvases[ci];
+          var ch = Chart.getChart(cv);
+          if (ch) { ch.resize(); ch.update('none'); }
+          else if (cv.id) needsRedraw = true;
         }
+        if (needsRedraw && typeof redraw === 'function') redraw();
       }
-      if (needsRedraw && typeof redraw === 'function') redraw();
-    }
-    setTimeout(resizeCharts, 60);
-    setTimeout(resizeCharts, 300);
+    }, 80);
   }
 }
 
