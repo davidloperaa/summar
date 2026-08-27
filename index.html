@@ -384,6 +384,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
     <div class="kc" style="--kcc:#1D9E75"><div class="kc-lbl">Días Ausentismo EG</div><div class="kc-val" id="res-kpi-eg">—</div><div class="kc-sub">Total días incapacidad EG</div></div>
     <div class="kc" style="--kcc:#185FA5"><div class="kc-lbl">Entrevistas Retiro</div><div class="kc-val" id="res-kpi-entrevistas">—</div><div class="kc-sub" id="res-kpi-entrevistas-sub">Total encuestas</div></div>
   </div>
+  <!-- Pipeline resumen compacto -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h"><div class="cc-title" style="font-weight:700">Estado del Pipeline de Selección</div><span class="cc-tag">Activo</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px">
+      <div style="text-align:center;padding:14px;background:var(--bg2);border-radius:8px;border-left:4px solid #BA7517">
+        <div style="font-size:28px;font-weight:800;color:#BA7517" id="res-pipe-sel">—</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:4px">En Selección</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--bg2);border-radius:8px;border-left:4px solid #185FA5">
+        <div style="font-size:28px;font-weight:800;color:#185FA5" id="res-pipe-cont">—</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:4px">En Contratación</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--bg2);border-radius:8px;border-left:4px solid #1D9E75">
+        <div style="font-size:28px;font-weight:800;color:#1D9E75" id="res-pipe-ent">—</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:4px">Entregados</div>
+      </div>
+    </div>
+  </div>
   <div class="cg t23">
     <div class="cc"><div class="cc-h"><div class="cc-title">Tendencia ANS — Tiempo vs Cantidad</div></div>
       <div class="leg"><span class="ld"><span class="ls" style="background:#1D9E75"></span>% ANS Tiempo</span><span class="ld"><span class="ls" style="background:#185FA5"></span>% ANS Cantidad</span></div>
@@ -418,6 +436,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#EBEBEB;color:var(--
         <input type="date" id="ans-flt-hasta" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-size:12px">
         <button class="ans-flt-btn active" onclick="filtrarANS('rango-aplicar')">Aplicar</button>
       </span>
+    </div>
+  </div>
+  <!-- Pipeline detalle por cargo y ciudad -->
+  <div class="cg" style="margin-bottom:14px">
+    <div class="cc">
+      <div class="cc-h"><div class="cc-title" style="font-weight:700">Pipeline por Tipo de Cargo</div></div>
+      <div class="tscroll"><table class="tbl" style="font-size:12px">
+        <thead><tr><th>Cargo</th><th style="text-align:center;color:#BA7517">🔍 Selección</th><th style="text-align:center;color:#185FA5">📝 Contratación</th><th style="text-align:center;color:#1D9E75">✅ Entregados</th><th style="text-align:center">Total</th></tr></thead>
+        <tbody id="pipe-cargo-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;padding:12px">Carga SELECCION para ver el pipeline</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="cc">
+      <div class="cc-h"><div class="cc-title" style="font-weight:700">Pipeline por Ciudad</div></div>
+      <div class="tscroll"><table class="tbl" style="font-size:12px">
+        <thead><tr><th>Ciudad</th><th style="text-align:center;color:#BA7517">🔍 Selección</th><th style="text-align:center;color:#185FA5">📝 Contratación</th><th style="text-align:center;color:#1D9E75">✅ Entregados</th><th style="text-align:center">Total</th></tr></thead>
+        <tbody id="pipe-ciudad-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;padding:12px">Carga SELECCION para ver el pipeline</td></tr></tbody>
+      </table></div>
     </div>
   </div>
   <div class="ans-row">
@@ -2309,6 +2344,58 @@ function buildPipelineFromBase(rows) {
     Object.keys(cargos).sort().forEach(function(c){ var o=document.createElement('option'); o.value=c; o.text=c; cargoSel.appendChild(o); });
     Object.keys(sucs).sort().forEach(function(s){ var o=document.createElement('option'); o.value=s; o.text=s; sucSel.appendChild(o); });
   }
+
+  // Totals for resumen pipeline summary
+  var totSel=0,totCont=0,totEnt=0;
+  data.forEach(function(r){
+    totSel+=(parseInt(r['EnSeleccion'])||parseInt(r['En_Seleccion'])||0);
+    totCont+=(parseInt(r['EnContratacion'])||parseInt(r['En_Contratacion'])||0);
+    totEnt+=(parseInt(r['Contratados'])||parseInt(r['Entregados'])||0);
+  });
+  function sp(id,v){var e=document.getElementById(id);if(e)e.textContent=v.toLocaleString();}
+  sp('res-pipe-sel',totSel);
+  sp('res-pipe-cont',totCont);
+  sp('res-pipe-ent',totEnt);
+
+  // Pipeline by Cargo
+  var byCargo={};
+  data.forEach(function(r){
+    var c=(r['PerfilCargo']||r['Cargo']||'Sin cargo').toString().trim();
+    if(!byCargo[c]) byCargo[c]={sel:0,cont:0,ent:0};
+    byCargo[c].sel+=(parseInt(r['EnSeleccion'])||parseInt(r['En_Seleccion'])||0);
+    byCargo[c].cont+=(parseInt(r['EnContratacion'])||parseInt(r['En_Contratacion'])||0);
+    byCargo[c].ent+=(parseInt(r['Contratados'])||parseInt(r['Entregados'])||0);
+  });
+  var cargoTbody=document.getElementById('pipe-cargo-tbody');
+  if(cargoTbody){
+    var cargoKeys=Object.keys(byCargo).sort(function(a,b){
+      return (byCargo[b].sel+byCargo[b].cont+byCargo[b].ent)-(byCargo[a].sel+byCargo[a].cont+byCargo[a].ent);
+    }).slice(0,12);
+    cargoTbody.innerHTML=cargoKeys.length?cargoKeys.map(function(k){
+      var r=byCargo[k],tot=r.sel+r.cont+r.ent;
+      return '<tr><td>'+k+'</td><td style="text-align:center;color:#BA7517;font-weight:700">'+r.sel+'</td><td style="text-align:center;color:#185FA5;font-weight:700">'+r.cont+'</td><td style="text-align:center;color:#1D9E75;font-weight:700">'+r.ent+'</td><td style="text-align:center;font-weight:700">'+tot+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:10px">Sin datos</td></tr>';
+  }
+
+  // Pipeline by Ciudad
+  var byCiudad={};
+  data.forEach(function(r){
+    var c=(r['Ciudad']||r['Sucursal']||'Sin ciudad').toString().trim();
+    if(!byCiudad[c]) byCiudad[c]={sel:0,cont:0,ent:0};
+    byCiudad[c].sel+=(parseInt(r['EnSeleccion'])||parseInt(r['En_Seleccion'])||0);
+    byCiudad[c].cont+=(parseInt(r['EnContratacion'])||parseInt(r['En_Contratacion'])||0);
+    byCiudad[c].ent+=(parseInt(r['Contratados'])||parseInt(r['Entregados'])||0);
+  });
+  var ciudadTbody=document.getElementById('pipe-ciudad-tbody');
+  if(ciudadTbody){
+    var ciudadKeys=Object.keys(byCiudad).sort(function(a,b){
+      return (byCiudad[b].sel+byCiudad[b].cont+byCiudad[b].ent)-(byCiudad[a].sel+byCiudad[a].cont+byCiudad[a].ent);
+    }).slice(0,12);
+    ciudadTbody.innerHTML=ciudadKeys.length?ciudadKeys.map(function(k){
+      var r=byCiudad[k],tot=r.sel+r.cont+r.ent;
+      return '<tr><td>'+k+'</td><td style="text-align:center;color:#BA7517;font-weight:700">'+r.sel+'</td><td style="text-align:center;color:#185FA5;font-weight:700">'+r.cont+'</td><td style="text-align:center;color:#1D9E75;font-weight:700">'+r.ent+'</td><td style="text-align:center;font-weight:700">'+tot+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:10px">Sin datos</td></tr>';
+  }
 }
 
 // ── ENTREVISTAS PARSER ────────────────────────────────────────
@@ -2495,6 +2582,193 @@ function renderCasosMedicosTable(rows) {
 // ── DEMO / BYPASS ────────────────────────────────────────────
 function loadDemoData() {
   document.getElementById('upload-screen').style.display = 'none';
+
+  var MES = ['2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
+  var causales = ['Paso Directo','Renuncia Personal','Terminación Contrato','Bajo Desempeño','Justa Causa'];
+  var ciudades = ['Bogotá','Medellín','Cali','Barranquilla','Bucaramanga','Pereira'];
+  var cargos = ['Operario','Auxiliar de Servicios','Técnico','Auxiliar Admin','Coordinador','Auxiliar BPM'];
+  var diags = ['Musculoesquelético','Infeccioso','Digestivo','Neurológico','Respiratorio'];
+  var motEnt = ['Mejor oferta económica','Distancia al trabajo','Ambiente laboral','Crecimiento profesional','Situación personal','Fin de contrato'];
+
+  function sv(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function sp2(id,v){var e=document.getElementById(id);if(e)e.textContent=typeof v==='number'?v.toLocaleString():v;}
+
+  // ── ROTACIÓN ──────────────────────────────────────────
+  var retPorMes=[8,11,12,14,16,18,15,17,16];
+  var rotRows=[];
+  MES.forEach(function(m,mi){
+    for(var i=0;i<retPorMes[mi];i++){
+      var d=i<9?'0'+(i+1):String(i+1);
+      rotRows.push({
+        CausalRetiro:causales[(mi+i)%causales.length],
+        Ciudad:ciudades[(i+mi*2)%ciudades.length],
+        Cargo:cargos[i%cargos.length],
+        FechaRetiro:new Date(m+'-'+d),
+        Genero:i%3===0?'F':'M',
+        DiasLaborados:45+(i*23)%300
+      });
+    }
+  });
+  var mot={},gen={M:0,F:0},ciud={};
+  rotRows.forEach(function(r){
+    mot[r.CausalRetiro]=(mot[r.CausalRetiro]||0)+1;
+    gen[r.Genero]++;
+    ciud[r.Ciudad]=(ciud[r.Ciudad]||0)+1;
+  });
+  window._rotData={total:rotRows.length,motivos:mot,generos:gen,ciudades:ciud,rows:rotRows};
+
+  // ── PERSONAL ACTIVO ───────────────────────────────────
+  var cargoAct={'Operario':480,'Auxiliar de Servicios':320,'Técnico':180,'Auxiliar Admin':140,'Coordinador':80,'Auxiliar BPM':40};
+  var ciudAct={'Bogotá':430,'Medellín':310,'Cali':220,'Barranquilla':150,'Bucaramanga':90,'Pereira':40};
+  var totalActivos=1240, temporalidad=87;
+  var persRows=[];
+  Object.keys(cargoAct).forEach(function(c,ci){
+    for(var i=0;i<cargoAct[c];i++) persRows.push({Cargo:c,Estado:'ACTIVO',Ciudad:ciudades[(i+ci)%ciudades.length]});
+  });
+  window._personalData={total:totalActivos,sucursales:ciudAct,cargos:cargoAct,areas:{'Manufactura':480,'Logística':320,'Administración':220,'Comercial':140,'Servicios':80},rows:persRows};
+
+  // ── AT ACCIDENTES ──────────────────────────────────────
+  var atPorMes=[3,2,4,3,2,3,4,3,2];
+  var atRows=[];
+  MES.forEach(function(m,mi){
+    for(var i=0;i<atPorMes[mi];i++){
+      var dias=[0,2,5,15,30,3,1,8,0][i%9];
+      atRows.push({
+        FechaAccidente:new Date(m+'-'+String(5+i*4).padStart(2,'0')),
+        FechaReporte:new Date(m+'-'+String(6+i*4).padStart(2,'0')),
+        DiasIncapacidad:dias,
+        TipoLesion:['Golpe o contusión','Torcedura/esguince','Herida','Trauma superficial','Fractura'][i%5],
+        TipoAccidente:['Trabajo','En misión'][i%2],
+        Genero:i%3===0?'F':'M',
+        Cargo:cargos[i%cargos.length],
+        ContratoComercial:ciudades[i%ciudades.length],
+        CAUSA:['Comportamiento subestándar','Condición insegura','No clasificado'][i%3],
+        Peligro:['Biomecánico','Locativo','Eléctrico','Físico','Químico'][i%5],
+        ParteCuerpoAfectada:['Manos','Pies','Espalda','Rodillas','Cabeza'][i%5],
+        MecanismoAccidente:['Pisadas o golpes','Sobreesfuerzo','Caída mismo nivel','Contacto cortantes','Otro'][i%5],
+        Extemporaneo:i%7===0?'SI':'NO',
+        Estado:'Cerrado'
+      });
+    }
+  });
+  var atLes={},atPel={},atMec={},atCuer={},atCau={},atCC={},atCar={},atGen={M:0,F:0},atTip={};
+  atRows.forEach(function(r){
+    atLes[r.TipoLesion]=(atLes[r.TipoLesion]||0)+1;
+    atPel[r.Peligro]=(atPel[r.Peligro]||0)+1;
+    atMec[r.MecanismoAccidente]=(atMec[r.MecanismoAccidente]||0)+1;
+    atCuer[r.ParteCuerpoAfectada]=(atCuer[r.ParteCuerpoAfectada]||0)+1;
+    atCau[r.CAUSA]=(atCau[r.CAUSA]||0)+1;
+    atCC[r.ContratoComercial]=(atCC[r.ContratoComercial]||0)+1;
+    atCar[r.Cargo]=(atCar[r.Cargo]||0)+1;
+    atGen[r.Genero]++;
+    atTip[r.TipoAccidente]=(atTip[r.TipoAccidente]||0)+1;
+  });
+  var atTot=atRows.length,atDias=atRows.reduce(function(s,r){return s+(parseInt(r.DiasIncapacidad)||0);},0);
+  var atCero=atRows.filter(function(r){return !(parseInt(r.DiasIncapacidad));}).length;
+  var atLeve=atRows.filter(function(r){var d=parseInt(r.DiasIncapacidad)||0;return d>=1&&d<=3;}).length;
+  var atSev=atRows.filter(function(r){return (parseInt(r.DiasIncapacidad)||0)>15;}).length;
+  var atExt=atRows.filter(function(r){return r.Extemporaneo==='SI';}).length;
+  window._atData={total:atTot,diasAusentismo:atDias,promDias:atTot?Math.round(atDias/atTot*10)/10:0,sinDias:atCero,leves:atLeve,severos:atSev,extemporaneos:atExt,lesiones:atLes,peligros:atPel,mecanismos:atMec,cuerpos:atCuer,causas:atCau,contratosComerciales:atCC,cargos:atCar,generos:atGen,tipos:atTip,rows:atRows};
+
+  // ── EG ENFERMEDADES ────────────────────────────────────
+  var egPorMes=[5,6,8,7,9,10,9,11,10];
+  var egRows=[];
+  MES.forEach(function(m,mi){
+    for(var i=0;i<egPorMes[mi];i++){
+      var dias=[3,5,7,2,10,4,6,3,8,5][i%10];
+      egRows.push({
+        FechaInicio:new Date(m+'-'+String(3+i*3).padStart(2,'0')),
+        DiasIncapacidad:dias,
+        DiasAcumulados:dias+(i%3)*2,
+        GrupoDiagnostico:diags[i%diags.length],
+        CodigoDiagnostico:['M54','J06','K30','G43','J11'][i%5],
+        Genero:i%3===0?'F':'M',
+        Cargo:cargos[i%cargos.length],
+        ContratoComercial:ciudades[i%ciudades.length]
+      });
+    }
+  });
+  var egDiags={},egCC={},egCar={},egGen={M:0,F:0},egGC={};
+  egRows.forEach(function(r){
+    egDiags[r.GrupoDiagnostico]=(egDiags[r.GrupoDiagnostico]||0)+1;
+    egCC[r.ContratoComercial]=(egCC[r.ContratoComercial]||0)+1;
+    egCar[r.Cargo]=(egCar[r.Cargo]||0)+1;
+    egGen[r.Genero]++;
+    egGC[r.CodigoDiagnostico]=(egGC[r.CodigoDiagnostico]||0)+1;
+  });
+  var egTot=egRows.length,egDias=egRows.reduce(function(s,r){return s+(parseInt(r.DiasIncapacidad)||0);},0);
+  var egAcum=egRows.reduce(function(s,r){return s+(parseInt(r.DiasAcumulados)||0);},0);
+  window._egData={total:egTot,diasAusentismo:egDias,promDias:egTot?Math.round(egDias/egTot*10)/10:0,diagnosticos:egDiags,contratosComerciales:egCC,cargos:egCar,generos:egGen,grupoCausas:egGC,rows:egRows};
+
+  // ── ENTREVISTAS ────────────────────────────────────────
+  var entPorMes=[5,6,4,8,7,9,8,10,9];
+  var entRows=[];
+  MES.forEach(function(m,mi){
+    for(var i=0;i<entPorMes[mi];i++){
+      entRows.push({
+        FechaEncuesta:new Date(m+'-'+String(5+i*3).padStart(2,'0')),
+        MotivoRetiro:motEnt[i%motEnt.length],
+        Ciudad:ciudades[(i+mi)%ciudades.length],
+        Cargo:cargos[i%cargos.length],
+        TratoJefe:['Bueno','Bueno','Regular','Bueno','Deficiente','Bueno'][i%6],
+        Sucursal:ciudades[(i+mi)%ciudades.length]
+      });
+    }
+  });
+  var entMot={},entSuc={};
+  entRows.forEach(function(r){
+    entMot[r.MotivoRetiro]=(entMot[r.MotivoRetiro]||0)+1;
+    var s=r.Ciudad||r.Sucursal||'';
+    if(s) entSuc[s]=(entSuc[s]||0)+1;
+  });
+  window._entData={total:entRows.length,motivos:entMot,sucursales:entSuc,percepcion:{Positiva:42,Neutra:12,Negativa:8},preguntas:[],rows:entRows};
+
+  // ── CASOS MÉDICOS ──────────────────────────────────────
+  window._sinData={total:14,estados:{'En trámite':5,'Calificado':4,'Cerrado':3,'Pendiente':2},tipos:{'Siniestro':8,'Fuero de Salud':4,'Otro':2},rows:[]};
+
+  // ── SET KPIs DIRECTLY ─────────────────────────────────
+  sv('act-kpi-total',    totalActivos.toLocaleString());
+  sv('act-kpi-temporalidad', temporalidad);
+  sv('rot-kpi-total',    rotRows.length);
+  sv('rot-kpi-tasa',     (rotRows.length/totalActivos*100).toFixed(1)+'%');
+  sv('ent-kpi-total',    entRows.length);
+  sv('res-kpi-rotacion', rotRows.length);
+  sv('res-kpi-at',       atTot);
+  sv('res-kpi-eg',       egDias);
+  sv('res-kpi-entrevistas', entRows.length);
+  sv('at-kpi-total',     atTot);
+  sv('at-kpi-dias',      atDias);
+  sv('at-kpi-prom',      (atTot?Math.round(atDias/atTot*10)/10:0)+' días');
+  sv('at-kpi-cero',      atCero);
+  sv('at-kpi-leve',      atLeve);
+  sv('at-kpi-severo',    atSev);
+  sv('at-kpi-extempo',   atExt);
+  sv('eg-kpi-total',     egTot);
+  sv('eg-kpi-dias',      egDias);
+  sv('eg-kpi-prom',      (egTot?Math.round(egDias/egTot*10)/10:0)+' días');
+  sv('eg-kpi-diag',      Object.keys(egDiags).length);
+  sv('eg-kpi-acum',      egAcum);
+
+  // Demo pipeline totals
+  sp2('res-pipe-sel', 312);
+  sp2('res-pipe-cont', 187);
+  sp2('res-pipe-ent', 9324);
+  // Demo pipeline by cargo table
+  var demoCargoHTML = [
+    ['Operario',148,89,4200],['Auxiliar de Servicios',82,51,2800],['Técnico',45,28,1100],
+    ['Auxiliar Admin',22,13,680],['Coordinador',10,4,340],['Auxiliar BPM',5,2,204]
+  ].map(function(r){
+    return '<tr><td>'+r[0]+'</td><td style="text-align:center;color:#BA7517;font-weight:700">'+r[1]+'</td><td style="text-align:center;color:#185FA5;font-weight:700">'+r[2]+'</td><td style="text-align:center;color:#1D9E75;font-weight:700">'+r[3]+'</td><td style="text-align:center;font-weight:700">'+(r[1]+r[2]+r[3])+'</td></tr>';
+  }).join('');
+  var pct=document.getElementById('pipe-cargo-tbody'); if(pct) pct.innerHTML=demoCargoHTML;
+  var demoCiudadHTML=[
+    ['Bogotá',110,65,3280],['Medellín',78,48,2100],['Cali',55,32,1640],
+    ['Barranquilla',38,24,1200],['Bucaramanga',20,12,680],['Pereira',11,6,424]
+  ].map(function(r){
+    return '<tr><td>'+r[0]+'</td><td style="text-align:center;color:#BA7517;font-weight:700">'+r[1]+'</td><td style="text-align:center;color:#185FA5;font-weight:700">'+r[2]+'</td><td style="text-align:center;color:#1D9E75;font-weight:700">'+r[3]+'</td><td style="text-align:center;font-weight:700">'+(r[1]+r[2]+r[3])+'</td></tr>';
+  }).join('');
+  var pciud=document.getElementById('pipe-ciudad-tbody'); if(pciud) pciud.innerHTML=demoCiudadHTML;
+
   redraw();
 }
 
